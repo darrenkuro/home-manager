@@ -2,8 +2,9 @@
 
 {
   imports = [
-    ./aliases.nix
+    ./alias.nix
    ];
+   
   # Home Manager needs a bit of information about you and the paths it should
   # manage.
   home.username = "darrenlu";
@@ -80,7 +81,7 @@
 
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
-
+  programs.zsh.enable = true;
   # Starship
   programs.starship = {
     enable = true;
