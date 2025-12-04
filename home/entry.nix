@@ -1,6 +1,9 @@
 { config, pkgs, system, ... }:
 
 {
+  imports = [
+    ./aliases.nix
+   ];
   # Home Manager needs a bit of information about you and the paths it should
   # manage.
   home.username = "darrenlu";
@@ -82,7 +85,6 @@
   programs.starship = {
     enable = true;
     enableZshIntegration = true;
-    #configFile = ./starship.toml;
   };
   
 }

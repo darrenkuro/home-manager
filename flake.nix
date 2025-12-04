@@ -37,7 +37,7 @@
          #   ];
 
          #   programs.home-manager.enable = true;
-          ./home.nix
+          ./home/entry.nix
           
         ];
 
