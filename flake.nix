@@ -2,7 +2,6 @@
   description = "Home Manager configuration of darrenlu";
 
   inputs = {
-    # Specify the source of Home Manager and Nixpkgs.
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     home-manager = {
       url = "github:nix-community/home-manager";
@@ -11,10 +10,12 @@
   };
 
   outputs =
-    { nixpkgs, home-manager, ... }:
+    { self, nixpkgs, home-manager, ... } @ inputs:
     let
-      system = "aarch64-darwin";
+      #system = builtins.currentSystem;
+      system = inputs.system or "aarch64-darwin";
       pkgs = nixpkgs.legacyPackages.${system};
+      #pkgs = import nixpkgs { inherit system; };
     in
     {
       homeConfigurations."darrenlu" = home-manager.lib.homeManagerConfiguration {
@@ -22,7 +23,23 @@
 
         # Specify your home configuration modules here, for example,
         # the path to your home.nix.
-        modules = [ ./home.nix ];
+        modules = [
+          
+       #     home.username = "darrenlu";
+        #    home.homeDirectory =
+         #     if system == "aarch64-darwin" then "/Users/darrenlu" else "/home/dlu";
+         #   home.stateVersion = "25.11"; # home-manager version; for keeping stable default
+         #   home.packages = with pkgs; [
+         #     starship
+         #     helix
+         #     git
+         #     neovim
+         #   ];
+
+         #   programs.home-manager.enable = true;
+          ./home.nix
+          
+        ];
 
         # Optionally use extraSpecialArgs
         # to pass through arguments to home.nix
