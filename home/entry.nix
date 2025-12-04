@@ -21,8 +21,33 @@
   home.packages = with pkgs; [
     starship
     helix
+    typescript-language-server
+    clang-format
+    
+    #pyright
+    
     git
-    neovim
+    gh
+
+    rust-analyzer
+    rustc
+    cargo
+
+    node
+    pnpm
+    
+    tokei
+    trash
+
+    eza   # ls
+    fzf   
+    fd    # find
+    jq
+
+    # exiftool, ffuf
+    # cmake
+    # yarn, wget, yt-dlp, tor
+    
     # # Adds the 'hello' command to your environment. It prints a friendly
     # # "Hello, world!" when run.
     # pkgs.hello
@@ -84,5 +109,32 @@
     enable = true;
     enableZshIntegration = true;
   };
-  
+
+  # Helix
+  xdg.configFile."helix/config.toml".text = ''
+    theme = "onedark"
+    [editor]
+    soft-wrap.enable = true
+  '';
+  xdg.configFile."helix/languages.toml".text = ''
+    [[language]]
+    name = "typescript"
+    language-servers = ["typescript-language-server"]
+
+    [[language]]
+    name = "python"
+    language-servers = ["pylsp"]
+
+    [[language]]
+    name = "rust"
+    language-servers = ["rust-analyzer"]
+
+    [[language]]
+    name = "c"
+    language-servers = ["clangd"]
+
+    [[language]]
+    name = "cpp"
+    language-servers = ["clangd"]
+  '';
 }

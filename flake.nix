@@ -10,23 +10,16 @@
   };
 
   outputs =
-    { self, nixpkgs, home-manager, ... } @ inputs:
+    { self, nixpkgs, home-manager, ... }:
     let
       forSystem = system:
         nixpkgs.legacyPackages.${system};
-      #system = inputs.system or "aarch64-darwin";
-      #pkgs = nixpkgs.legacyPackages.${system};
-      #username =
-      #  if pkgs.stdenv.isDarwin then "darrenlu"
-      #  else "dlu";
-      #homeDir =
-      #  if pkgs.stdenv.isDarwin then "/Users/${username}"
-      #  else "/home/${username}";
     in
     {
       homeConfigurations = {
         mac = home-manager.lib.homeManagerConfiguration {
           pkgs = forSystem "aarch64-darwin";
+          extraSpecialArgs = { tag = "mac"; };
           modules = [
             {
               home.username = "darrenlu";
@@ -36,6 +29,7 @@
         };
         ft = home-manager.lib.homeManagerConfiguration {
           pkgs = forSystem "x86_64-linux";
+          extraSpecialArgs = { tag = "ft"; };
           modules = [
             {
               home.username = "dlu";
@@ -44,17 +38,5 @@
             ./home/entry.nix ];
         };
       };
-      
-      #homeConfigurations.${username} = home-manager.lib.homeManagerConfiguration {
-      #  inherit pkgs;
-
-#        modules = [
- #         {
-  #          home.username = username;
-   #         home.homeDirectory = homeDir;  
-    #      }
-     #     ./home/entry.nix ];
-
-      #};
     };
 }
