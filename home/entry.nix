@@ -22,7 +22,7 @@
     starship
     helix
     typescript-language-server
-    clang-format
+    llvmPackages_20.clang-tools
     
     #pyright
     
@@ -33,11 +33,11 @@
     rustc
     cargo
 
-    node
+    nodejs_24
     pnpm
     
     tokei
-    trash
+    #trash
 
     eza   # ls
     fzf   
