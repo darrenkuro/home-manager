@@ -12,37 +12,26 @@
   outputs =
     { self, nixpkgs, home-manager, ... } @ inputs:
     let
-      #system = builtins.currentSystem;
       system = inputs.system or "aarch64-darwin";
       pkgs = nixpkgs.legacyPackages.${system};
-      #pkgs = import nixpkgs { inherit system; };
+      username =
+        if pkgs.stdenv.isDarwin then "darrenlu"
+        else "dlu";
+      homeDir =
+        if pkgs.stdenv.isDarwin then "/Users/${username}"
+        else "/home/${username}";
     in
     {
-      homeConfigurations."darrenlu" = home-manager.lib.homeManagerConfiguration {
+      homeConfigurations.${username} = home-manager.lib.homeManagerConfiguration {
         inherit pkgs;
 
-        # Specify your home configuration modules here, for example,
-        # the path to your home.nix.
         modules = [
-          
-       #     home.username = "darrenlu";
-        #    home.homeDirectory =
-         #     if system == "aarch64-darwin" then "/Users/darrenlu" else "/home/dlu";
-         #   home.stateVersion = "25.11"; # home-manager version; for keeping stable default
-         #   home.packages = with pkgs; [
-         #     starship
-         #     helix
-         #     git
-         #     neovim
-         #   ];
+          {
+            home.username = username;
+            home.homeDirectory = homeDir;  
+          }
+          ./home/entry.nix ];
 
-         #   programs.home-manager.enable = true;
-          ./home/entry.nix
-          
-        ];
-
-        # Optionally use extraSpecialArgs
-        # to pass through arguments to home.nix
       };
     };
 }
