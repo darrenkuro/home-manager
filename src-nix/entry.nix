@@ -46,6 +46,10 @@
     ".config/helix/languages.toml".source = ../dotfiles/helix-languages.toml;
   };
 
+  home.file = if tag == "mac" then {
+    ".config/tmux/tmux.conf".source = ../dotfiles/tmux.mac.conf;
+  } else {};
+
   home.sessionVariables = {
     # setaf => foreground; setab => background
     BLACK="$(tput setaf 0)";
