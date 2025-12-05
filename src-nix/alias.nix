@@ -20,9 +20,9 @@ in {
     cloc = "tokei";
 
     # Fast access
-    dbox = "cd ${dp}";
-    dev = "cd ${dev}";
-    a = "hx ${hm}/src-nix/alias.nix";
+    dbox = "cd $${dp}";
+    dev = "cd $${dev}";
+    a = "hx $${hm}/src-nix/alias.nix";
 
     # Git
     gi = "gitinit";
@@ -49,7 +49,7 @@ in {
 
     hide = "chflags hidden";
     unhide = "chflags nohidden";
-    rm = "echo "
+    #rm = "echo \"$YELLOW DANGEROUS CMD: using trash instread!$RESET" && trash";
       
   } else if tag == "ft" then {
     re = "home-manager switch --flake ~/.config/home-manager#ft";

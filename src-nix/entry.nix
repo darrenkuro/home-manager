@@ -32,6 +32,8 @@
   ] ++ (if tag == "mac" then [
     pnpm
     alacritty
+
+    darwin.trash
     #ghostty-bin
     #anki
   ] else if tag == "ft" then [

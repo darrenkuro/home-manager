@@ -26,7 +26,7 @@
               home.username = "darrenlu";
               home.homeDirectory = "/Users/darrenlu";
             }
-            ./home/entry.nix ];
+            ./src-nix/entry.nix ];
         };
         ft = home-manager.lib.homeManagerConfiguration {
           pkgs = forSystem "x86_64-linux";
@@ -41,7 +41,7 @@
                 $${pkgs.xorg.xset}/bin/xset r rate 200 60
               '';
             }
-            ./home/entry.nix ];
+            ./src-nix/entry.nix ];
         };
       };
     };
