@@ -13,17 +13,20 @@
     gpl = "git push --force-with-lease";
     gchp = "gh pr checkout";
 
+    sscfg = "hx ~/.config/home-manager/starship.toml";
+    
+
     ncg = "nix-collect-garbage -d";
   }
   //
   (if tag == "mac" then {
-    run = "home-manager switch --flake ~/.config/home-manager#mac";
+    re = "home-manager switch --flake ~/.config/home-manager#mac";
 
     hide = "chflags hidden";
     unhide = "chflags nohidden";
       
   } else if tag == "ft" then {
-    run = "home-manager switch --flake ~/.config/home-manager#ft";
+    re = "home-manager switch --flake ~/.config/home-manager#ft";
     
   }
   else {});

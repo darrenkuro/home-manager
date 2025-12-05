@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs, tag, ... }:
 
 {
   imports = [
@@ -44,6 +44,7 @@
     fd    # find
     jq
     tmux
+    lf
 
     # exiftool, ffuf
     # cmake
@@ -99,6 +100,15 @@
   #  /etc/profiles/per-user/darrenlu/etc/profile.d/hm-session-vars.sh
   #
   home.sessionVariables = {
+    # Home Directory Hygenie
+    XDG_CONFIG_HOME = "$HOME/.config";
+    XDG_CACHE_HOME = "$HOME/.cache";
+    XDG_DATA_HOME = "$HOME/.local/share";
+    XDG_STATE_HOME = "$HOME/.local/state";
+
+    
+    DROPBOX = "/Users/darrenlu/Dropbox";
+    DEV = "$HOME/Documents/dev";
     # EDITOR = "emacs";
   };
 
