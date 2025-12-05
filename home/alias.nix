@@ -12,6 +12,8 @@
     ga = "git add -A";
     gpl = "git push --force-with-lease";
     gchp = "gh pr checkout";
+
+    ncg = "nix-collect-garbage -d";
   }
   //
   (if tag == "mac" then {
@@ -22,6 +24,7 @@
       
   } else if tag == "ft" then {
     run = "home-manager switch --flake ~/.config/home-manager#ft";
+    
   }
   else {});
 }

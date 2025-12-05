@@ -43,6 +43,7 @@
     fzf   
     fd    # find
     jq
+    tmux
 
     # exiftool, ffuf
     # cmake
