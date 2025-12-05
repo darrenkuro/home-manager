@@ -35,6 +35,11 @@
             {
               home.username = "dlu";
               home.homeDirectory = "/home/dlu";
+              
+              xsession.enable = true;
+              xsession.initExtra = ''
+                $${pkgs.xorg.xset}/bin/xset r rate 200 60
+              '';
             }
             ./home/entry.nix ];
         };
