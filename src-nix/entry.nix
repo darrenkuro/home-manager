@@ -44,7 +44,7 @@
     ".config/starship.toml".source = ../dotfiles/starship.toml;
     ".config/helix/config.toml".source = ../dotfiles/helix-conf.toml;
     ".config/helix/languages.toml".source = ../dotfiles/helix-languages.toml;
-    ".config/lf/preview.sh".source = ../dotfiles/lf-preview;
+    ".config/lf/preview.sh".source = ../dotfiles/lf-preview.sh;
   }
   // (if tag == "mac" then {
     ".config/tmux/tmux.conf".source = ../dotfiles/tmux.mac.conf;
