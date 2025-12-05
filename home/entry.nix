@@ -82,6 +82,8 @@
     
     EDITOR = "hx";
     VISUAL = "hx";
+
+    BAT_THEME = "OneDark";
   };
 
   # Let Home Manager install and manage itself.
@@ -134,15 +136,23 @@
       cmd open-multi $${EDITOR:-hx} "$fx"
 
       map <enter> open
+      cmd q quit
       map o open-multi
       map s split
       cmd split tmux split-window -v hx "$f"
     '';
   };
 
-  home.file.".config/lf/preview.sh".text = ''
-    #!/usr/bin/env bash
-    bat --color=always --style=plain "$1"
-  '';
+  programs.bat = {
+    enable = true;
+    config = { theme = "OneDark"; };
+  };
 
+  home.file.".config/lf/preview.sh" = {
+    text = ''
+      #!/usr/bin/env bash
+      bat --color=always --style=plain "$1"
+    '';
+    executable = true;
+  };
 }
