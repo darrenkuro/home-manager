@@ -39,22 +39,31 @@
   ] else []);
 
   home.file = {
-    ".config/starship.toml".source = ../files/starship.toml;
-    ".config/helix/config.toml".source = ../files/helix-conf.toml;
-    ".config/helix/languages.toml".source = ../files/helix-languages.toml;
+    ".config/starship.toml".source = ../dotfiles/starship.toml;
+    ".config/helix/config.toml".source = ../dotfiles/helix-conf.toml;
+    ".config/helix/languages.toml".source = ../dotfiles/helix-languages.toml;
   };
 
   home.sessionVariables = {
+    # setaf => foreground; setab => background
+    BLACK="$(tput setaf 0)";
+    RED="$(tput setaf 1)";
+    GREEN="$(tput setaf 2)";
+    YELLOW="$(tput setaf 3)";
+    BLUE="$(tput setaf 4)";
+    MAGENTA="$(tput setaf 5)";
+    CYAN="$(tput setaf 6)";
+    WHITE="$(tput setaf 7)";
+
+    # tput sgr0 sets all the settings back to terminal default.
+    RESET="$(tput sgr0)";
+
     # Home Directory Hygenie
     XDG_CONFIG_HOME = "$HOME/.config";
     XDG_CACHE_HOME = "$HOME/.cache";
     XDG_DATA_HOME = "$HOME/.local/share";
     XDG_STATE_HOME = "$HOME/.local/state";
 
-    DROPBOX = "/Users/darrenlu/Dropbox";
-    DEV = "$HOME/Documents/dev";
-    NIX = "$HOME/.config/home-manager";
-    
     EDITOR = "hx";
     VISUAL = "hx";
 
