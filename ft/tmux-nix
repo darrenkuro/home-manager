@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+#nix-user-chroot /home/dlu/.nix zsh -l
+#tmux
+#if [ -z "$TMUX" ]; then
+#	tmux
+#	exit
+#fi
+
+set -euo pipefail
+
+NUC="${NUC:-/home/dlu/bin/nix-user-chroot}"
+NIXROOT="${NIXROOT:-\"$HOME/.nix\"}"
+
+if [[ -n "${TMUX-}" ]]; then
+	exec "$NUC" "$NIXROOT" zsh -l
+fi
+
+exec tmux new-session -As dev "exec \"$NUC\" \"$NIXROOT\" zsh -l"
+
+#tmux has-session -t dev 2>/dev/null && exec tmux attach -t dev || exec tmux new session -dev "nix-user-chroot ~/.nix zsh -l"
