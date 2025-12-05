@@ -1,0 +1,6 @@
+# This file is managed by Nix
+
+theme = "onedark"
+
+[editor]
+soft-wrap.enable = true

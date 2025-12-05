@@ -1,7 +1,8 @@
 {
-  description = "Home Manager config for Darren";
+  description = "Darren's Home Manager";
 
   inputs = {
+    # Newest, Update daily
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     home-manager = {
       url = "github:nix-community/home-manager";
