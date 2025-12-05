@@ -44,12 +44,12 @@
     ".config/starship.toml".source = ../dotfiles/starship.toml;
     ".config/helix/config.toml".source = ../dotfiles/helix-conf.toml;
     ".config/helix/languages.toml".source = ../dotfiles/helix-languages.toml;
-  };
-
-  home.file = if tag == "mac" then {
+    ".config/lf/preview.sh".source = ../dotfiles/lf-preview;
+  }
+  // (if tag == "mac" then {
     ".config/tmux/tmux.conf".source = ../dotfiles/tmux.mac.conf;
-  } else {};
-
+  } else {});
+  
   home.sessionVariables = {
     # setaf => foreground; setab => background
     BLACK="$(tput setaf 0)";
@@ -122,11 +122,4 @@
     };
   };
 
-  home.file.".config/lf/preview.sh" = {
-    text = ''
-      #!/usr/bin/env bash
-      bat --color=always --style=plain "$1"
-    '';
-    executable = true;
-  };
 }

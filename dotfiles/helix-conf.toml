@@ -4,3 +4,7 @@ theme = "onedark"
 
 [editor]
 soft-wrap.enable = true
+true_color = true
+
+[editor.ui]
+transparent = true
