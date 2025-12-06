@@ -11,4 +11,9 @@ color-modes = true
 [editor.whitespace.render]
 tab = "all"
 
+[editor.whitespace.characters]
 tab = "→"
+
+[editor.indent]
+tab-width = 4
+unit = "    "
