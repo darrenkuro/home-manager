@@ -54,7 +54,7 @@
   ] else []);
 
   home.file = {
-    ".config/starship.toml".source = ../dotfiles/starship.toml;
+    #".config/starship.toml".source = ../dotfiles/starship.toml;
     ".config/helix/config.toml".source = ../dotfiles/helix-conf.toml;
     ".config/helix/languages.toml".source = ../dotfiles/helix-languages.toml;
     ".config/lf/preview.sh".source = ../dotfiles/lf-preview.sh;
@@ -135,5 +135,4 @@
       init.defaultBranch = "main";
     };
   };
-
 }

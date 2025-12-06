@@ -2,24 +2,16 @@
   description = "Darren's Home Manager";
 
   inputs = {
-    # Newest, Update daily
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    home-manager = {
-      url = "github:nix-community/home-manager";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    home-manager.url = "github:nix-community/home-manager";
+    home-manager.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
-    { self, nixpkgs, home-manager, ... }:
-    let
-      forSystem = system:
-        nixpkgs.legacyPackages.${system};
-    in
-    {
+    { self, nixpkgs, home-manager, ... }: {
       homeConfigurations = {
         mac = home-manager.lib.homeManagerConfiguration {
-          pkgs = forSystem "aarch64-darwin";
+          pkgs = nixpkgs.legacyPackages."aarch64-darwin";
           extraSpecialArgs = { tag = "mac"; };
           modules = [
             {
@@ -29,7 +21,7 @@
             ./src-nix/entry.nix ];
         };
         ft = home-manager.lib.homeManagerConfiguration {
-          pkgs = forSystem "x86_64-linux";
+          pkgs = nixpkgs.legacyPackages."x86_64-linux";
           extraSpecialArgs = { tag = "ft"; };
           modules = [
             {
@@ -41,7 +33,7 @@
                 $${pkgs.xorg.xset}/bin/xset r rate 200 60
               '';
             }
-            ./src-nix/entry.nix ];
+            ./src-nix/entry.nix ./modules/programs/starship.nix ];
         };
       };
     };
