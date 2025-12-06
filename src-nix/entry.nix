@@ -2,6 +2,7 @@
 
 {
   imports = [ ./alias.nix ];
+  nixpkgs.config.allowUnfree = true;
 
   home.stateVersion = "25.11";
   home.packages = with pkgs; [
@@ -44,14 +45,10 @@
     anki
     brave
     the-unarchiver
-    avidemux
+    #avidemux
     google-chrome
     obsidian
-    
-
-    
     #ghostty-bin
-    #anki
   ] else if tag == "ft" then [
     
   ] else []);
@@ -100,31 +97,32 @@
     enable = true;
     enableZshIntegration = true;
   };
+
   
-  programs.lf = {
-    enable = true;
-    settings = {
-      icons = true;
-      preview = true;
-      previewer = "~/.config/lf/preview.sh";
-    };
+  # programs.lf = {
+  #   enable = true;
+  #   settings = {
+  #     icons = true;
+  #     preview = true;
+  #     previewer = "~/.config/lf/preview.sh";
+  #   };
 
-    extraConfig = ''
-      cmd open $${EDITOR:-hx} "$f"
-      cmd open-multi $${EDITOR:-hx} "$fx"
+  #   extraConfig = ''
+  #     cmd open $${EDITOR:-hx} "$f"
+  #     cmd open-multi $${EDITOR:-hx} "$fx"
 
-      map <enter> open
-      cmd q quit
-      map o open-multi
-      map s split
-      cmd split tmux split-window -v hx "$f"
-    '';
-  };
+  #     map <enter> open
+  #     cmd q quit
+  #     map o open-multi
+  #     map s split
+  #     cmd split tmux split-window -v hx "$f"
+  #   '';
+  # };
 
-  programs.bat = {
-    enable = true;
-    config = { theme = "OneDark"; };
-  };
+  # programs.bat = {
+  #   enable = true;
+  #   config = { theme = "OneDark"; };
+  # };
 
   programs.git = {
     enable = true;
