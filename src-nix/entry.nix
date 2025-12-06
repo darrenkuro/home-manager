@@ -26,6 +26,7 @@
     
   ] ++ (if tag == "mac" then [
     pnpm
+    docker
 
     tokei
     eza
@@ -33,8 +34,22 @@
     jq
     fzf
 
+    ffmpeg
+    imagemagick
+    rename
+    ripgrep
     
     darwin.trash
+
+    anki
+    brave
+    the-unarchiver
+    avidemux
+    google-chrome
+    obsidian
+    
+
+    
     #ghostty-bin
     #anki
   ] else if tag == "ft" then [
