@@ -20,10 +20,10 @@ in {
     cloc = "tokei";
 
     # Fast access
-    dev = "cd ${dev}";
     a = "hx ${hm}/src-nix/alias.nix";
     hm = "cd ${hm}";
-
+    dev = "cd ${dev}";
+    
     # Git
     gi = "gitinit";
     gpa = "git add -A && git commit -m \"Update\" && git push";
@@ -37,6 +37,7 @@ in {
     gchp = "gh pr checkout";
 
     sscfg = "hx ${dotfile}/starship.toml";
+    hcfg = "hx ${dotfile}/helix-conf.toml";
 
     ncg = "nix-collect-garbage -d";
 

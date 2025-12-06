@@ -6,3 +6,9 @@ theme = "onedark"
 [editor]
 soft-wrap.enable = true
 true-color = true
+color-modes = true
+
+[editor.whitespace.render]
+tab = "all"
+
+tab = "→"
