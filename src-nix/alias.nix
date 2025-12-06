@@ -20,9 +20,9 @@ in {
     cloc = "tokei";
 
     # Fast access
-    dbox = "cd $${dp}";
-    dev = "cd $${dev}";
-    a = "hx $${hm}/src-nix/alias.nix";
+    dev = "cd ${dev}";
+    a = "hx ${hm}/src-nix/alias.nix";
+    hm = "cd ${hm}";
 
     # Git
     gi = "gitinit";
@@ -45,6 +45,8 @@ in {
   }
   //
   (if tag == "mac" then {
+    dbox = "cd ${dp}";
+    
     re = "home-manager switch --flake ~/.config/home-manager#mac";
 
     hide = "chflags hidden";
