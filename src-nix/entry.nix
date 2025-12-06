@@ -5,9 +5,10 @@
 
   home.stateVersion = "25.11";
   home.packages = with pkgs; [
-    # Shared packages 
+    # Shared 
     starship
     helix
+    tmux
 
     nodejs_24  
     typescript-language-server
@@ -20,19 +21,19 @@
     rustc
     cargo
 
-    tokei
-    eza   # ls
-    fzf   
-    fd    # find
-    jq
-    tmux
-    lf
-    bat
+    # lf
+    # bat
     
   ] ++ (if tag == "mac" then [
     pnpm
-    alacritty
 
+    tokei
+    eza
+    fd
+    jq
+    fzf
+
+    
     darwin.trash
     #ghostty-bin
     #anki
