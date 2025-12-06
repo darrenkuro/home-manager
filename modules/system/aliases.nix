@@ -1,10 +1,10 @@
-{ paths, tag... }: {
+{ tag, ... }: {
   programs.zsh.shellAliases = {
     h = "hx";
     cloc = "tokei";
 
-    a = "hx ${paths.sys}/alias.nix"; # Aliases (shared)
-    p = if tag == "mac" then "hx ${paths.sys}/macos.nix" else "hx ${paths.sys}/linux-ft.nix";
+    #a = "hx $HM/${paths.sys}/alias.nix"; # Aliases (shared)
+    #p = if tag == "mac" then "hx $HM/${paths.sys}/macos.nix" else "hx $HM/${paths.sys}/linux-ft.nix";
     hm = "cd $HM";
     dev = "cd $DEV";
 

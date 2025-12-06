@@ -1,4 +1,4 @@
-{ pkgs, tag, paths...}:
+{ pkgs, tag, paths, ...}:
 {
     home.username = if tag == "mac" then "darrenlu" else "dlu";
     home.homeDirectory = if tag == "mac" then "/Users/darrenlu" else "/user/dlu";
@@ -9,13 +9,13 @@
 	programs.bash.enable = true;
 
 	imports = [
-		${paths.sys}/aliases.nix
-		${paths.sys}/env.nix
+		paths.sys/aliases.nix
+		paths.sys/env.nix
 
-		${paths.apps}/starship.nix
-		${paths.apps}/git.nix
-		${paths.apps}/tmux.nix
+		paths.apps/starship.nix
+		paths.apps/git.nix
+		paths.apps/tmux.nix
 
-		(if tag == "mac" then ${paths.sys}/macos.nix else ${paths.sys}/linux-ft.nix)
+		(if tag == "mac" then paths.sys/macos.nix else paths.sys/linux-ft.nix)
 	];
 }

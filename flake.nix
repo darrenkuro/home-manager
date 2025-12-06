@@ -10,9 +10,9 @@
   outputs = { self, nixpkgs, home-manager, ... }:
   let
 	paths = {
-		apps = "$HOME/.config/home-manager/modules/apps";
-		sys = "$HOME/.config/home-manager/modules/system";
-		dev = "$HOME/.config/home-manager/modules/dev";
+		apps = ./modules/apps;
+		sys = ./modules/system;
+		dev = ./modules/dev;
 	};
 
     mkHome = { system, tag }: home-manager.lib.homeManagerConfiguration {

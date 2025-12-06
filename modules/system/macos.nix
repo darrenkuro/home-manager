@@ -1,5 +1,5 @@
 { pkgs, paths, ... }: {
-	import = with ${paths.dev}; [ c.nix rust.nix ts.nix ];
+	import = [ paths.dev/c.nix paths.dev/rust.nix paths.dev/ts.nix ];
 
 	home.packages = with pkgs; [
 		pnpm
