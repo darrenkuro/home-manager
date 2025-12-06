@@ -20,7 +20,8 @@ in {
     cloc = "tokei";
 
     # Fast access
-    a = "hx ${hm}/src-nix/alias.nix";
+    a = "hx ${hm}/src-nix/alias.nix"; # Aliases
+    p = "hx ${hm}/src-nix/entry.nix"; # Packages
     hm = "cd ${hm}";
     dev = "cd ${dev}";
     
