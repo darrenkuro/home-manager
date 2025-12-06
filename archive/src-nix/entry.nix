@@ -3,18 +3,17 @@
 {
   imports = [ ./alias.nix ];
   nixpkgs.config.allowUnfree = true;
-
   home.stateVersion = "25.11";
   home.packages = with pkgs; [
-    # Shared 
+    # Shared
     starship
     helix
     tmux
 
-    nodejs_24  
+    nodejs_24
     typescript-language-server
     llvmPackages_20.clang-tools
-  
+
     git
     gh
 
@@ -24,7 +23,7 @@
 
     # lf
     # bat
-    
+
   ] ++ (if tag == "mac" then [
     pnpm
     docker
@@ -39,7 +38,7 @@
     imagemagick
     rename
     ripgrep
-    
+
     darwin.trash
 
     anki
@@ -50,7 +49,7 @@
     obsidian
     #ghostty-bin
   ] else if tag == "ft" then [
-    
+
   ] else []);
 
   home.file = {
@@ -62,7 +61,7 @@
   // (if tag == "mac" then {
     ".config/tmux/tmux.conf".source = ../dotfiles/tmux.mac.conf;
   } else {});
-  
+
   home.sessionVariables = {
     # setaf => foreground; setab => background
     BLACK="$(tput setaf 0)";
@@ -93,46 +92,4 @@
   programs.home-manager.enable = true;
   programs.zsh.enable = true;
 
-  programs.starship = {
-    enable = true;
-    enableZshIntegration = true;
-  };
 
-  
-  # programs.lf = {
-  #   enable = true;
-  #   settings = {
-  #     icons = true;
-  #     preview = true;
-  #     previewer = "~/.config/lf/preview.sh";
-  #   };
-
-  #   extraConfig = ''
-  #     cmd open $${EDITOR:-hx} "$f"
-  #     cmd open-multi $${EDITOR:-hx} "$fx"
-
-  #     map <enter> open
-  #     cmd q quit
-  #     map o open-multi
-  #     map s split
-  #     cmd split tmux split-window -v hx "$f"
-  #   '';
-  # };
-
-  # programs.bat = {
-  #   enable = true;
-  #   config = { theme = "OneDark"; };
-  # };
-
-  programs.git = {
-    enable = true;
-    #user.email = if tag == "ft" then "dlu@student.42berlin.de" else "odon5ht@gmail.com";
-    settings = {
-      user.name = "darrenkuro";
-      user.email = "odon5ht@gmail.com";
-      core.editor = "hx";
-      color.ui = "auto";
-      init.defaultBranch = "main";
-    };
-  };
-}

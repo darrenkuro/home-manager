@@ -7,34 +7,26 @@
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs =
-    { self, nixpkgs, home-manager, ... }: {
-      homeConfigurations = {
-        mac = home-manager.lib.homeManagerConfiguration {
-          pkgs = nixpkgs.legacyPackages."aarch64-darwin";
-          extraSpecialArgs = { tag = "mac"; };
-          modules = [
-            {
-              home.username = "darrenlu";
-              home.homeDirectory = "/Users/darrenlu";
-            }
-            ./src-nix/entry.nix ];
-        };
-        ft = home-manager.lib.homeManagerConfiguration {
-          pkgs = nixpkgs.legacyPackages."x86_64-linux";
-          extraSpecialArgs = { tag = "ft"; };
-          modules = [
-            {
-              home.username = "dlu";
-              home.homeDirectory = "/home/dlu";
-              
-              xsession.enable = true;
-              xsession.initExtra = ''
-                $${pkgs.xorg.xset}/bin/xset r rate 200 60
-              '';
-            }
-            ./src-nix/entry.nix ./modules/programs/starship.nix ];
-        };
+  outputs = { self, nixpkgs, home-manager, ... }:
+  let
+	paths = {
+		apps = "$HOME/.config/home-manager/modules/apps";
+		sys = "$HOME/.config/home-manager/modules/system";
+		dev = "$HOME/.config/home-manager/modules/dev";
+	};
+
+    mkHome = { system, tag }: home-manager.lib.homeManagerConfiguration {
+      pkgs = import nixpkgs {
+        inherit system;
+        config.allowUnfree = true;
       };
+      extraSpecialArgs = { inherit tag system paths; };
+      modules = [ ./home.nix ];
     };
+  in {
+    homeConfigurations = {
+      mac = mkHome { system = "aarch64-darwin"; tag = "mac"; };
+      ft  = mkHome { system = "x86_64-linux";  tag = "ft";  };
+    };
+  };
 }

@@ -1,6 +1,0 @@
-**/.env
-**/.DS_Store
-**/*.o
-
-**/node_modules/
-**/dist/
