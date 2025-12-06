@@ -1,5 +1,5 @@
-{ pkgs, paths, ... }: {
-	import = [ paths.dev/c.nix paths.dev/rust.nix paths.dev/ts.nix ];
+{ pkgs, ... }: {
+	imports = [ ../dev/c.nix ../dev/rust.nix ../dev/ts.nix ];
 
 	home.packages = with pkgs; [
 		pnpm
@@ -25,7 +25,7 @@
 		google-chrome
 		obsidian
 		#ghostty-bin
-	]
+	];
 
 	programs.zsh.shellAliases = {
 		dbox = "cd $DBOX";
@@ -35,5 +35,5 @@
 		hide = "chflags hidden";
     	unhide = "chflags nohidden";
     	rm = "echo \"$YELLOW DANGEROUS CMD: using trash instread!$RESET\" && trash";
-	}
+	};
 }

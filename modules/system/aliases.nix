@@ -3,8 +3,8 @@
     h = "hx";
     cloc = "tokei";
 
-    #a = "hx $HM/${paths.sys}/alias.nix"; # Aliases (shared)
-    #p = if tag == "mac" then "hx $HM/${paths.sys}/macos.nix" else "hx $HM/${paths.sys}/linux-ft.nix";
+    a = "hx $HM/modules/system/alias.nix"; # Aliases (shared)
+    p = if tag == "mac" then "hx $HM//modules/system/macos.nix" else "hx $HM/modules/system/linux-ft.nix";
     hm = "cd $HM";
     dev = "cd $DEV";
 

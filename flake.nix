@@ -9,18 +9,18 @@
 
   outputs = { self, nixpkgs, home-manager, ... }:
   let
-	paths = {
-		apps = ./modules/apps;
-		sys = ./modules/system;
-		dev = ./modules/dev;
-	};
+	# paths = {
+	# 	apps = ./modules/apps;
+	# 	sys = ./modules/system;
+	# 	dev = ./modules/dev;
+	# };
 
     mkHome = { system, tag }: home-manager.lib.homeManagerConfiguration {
       pkgs = import nixpkgs {
         inherit system;
         config.allowUnfree = true;
       };
-      extraSpecialArgs = { inherit tag system paths; };
+      extraSpecialArgs = { inherit tag system ; };
       modules = [ ./home.nix ];
     };
   in {

@@ -28,5 +28,5 @@
 		# VISUAL = "hx";
 
 		# BAT_THEME = "OneDark";
-	}
+	};
 }

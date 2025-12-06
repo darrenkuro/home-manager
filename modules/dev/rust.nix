@@ -3,5 +3,5 @@
 		rustc
 		cargo
 		rust-analyzer
-	]
+	];
 }
