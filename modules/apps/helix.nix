@@ -1,6 +1,7 @@
 { pkgs, ... }: {
   programs.helix = {
     enable = true;
+	defaultEditor = true;
 
     settings = {
       theme = "onedark";
@@ -15,8 +16,9 @@
           characters.tab = "→";
         };
       };
+	};
 
-      languages = [
+    languages = [
         {
           name = "typescript";
           language-servers = [ "typescript-language-server" ];
@@ -35,13 +37,13 @@
         }
       ];
     };
-  };
-
-  # Optional: ensure LSP servers exist
-	  home.packages = with pkgs; [
-	    helix
-	    nodePackages.typescript-language-server
-	    rust-analyzer
-	    clang-tools
-	  ];
 }
+
+#   # Optional: ensure LSP servers exist
+# 	  home.packages = with pkgs; [
+# 	    helix
+# 	    nodePackages.typescript-language-server
+# 	    rust-analyzer
+# 	    #clang-tools
+# 	  ];
+
