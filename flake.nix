@@ -7,26 +7,39 @@
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { self, nixpkgs, home-manager, ... }:
-  let
-	# paths = {
-	# 	apps = ./modules/apps;
-	# 	sys = ./modules/system;
-	# 	dev = ./modules/dev;
-	# };
-
-    mkHome = { system, tag }: home-manager.lib.homeManagerConfiguration {
-      pkgs = import nixpkgs {
-        inherit system;
-        config.allowUnfree = true;
+  outputs = {
+    self,
+    nixpkgs,
+    home-manager,
+    ...
+  }: let
+    # paths = {
+    # 	apps = ./modules/apps;
+    # 	sys = ./modules/system;
+    # 	dev = ./modules/dev;
+    # };
+    mkHome = {
+      system,
+      tag,
+    }:
+      home-manager.lib.homeManagerConfiguration {
+        pkgs = import nixpkgs {
+          inherit system;
+          config.allowUnfree = true;
+        };
+        extraSpecialArgs = {inherit tag system;};
+        modules = [./home.nix];
       };
-      extraSpecialArgs = { inherit tag system ; };
-      modules = [ ./home.nix ];
-    };
   in {
     homeConfigurations = {
-      mac = mkHome { system = "aarch64-darwin"; tag = "mac"; };
-      ft  = mkHome { system = "x86_64-linux";  tag = "ft";  };
+      mac = mkHome {
+        system = "aarch64-darwin";
+        tag = "mac";
+      };
+      ft = mkHome {
+        system = "x86_64-linux";
+        tag = "ft";
+      };
     };
   };
 }

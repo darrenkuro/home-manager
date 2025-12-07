@@ -1,6 +1,11 @@
- { config, lib, pkgs, ... }: {
-	home.packages = with pkgs; [ git gh ];
-	programs.git = {
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}: {
+  home.packages = with pkgs; [git gh];
+  programs.git = {
     enable = true;
     #user.email = if tag == "ft" then "dlu@student.42berlin.de" else "odon5ht@gmail.com";
     settings = {
@@ -11,18 +16,18 @@
       init.defaultBranch = "main";
     };
   };
-    programs.zsh.shellAliases = {
-		hmgit = "hx $HM/modules/apps/git.nix";
+  programs.zsh.shellAliases = {
+    hmgit = "hx $HM/modules/apps/git.nix";
 
-		gi = "gitinit";
-		gpa = "git add -A && git commit -m \"Update\" && git push";
-		gm = "git commit -m";
-		gma = "git add -A && git commit -m";
-		gch = "git checkout";
-		gs = "git status";
-		gp = "git push";
-		ga = "git add -A";
-		gpl = "git push --force-with-lease";
-		gchp = "gh pr checkout";
+    gi = "gitinit";
+    gpa = "git add -A && git commit -m \"Update\" && git push";
+    gm = "git commit -m";
+    gma = "git add -A && git commit -m";
+    gch = "git checkout";
+    gs = "git status";
+    gp = "git push";
+    ga = "git add -A";
+    gpl = "git push --force-with-lease";
+    gchp = "gh pr checkout";
   };
 }

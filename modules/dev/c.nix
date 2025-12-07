@@ -1,5 +1,5 @@
-{ pkgs, ... }: {
-	home.packages = with pkgs; [
-		llvmPackages_20.clang-tools
-	];
+{pkgs, ...}: {
+  home.packages = with pkgs; [
+    llvmPackages_20.clang-tools
+  ];
 }

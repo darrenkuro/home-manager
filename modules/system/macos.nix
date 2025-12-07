@@ -1,43 +1,43 @@
-{ pkgs, ... }: {
-	imports = [ ../dev/c.nix ../dev/rust.nix ../dev/ts.nix ];
+{pkgs, ...}: {
+  imports = [../dev/c.nix ../dev/rust.nix ../dev/ts.nix];
 
-	home.packages = with pkgs; [
-		pnpm
-    	docker
+  home.packages = with pkgs; [
+    pnpm
+    docker
 
-		tokei
-    	eza
-  		fd
-		jq
-		fzf
+    tokei
+    eza
+    fd
+    jq
+    fzf
 
-		ffmpeg
-		imagemagick
-		rename
-		ripgrep
+    ffmpeg
+    imagemagick
+    rename
+    ripgrep
 
-		darwin.trash
+    darwin.trash
 
-		anki
-		brave
-		the-unarchiver
-		#avidemux
-		google-chrome
-		obsidian
-		#ghostty-bin
+    anki
+    brave
+    the-unarchiver
+    #avidemux
+    google-chrome
+    obsidian
+    #ghostty-bin
 
-		taskwarrior3
+    taskwarrior3
 
-		alejandra
-	];
+    alejandra
+  ];
 
-	programs.zsh.shellAliases = {
-		dbox = "cd $DBOX";
+  programs.zsh.shellAliases = {
+    dbox = "cd $DBOX";
 
-		re = "home-manager switch --flake ~/.config/home-manager#mac";
+    re = "home-manager switch --flake ~/.config/home-manager#mac";
 
-		hide = "chflags hidden";
-    	unhide = "chflags nohidden";
-    	rm = "echo \"☠️ $YELLOW DANGEROUS CMD: using trash instread!$RESET\" && trash";
-	};
+    hide = "chflags hidden";
+    unhide = "chflags nohidden";
+    rm = "echo \"☠️ $YELLOW DANGEROUS CMD: using trash instread!$RESET\" && trash";
+  };
 }
