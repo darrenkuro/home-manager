@@ -27,6 +27,8 @@
 		#ghostty-bin
 
 		taskwarrior3
+
+		alejandra
 	];
 
 	programs.zsh.shellAliases = {

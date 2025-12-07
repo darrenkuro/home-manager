@@ -36,6 +36,14 @@
 			name = "cpp";
 			language-servers = [ "clangd" ];
 			}
+			{
+			name = "nix";
+			auto-format = true;
+			formatter = {
+				command = "alejandra";
+				args = [ "-q" ];  # quiet mode
+			};
+			}
 		];
 	  };
     };
