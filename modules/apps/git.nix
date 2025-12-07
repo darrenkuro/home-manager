@@ -11,6 +11,8 @@
     };
   };
     programs.zsh.shellAliases = {
+		hmgit = "hx $HM/modules/apps/git.nix";
+
 		gi = "gitinit";
 		gpa = "git add -A && git commit -m \"Update\" && git push";
 		gm = "git commit -m";

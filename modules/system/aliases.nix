@@ -8,9 +8,6 @@
     hm = "cd $HM";
     dev = "cd $DEV";
 
-    # sscfg = "hx ${dotfile}/starship.toml";
-    # hcfg = "hx ${dotfile}/helix-conf.toml";
-
     ncg = "nix-collect-garbage -d";
 
     lss = "eza --icons --ignore-glob='*.log|.git|node_modules|.DS_Store'";

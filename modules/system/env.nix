@@ -22,10 +22,5 @@
 		XDG_CACHE_HOME = "$HOME/.cache";
 		XDG_DATA_HOME = "$HOME/.local/share";
 		XDG_STATE_HOME = "$HOME/.local/state";
-
-		# EDITOR = "hx";
-		# VISUAL = "hx";
-
-		# BAT_THEME = "OneDark";
 	};
 }
