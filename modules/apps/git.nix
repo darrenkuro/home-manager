@@ -1,4 +1,5 @@
  { config, lib, pkgs, ... }: {
+	home.packages = with pkgs; [ git gh ];
 	programs.git = {
     enable = true;
     #user.email = if tag == "ft" then "dlu@student.42berlin.de" else "odon5ht@gmail.com";
