@@ -4,20 +4,9 @@
     cloc = "tokei";
 
     a = "hx $HM/modules/system/alias.nix"; # Aliases (shared)
-    p = if tag == "mac" then "hx $HM//modules/system/macos.nix" else "hx $HM/modules/system/linux-ft.nix";
+    p = if tag == "mac" then "hx $HM/modules/system/macos.nix" else "hx $HM/modules/system/linux-ft.nix";
     hm = "cd $HM";
     dev = "cd $DEV";
-
-    gi = "gitinit";
-    gpa = "git add -A && git commit -m \"Update\" && git push";
-    gm = "git commit -m";
-    gma = "git add -A && git commit -m";
-    gch = "git checkout";
-    gs = "git status";
-    gp = "git push";
-    ga = "git add -A";
-    gpl = "git push --force-with-lease";
-    gchp = "gh pr checkout";
 
     # sscfg = "hx ${dotfile}/starship.toml";
     # hcfg = "hx ${dotfile}/helix-conf.toml";

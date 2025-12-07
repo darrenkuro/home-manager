@@ -10,4 +10,16 @@
       init.defaultBranch = "main";
     };
   };
+    programs.zsh.shellAliases = {
+		gi = "gitinit";
+		gpa = "git add -A && git commit -m \"Update\" && git push";
+		gm = "git commit -m";
+		gma = "git add -A && git commit -m";
+		gch = "git checkout";
+		gs = "git status";
+		gp = "git push";
+		ga = "git add -A";
+		gpl = "git push --force-with-lease";
+		gchp = "gh pr checkout";
+  };
 }
