@@ -4,7 +4,7 @@
 		enableZshIntegration = true;
 
 		settings = {
-			format = "[](color_orange)$os$username$nix_shell[](bg:color_yellow fg:color_orange)$directory[](fg:color_yellow bg:color_bg3)$git_branch$git_status$git_metrics[](fg:color_bg3 bg:color_blue)$git_state$c$rust$nodejs$python[](fg:color_blue bg:color_bg3)$docker_context$jobs[](fg:color_bg3 bg:color_orange)$cmd_duration[](fg:color_orange bg:color_aqua)$time[ ](fg:color_aqua)$line_break$character";
+			format = "[](color_orange)$os$username[](bg:color_yellow fg:color_orange)$directory[](fg:color_yellow bg:color_bg3)$git_branch$git_status$git_metrics[](fg:color_bg3 bg:color_blue)$git_state$c$rust$nodejs$python[](fg:color_blue bg:color_bg3)$docker_context$jobs[](fg:color_bg3 bg:color_orange)$cmd_duration[](fg:color_orange bg:color_aqua)$time[ ](fg:color_aqua)$line_break$nix_shell$character";
 			palette = "gruvbox_dark";
 			palettes = {
 				gruvbox_dark = {
@@ -55,8 +55,9 @@
 			};
 			nix_shell = {
 				disabled = false;
-        		symbol = "❄️ ";
+        		symbol = " ";
         		style = "bold blue";
+				format = "[ $symbol ($state) ]($style)";
         		impure_msg = "[impure]";
         		pure_msg = "[pure]";
         		unknown_msg = "[nix]";
