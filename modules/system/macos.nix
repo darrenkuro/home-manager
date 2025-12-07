@@ -34,6 +34,6 @@
 
 		hide = "chflags hidden";
     	unhide = "chflags nohidden";
-    	rm = "echo \"$YELLOW DANGEROUS CMD: using trash instread!$RESET\" && trash";
+    	rm = "echo \"☠️ $YELLOW DANGEROUS CMD: using trash instread!$RESET\" && trash";
 	};
 }
