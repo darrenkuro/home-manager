@@ -3,7 +3,6 @@
 		DBOX = "$HOME/Dropbox";
   		DEV = "$HOME/Documents/dev";
   		HM = "$HOME/.config/home-manager";
-  		# = "$HOME/.config/home-manager/dotfiles";
 
 		# setaf => foreground; setab => background
 		BLACK = "$(tput setaf 0)";
