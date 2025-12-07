@@ -1,4 +1,4 @@
-<h1 align="center">{{PROJECT_NAME}}</h1>
+<h1 align="center">Home manager</h1>
 
 <p align="center">
     <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License"/>
@@ -56,5 +56,5 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 
 ## 📫 Contact
 
-Darren Kuro – [darrenkuro@icloud.com](mailto:darrenkuro@icloud.com)  
+Darren Kuro – [darrenkuro@icloud.com](mailto:darrenkuro@icloud.com)
 GitHub: [@darrenkuro](https://github.com/darrenkuro)
