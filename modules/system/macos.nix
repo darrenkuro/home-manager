@@ -25,6 +25,8 @@
 		google-chrome
 		obsidian
 		#ghostty-bin
+
+		taskwarrior3
 	];
 
 	programs.zsh.shellAliases = {
