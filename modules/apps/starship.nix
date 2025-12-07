@@ -4,7 +4,7 @@
 		enableZshIntegration = true;
 
 		settings = {
-			format = "[](color_orange)$os$username[](bg:color_yellow fg:color_orange)$directory[](fg:color_yellow bg:color_bg3)$git_branch$git_status$git_metrics[](fg:color_bg3 bg:color_blue)$git_state$c$rust$nodejs$python[](fg:color_blue bg:color_bg3)$docker_context$jobs[](fg:color_bg3 bg:color_orange)$cmd_duration[](fg:color_orange bg:color_aqua)$time[ ](fg:color_aqua)$line_break$character";
+			format = "[](color_orange)$os$username$nix_shell[](bg:color_yellow fg:color_orange)$directory[](fg:color_yellow bg:color_bg3)$git_branch$git_status$git_metrics[](fg:color_bg3 bg:color_blue)$git_state$c$rust$nodejs$python[](fg:color_blue bg:color_bg3)$docker_context$jobs[](fg:color_bg3 bg:color_orange)$cmd_duration[](fg:color_orange bg:color_aqua)$time[ ](fg:color_aqua)$line_break$character";
 			palette = "gruvbox_dark";
 			palettes = {
 				gruvbox_dark = {
@@ -52,6 +52,14 @@
 				style_user = "bg:color_orange fg:color_fg0";
 				style_root = "bg:color_orange fg:color_fg0";
 				format = "[$user ]($style)";
+			};
+			nix_shell = {
+				disabled = false;
+        		symbol = "❄️ ";
+        		style = "bold blue";
+        		impure_msg = "[impure]";
+        		pure_msg = "[pure]";
+        		unknown_msg = "[nix]";
 			};
 			directory = {
 				style = "bg:color_yellow";
