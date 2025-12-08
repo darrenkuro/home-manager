@@ -17,6 +17,7 @@
   fonts.fontconfig.enable = true;
 
   imports = [
+    # Shared across all profiles
     ./modules/system/aliases.nix
     ./modules/system/env.nix
 

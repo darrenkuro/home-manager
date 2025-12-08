@@ -1,5 +1,13 @@
 { ... }:
 {
+  imports = [
+    ../dev/c-cpp.nix
+    ../dev/nix.nix
+
+    # ../dev/rust.nix
+    #../dev/js-ts.nix
+  ];
+
   #   xsession.enable = true;
   #   xsession.initExtra = ''
   #     $${pkgs.xorg.xset}/bin/xset r rate 200 60
