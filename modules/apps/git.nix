@@ -1,12 +1,15 @@
 {
-  config,
-  lib,
   pkgs,
   git-init,
   system,
   ...
-}: {
-  home.packages = [pkgs.git pkgs.gh git-init.packages.${system}.default];
+}:
+{
+  home.packages = [
+    pkgs.git
+    pkgs.gh
+    git-init.packages.${system}.default
+  ];
   programs.git = {
     enable = true;
     #user.email = if tag == "ft" then "dlu@student.42berlin.de" else "odon5ht@gmail.com";

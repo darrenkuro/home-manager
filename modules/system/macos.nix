@@ -1,5 +1,13 @@
-{pkgs, ...}: {
-  imports = [../dev/c-cpp.nix ../dev/rust.nix ../dev/js-ts.nix ../dev/nix.nix];
+{ pkgs, ... }:
+{
+  imports = [
+    ../dev/c-cpp.nix
+    ../dev/rust.nix
+    ../dev/js-ts.nix
+    ../dev/nix.nix
+  ];
+
+  home.file."Library/Fonts/NixNerdFonts".source = "${pkgs.nerd-fonts.fira-code}/share/fonts";
 
   home.packages = with pkgs; [
     pnpm

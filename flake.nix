@@ -9,40 +9,39 @@
     git-init.url = "github:darrenkuro/git-init";
   };
 
-  outputs = {
-    self,
-    nixpkgs,
-    home-manager,
-    git-init,
-    ...
-  }: let
-    # paths = {
-    # 	apps = ./modules/apps;
-    # 	sys = ./modules/system;
-    # 	dev = ./modules/dev;
-    # };
-    mkHome = {
-      system,
-      tag,
+  outputs =
+    {
+      self,
+      nixpkgs,
+      home-manager,
+      git-init,
+      ...
     }:
-      home-manager.lib.homeManagerConfiguration {
-        pkgs = import nixpkgs {
-          inherit system;
-          config.allowUnfree = true;
+    let
+      mkHome =
+        {
+          system,
+          tag,
+        }:
+        home-manager.lib.homeManagerConfiguration {
+          pkgs = import nixpkgs {
+            inherit system;
+            config.allowUnfree = true;
+          };
+          extraSpecialArgs = { inherit tag system git-init; };
+          modules = [ ./home.nix ];
         };
-        extraSpecialArgs = {inherit tag system git-init;};
-        modules = [./home.nix];
-      };
-  in {
-    homeConfigurations = {
-      mac = mkHome {
-        system = "aarch64-darwin";
-        tag = "mac";
-      };
-      ft = mkHome {
-        system = "x86_64-linux";
-        tag = "ft";
+    in
+    {
+      homeConfigurations = {
+        mac = mkHome {
+          system = "aarch64-darwin";
+          tag = "mac";
+        };
+        ft = mkHome {
+          system = "x86_64-linux";
+          tag = "ft";
+        };
       };
     };
-  };
 }

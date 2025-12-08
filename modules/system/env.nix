@@ -1,4 +1,5 @@
-{...}: {
+{ ... }:
+{
   home.sessionVariables = {
     DBOX = "$HOME/Dropbox";
     DEV = "$HOME/Documents/dev";
