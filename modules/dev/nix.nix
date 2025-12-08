@@ -9,7 +9,7 @@
     language = [
       {
         name = "nix";
-        language-server = {
+        language-servers = {
           command = "nil";
         };
         auto-format = true;

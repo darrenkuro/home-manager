@@ -11,7 +11,7 @@
     language = [
       {
         name = "javascript";
-        language-server = {
+        language-servers = {
           command = "typescript-language-server";
           args = [ "--stdio" ];
         };
@@ -23,7 +23,7 @@
       }
       {
         name = "typescript";
-        language-server = {
+        language-servers = {
           command = "typescript-language-server";
           args = [ "--stdio" ];
         };
