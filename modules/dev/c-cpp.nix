@@ -62,7 +62,7 @@
         "C_Cpp.intelliSenseEngine" = "disabled"; # Disable VSCode’s own IntelliSense engine
         "C_Cpp.autocomplete" = "disabled";
         "C_Cpp.errorSquiggles" = "disabled"; # clangd handles diagnostics now
-        "C_Cpp.clang_format_path" = "clangd"; # use the Nix binary
+        "C_Cpp.clang_format_path" = "clang-format"; # use the Nix binary
         "clangd.arguments" = [
           "--background-index"
           "--clang-tidy"
