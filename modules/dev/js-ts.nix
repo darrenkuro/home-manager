@@ -11,10 +11,12 @@
     language = [
       {
         name = "javascript";
-        language-servers = {
-          command = "typescript-language-server";
-          args = [ "--stdio" ];
-        };
+        language-servers = [
+          {
+            command = "typescript-language-server";
+            args = [ "--stdio" ];
+          }
+        ];
         auto-format = true;
         formatter = {
           command = "prettierd";
@@ -23,10 +25,12 @@
       }
       {
         name = "typescript";
-        language-servers = {
-          command = "typescript-language-server";
-          args = [ "--stdio" ];
-        };
+        language-servers = [
+          {
+            command = "typescript-language-server";
+            args = [ "--stdio" ];
+          }
+        ];
         auto-format = true;
         formatter = {
           command = "prettierd";

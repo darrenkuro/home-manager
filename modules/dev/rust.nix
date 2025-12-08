@@ -14,9 +14,11 @@
       {
         name = "rust";
 
-        language-servers = {
-          command = "rust-analyzer";
-        };
+        language-servers = [
+          {
+            command = "rust-analyzer";
+          }
+        ];
 
         auto-format = true;
         formatter = {
