@@ -1,0 +1,18 @@
+[[keyboard.bindings]]
+action = "ToggleFullscreen"
+key = "F11"
+
+[font]
+size = 14.0
+
+[font.normal]
+family = "Hack Nerd Font"
+style = "Regular"
+
+[window]
+opacity = 0.9
+startup_mode = "Maximized"
+
+[terminal.shell]
+program = "/home/dlu/bin/tmux-nix"
+args = [""]
