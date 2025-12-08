@@ -31,7 +31,6 @@
   };
 
   programs.vscode = {
-
     profiles.default = {
       extensions = with pkgs.vscode-extensions; [
         rust-lang.rust-analyzer
@@ -48,6 +47,9 @@
         "rust-analyzer.cargo.autoreload" = true;
         "rust-analyzer.procMacro.enable" = true;
         "rust-analyzer.checkOnSave.command" = "clippy";
+
+        "rust-analyzer.inlayHints.typeHints.enable" = false;
+        # "rust-analyzer.inlayHints.parameterHints.enable" = false;
       };
     };
   };
