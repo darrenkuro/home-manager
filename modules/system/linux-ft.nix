@@ -4,7 +4,7 @@
     ../dev/c-cpp.nix
     ../dev/nix.nix
 
-    # ../dev/rust.nix
+    #../dev/rust.nix
     #../dev/js-ts.nix
   ];
 

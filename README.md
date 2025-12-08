@@ -8,6 +8,7 @@
 
 > My personal flake.nix for home manager.
 
+./modules/apps/vscode.nix
 ```
 . ~/.nix-profile/etc/profile.d/nix.sh
 ```
