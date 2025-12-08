@@ -1,5 +1,5 @@
 {pkgs, ...}: {
-  imports = [../dev/c.nix ../dev/rust.nix ../dev/ts.nix];
+  imports = [../dev/c-cpp.nix ../dev/rust.nix ../dev/js-ts.nix ../dev/nix.nix];
 
   home.packages = with pkgs; [
     pnpm
@@ -27,8 +27,6 @@
     #ghostty-bin
 
     taskwarrior3
-
-    alejandra
   ];
 
   programs.zsh.shellAliases = {

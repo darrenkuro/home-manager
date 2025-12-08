@@ -2,9 +2,11 @@
   config,
   lib,
   pkgs,
+  git-init,
+  system,
   ...
 }: {
-  home.packages = with pkgs; [git gh];
+  home.packages = [pkgs.git pkgs.gh git-init.packages.${system}.default];
   programs.git = {
     enable = true;
     #user.email = if tag == "ft" then "dlu@student.42berlin.de" else "odon5ht@gmail.com";
@@ -19,7 +21,7 @@
   programs.zsh.shellAliases = {
     hmgit = "hx $HM/modules/apps/git.nix";
 
-    gi = "gitinit";
+    gi = "git-init";
     gpa = "git add -A && git commit -m \"Update\" && git push";
     gm = "git commit -m";
     gma = "git add -A && git commit -m";

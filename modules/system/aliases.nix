@@ -3,7 +3,7 @@
     h = "hx";
     cloc = "tokei";
 
-    a = "hx $HM/modules/system/alias.nix"; # Aliases (shared)
+    a = "hx $HM/modules/system/aliases.nix"; # Aliases (shared)
     p =
       if tag == "mac"
       then "hx $HM/modules/system/macos.nix"
