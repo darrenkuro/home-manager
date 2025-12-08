@@ -1,33 +1,42 @@
-{pkgs, ...}: {
-    home.packages = with pkgs; [ alejandra ];
+{ pkgs, ... }:
+{
+  home.packages = with pkgs; [
+    alejandra # Formatter
+    nil # LS
+  ];
+
   programs.helix.languages = {
-      language = [
-        {
-          name = "nix";
-          auto-format = true;
-          formatter = {
-            command = "alejandra";
-            args = ["-q"]; # quiet mode
-          };
-        }
-      ];
+    language = [
+      {
+        name = "nix";
+        language-server = {
+          command = "nil";
+        };
+        auto-format = true;
+        formatter = {
+          command = "alejandra";
+          args = [ "-q" ]; # quiet mode
+        };
+      }
+    ];
   };
+
   programs.vscode = {
-  userSettings = {
-    # Disable automatic extension-based formatting
-    "editor.defaultFormatter" = null;
+    profiles.default.extensions = with pkgs.vscode-extensions; [
+      jnoortheen.nix-ide
+    ];
 
-    # Format .nix files on save using the CLI binary
-    "[nix]" = {
-      "editor.formatOnSave" = true;
+    profiles.default.userSettings = {
+      "nix.enableLanguageServer" = true;
+      "nix.serverPath" = "nil";
+
+      "[nix]" = {
+        "editor.defaultFormatter" = null;
+        "editor.formatOnSave" = true;
+      };
+
+      "nix.formatterPath" = "alejandra";
+      "nix.formatterArgs" = [ "-q" ]; # quiet mode
     };
-
-    # Tell VS Code how to format Nix files manually
-    "nix.formatterPath" = "alejandra";
-    "nix.formatterArgs" = [ "-q" ]; # optional
-
-    # # Optional global behavior
-    # "editor.formatOnSaveMode" = "file";
   };
-};
 }
