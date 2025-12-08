@@ -3,7 +3,7 @@
 set -euo pipefail
 
 NUC="${NUC:-/home/dlu/bin/nix-user-chroot}"
-NIXROOT="${NIXROOT:-\"$HOME/.nix\"}"
+NIXROOT="${NIXROOT:-\"$HOME/sgoinfre/nix\"}"
 
 # If already in a tmux session
 if [[ -n "${TMUX-}" ]]; then
