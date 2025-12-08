@@ -21,7 +21,6 @@
   programs.vscode = {
     profiles.default = {
       extensions = with pkgs.vscode-extensions; [
-        13
         xforever.language-asm # syntax highlighting for .s/.asm/.S
       ];
 

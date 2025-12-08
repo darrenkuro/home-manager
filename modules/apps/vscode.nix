@@ -20,6 +20,9 @@
 
       "files.trimTrailingWhitespace" = true;
       "files.insertFinalNewline" = true;
+        "security.workspace.trust.enabled" = true;
+  "security.workspace.trust.startupPrompt" = "never";
+  "security.workspace.trust.trustedFolders" = ["~/Documents/dev"];
     };
   };
 }

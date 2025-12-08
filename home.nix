@@ -13,8 +13,8 @@
   programs.bash.enable = true;
 
   # Font
-  home.packages = [ pkgs.nerd-fonts.fira-code ];
-  fonts.fontconfig.enable = true;
+  # home.packages = [ pkgs.nerd-fonts.fira-code ];
+  # fonts.fontconfig.enable = true;
 
   imports = [
     ./modules/system/aliases.nix
