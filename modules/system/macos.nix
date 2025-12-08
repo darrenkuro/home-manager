@@ -56,6 +56,7 @@
   programs.zsh.shellAliases = {
     dbox = "cd $DBOX";
 
+    cloc = "tokei";
     re = "home-manager switch --flake ~/.config/home-manager#mac";
 
     hide = "chflags hidden";

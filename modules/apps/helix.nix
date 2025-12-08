@@ -19,7 +19,9 @@
       };
     };
   };
+
   programs.zsh.shellAliases = {
+    h = "hx";
     hmhx = "hx $HM/modules/apps/helix.nix";
   };
 }

@@ -1,7 +1,6 @@
 { tag, ... }:
 {
   programs.zsh.shellAliases = {
-    h = "hx";
     cloc = "tokei";
 
     a = "hx $HM/modules/system/aliases.nix"; # Aliases (shared)
