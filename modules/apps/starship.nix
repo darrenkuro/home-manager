@@ -153,4 +153,7 @@
       };
     };
   };
+  programs.zsh.shellAliases = {
+    hmss = "hx $HM/modules/apps/starship.nix";
+  };
 }

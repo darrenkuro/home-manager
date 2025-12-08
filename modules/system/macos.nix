@@ -7,7 +7,7 @@
     ../dev/nix.nix
   ];
 
-  #home.file."Library/Fonts/NixNerdFonts".source = "${pkgs.nerd-fonts.fira-code}/share/fonts";
+  # home.file."Library/Fonts/NixNerdFonts".source = "${pkgs.nerd-fonts.fira-code}/share/fonts";
 
   home.packages = with pkgs; [
     darwin.trash

@@ -28,4 +28,8 @@
       ];
     };
   };
+
+  programs.zsh.shellAliases = {
+    hmvs = "hx $HM/modules/apps/vscode.nix";
+  };
 }

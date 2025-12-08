@@ -21,6 +21,7 @@
       init.defaultBranch = "main";
     };
   };
+
   programs.zsh.shellAliases = {
     hmgit = "hx $HM/modules/apps/git.nix";
 
