@@ -1,0 +1,102 @@
+{
+    "editor.minimap.enabled": false,
+    "workbench.iconTheme": "material-icon-theme",
+    "diffEditor.ignoreTrimWhitespace": false,
+    "javascript.updateImportsOnFileMove.enabled": "always",
+    "editor.acceptSuggestionOnCommitCharacter": false,
+    "sqltools.useNodeRuntime": true,
+    "git.autofetch": true,
+    "editor.suggestOnTriggerCharacters": false,
+    "explorer.confirmDelete": false,
+    "editor.accessibilitySupport": "off",
+	"git.confirmSync": false,
+    "editor.defaultFormatter": "evilcat.norminette-42",
+    "workbench.startupEditor": "none",
+    "terminal.integrated.env.osx": {
+		"FIG_NEW_SESSION": "1"
+	},
+    "typescript.updateImportsOnFileMove.enabled": "always",
+    "explorer.confirmDragAndDrop": false,
+    "prettier.singleAttributePerLine": true,
+    "workbench.colorTheme": "GitHub Dark",
+    "prettier.tabWidth": 4,
+    "material-icon-theme.activeIconPack": "react",
+    "material-icon-theme.opacity": 0.8,
+    "material-icon-theme.saturation": 0.8,
+    "material-icon-theme.folders.associations": {
+        "modals": "interface",
+        "commands": "functions",
+        "component": "react-components",
+        "to-process": "error",
+        "data-fetching": "Api",
+        "data-models": "database",
+        "entry-model": "database",
+        "experiment": "project"
+    },
+    "material-icon-theme.files.associations": {
+        "svg.tsx": "svgr",
+        "constants.ts": "tsconfig",
+        "playground.ts": "test-ts"
+    },
+    "files.exclude": {
+        "**/Icon?": true
+    },
+    "editor.inlineSuggest.enabled": true,
+    "editor.fontFamily": "FiraCode Nerd Font Mono, Menlo, Monaco, 'Courier New', monospace",
+    "github.copilot.enable": {
+        "*": false,
+        "yaml": false,
+        "plaintext": true,
+        "markdown": false
+    },
+    "editor.fontSize": 13,
+    "prettier.bracketSameLine": true,
+    "[json]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    // "[c]": {
+    //     "editor.defaultFormatter": "ms-vscode.cpptools"
+    // },
+    "[cpp]": {
+        "editor.defaultFormatter": "ms-vscode.cpptools"
+    },
+	"settingsSync.ignoredSettings": [
+		"editor.defaultFormatter"
+	],
+    "files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true,
+    "C_Cpp.vcFormat.newLine.beforeOpenBrace.block": "sameLine",
+    "C_Cpp.formatting": "clangFormat",
+    "C_Cpp.vcFormat.space.beforeComma": true,
+    "C_Cpp.clang_format_style": "{ BasedOnStyle: LLVM, IndentWidth: 4, AlwaysBreakTemplateDeclarations: true}",
+    "C_Cpp.vcFormat.indent.accessSpecifiers": true,
+    "C_Cpp.clang_format_fallbackStyle": "LLVM",
+    "42header.username": "dlu",
+	"42header.email": "dlu@student.42berlin.de",
+    "editor.insertSpaces": false,
+	"editor.detectIndentation": false,
+	"emmet.preferences": {},
+	"separators.classes.borderStyle": "dashed",
+	"C_Cpp.errorSquiggles": "disabled",
+	"workbench.editor.empty.hint": "hidden",
+	"[typescript]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
+	},
+	"svelte.enable-ts-plugin": true,
+	"typescript.enablePromptUseWorkspaceTsdk": true,
+	"C_Cpp.intelliSenseEngineFallback": "enabled",
+	"editor.formatOnSave": true,
+	"[svelte]": {
+		"editor.defaultFormatter": "svelte.svelte-vscode"
+	},
+	"[prisma]": {
+		"editor.defaultFormatter": "Prisma.prisma"
+	},
+	"rust-analyzer.inlayHints.typeHints.enable": false,
+	"rust-analyzer.inlayHints.parameterHints.enable": false,
+	"[rust]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "rust-lang.rust-analyzer",
+	},
+	"github.copilot.nextEditSuggestions.enabled": true
+}
