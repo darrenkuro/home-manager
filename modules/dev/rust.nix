@@ -14,7 +14,7 @@
       {
         name = "rust";
 
-        language-server = {
+        language-servers = {
           command = "rust-analyzer";
         };
 

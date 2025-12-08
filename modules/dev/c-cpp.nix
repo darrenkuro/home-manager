@@ -25,7 +25,7 @@
     language = [
       {
         name = "c";
-        language-server = {
+        language-servers = {
           command = "clangd";
         };
         auto-format = true;
@@ -36,7 +36,7 @@
       }
       {
         name = "cpp";
-        language-server = {
+        language-servers = {
           command = "clangd";
         };
         auto-format = true;

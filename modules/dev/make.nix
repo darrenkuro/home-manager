@@ -10,8 +10,8 @@
     {
       name = "make";
       scope = "source.makefile";
-      language-server.command = "${pkgs.bash-language-server}/bin/bash-language-server";
-      language-server.args = [ "start" ];
+      language-servers.command = "${pkgs.bash-language-server}/bin/bash-language-server";
+      language-servers.args = [ "start" ];
       auto-format = true;
       formatter = {
         command = "${pkgs.shfmt}/bin/shfmt";

@@ -9,7 +9,7 @@
     {
       name = "asm";
       scope = "source.asm";
-      language-server.command = "${pkgs.asm-lsp}/bin/asm-lsp";
+      language-servers.command = "${pkgs.asm-lsp}/bin/asm-lsp";
       auto-format = true;
       formatter = {
         command = "${pkgs.asmfmt}/bin/asmfmt";
