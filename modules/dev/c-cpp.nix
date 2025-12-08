@@ -73,11 +73,11 @@
         # 🧹 Formatting
         "[c]" = {
           "editor.formatOnSave" = true;
-          "editor.defaultFormatter" = "xaver.clang-format"; # or ms-vscode.cpptools
+          "editor.defaultFormatter" = "ms-vscode.cpptools";
         };
         "[cpp]" = {
           "editor.formatOnSave" = true;
-          "editor.defaultFormatter" = "xaver.clang-format";
+          "editor.defaultFormatter" = "ms-vscode.cpptools";
         };
 
         "clang-format.style" = "file"; # read .clang-format from repo

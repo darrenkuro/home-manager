@@ -27,12 +27,8 @@
         "~/.config/home-manager"
       ];
 
-      # disables pop-ups and notifications recommending extensions
-      "extensions.showRecommendationsOnlyOnDemand" = true;
       "extensions.ignoreRecommendations" = true;
 
-      # also disable Workspace / File-based suggestions
-      "extensions.ignoreWorkspaceRecommendations" = true;
       "extensions.ignoreExtensionRecommendations" = true;
 
       # optional: removes extension suggestions from status bar
