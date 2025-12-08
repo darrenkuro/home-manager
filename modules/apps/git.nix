@@ -8,7 +8,7 @@
   home.packages = [
     pkgs.git
     pkgs.gh
-    git-init.packages.${system}.default
+    # git-init.packages.${system}.default
   ];
   programs.git = {
     enable = true;
