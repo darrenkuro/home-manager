@@ -1,22 +1,20 @@
 { ... }:
 {
   home.sessionVariables = {
+    # Directories
     DBOX = "$HOME/Dropbox";
     DEV = "$HOME/Documents/dev";
     HM = "$HOME/.config/home-manager";
 
-    # setaf => foreground; setab => background
-    BLACK = "$(tput setaf 0)";
-    RED = "$(tput setaf 1)";
-    GREEN = "$(tput setaf 2)";
-    YELLOW = "$(tput setaf 3)";
-    BLUE = "$(tput setaf 4)";
-    MAGENTA = "$(tput setaf 5)";
-    CYAN = "$(tput setaf 6)";
-    WHITE = "$(tput setaf 7)";
-
-    # tput sgr0 sets all the settings back to terminal default
-    RESET = "$(tput sgr0)";
+    # Colors
+    RED = "\\u001b[31m";
+    GREEN = "\\u001b[32m";
+    YELLOW = "\\u001b[33m";
+    BLUE = "\\u001b[34m";
+    MAGENTA = "\\u001b[35m";
+    CYAN = "\\u001b[36m";
+    WHITE = "\\u001b[37m";
+    RESET = "\\u001b[0m";
 
     # Home Directory Hygenie
     XDG_CONFIG_HOME = "$HOME/.config";

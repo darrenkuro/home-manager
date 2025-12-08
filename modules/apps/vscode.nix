@@ -9,20 +9,23 @@
     ];
 
     profiles.default.userSettings = {
-      "editor.fontFamily" = "FiraCode Nerd Font Mono, Menlo, Monaco, 'Courier New', monospace";
+      "editor.fontFamily" = "Hack Nerd Font Mono, monospace";
       "workbench.iconTheme" = "material-icon-theme";
       "workbench.colorTheme" = "GitHub Dark";
 
-      "editor.fontSize" = 13;
+      "editor.fontSize" = 14;
       "editor.tabSize" = 4;
       "editor.minimap.enabled" = false;
       "editor.detectIndentation" = false;
 
       "files.trimTrailingWhitespace" = true;
       "files.insertFinalNewline" = true;
-        "security.workspace.trust.enabled" = true;
-  "security.workspace.trust.startupPrompt" = "never";
-  "security.workspace.trust.trustedFolders" = ["~/Documents/dev"];
+      "security.workspace.trust.enabled" = true;
+      "security.workspace.trust.startupPrompt" = "never";
+      "security.workspace.trust.trustedFolders" = [
+        "~/Documents/dev"
+        "~/.config/home-manager"
+      ];
     };
   };
 }

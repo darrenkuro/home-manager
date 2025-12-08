@@ -6,15 +6,15 @@
 {
   home.username = if tag == "mac" then "darrenlu" else "dlu";
   home.homeDirectory = if tag == "mac" then "/Users/darrenlu" else "/user/dlu";
-  home.stateVersion = "25.11";
+  home.stateVersion = "25.11"; # Version when started using
 
   programs.home-manager.enable = true;
   programs.zsh.enable = true;
   programs.bash.enable = true;
 
   # Font
-  # home.packages = [ pkgs.nerd-fonts.fira-code ];
-  # fonts.fontconfig.enable = true;
+  home.packages = [ pkgs.nerd-fonts.hack ];
+  fonts.fontconfig.enable = true;
 
   imports = [
     ./modules/system/aliases.nix
