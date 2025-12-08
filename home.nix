@@ -13,10 +13,8 @@
   programs.bash.enable = true;
 
   # Font
-  # fonts.packages = with pkgs; [
-  #   (nerdfonts.override { fonts = [ "FiraCode" ]; })
-  # ];
-  # fonts.fontconfig.enable = true;
+  home.packages = [ pkgs.nerd-fonts.fira-code ];
+  fonts.fontconfig.enable = true;
 
   imports = [
     ./modules/system/aliases.nix
