@@ -59,9 +59,9 @@
 
       userSettings = {
         # 🧠 Use the Nix-provided clangd for all language intelligence
-        "C_Cpp.intelliSenseEngine" = "disabled"; # Disable VSCode’s own IntelliSense engine
-        "C_Cpp.autocomplete" = "disabled";
-        "C_Cpp.errorSquiggles" = "disabled"; # clangd handles diagnostics now
+        # "C_Cpp.intelliSenseEngine" = "disabled"; # Disable VSCode’s own IntelliSense engine
+        # "C_Cpp.autocomplete" = "disabled";
+        # "C_Cpp.errorSquiggles" = "disabled"; # clangd handles diagnostics now
         "C_Cpp.clang_format_path" = "${pkgs.clang-tools}/bin/clang-format"; # use the Nix binary
         "clangd.arguments" = [
           "--background-index"
