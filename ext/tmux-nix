@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+NUC="${NUC:-/home/dlu/bin/nix-user-chroot}"
+NIXROOT="${NIXROOT:-\"$HOME/.nix\"}"
+
+# If already in a tmux session
+if [[ -n "${TMUX-}" ]]; then
+	exec "$NUC" "$NIXROOT" zsh -l
+fi
+
+exec tmux new-session -As dev "exec \"$NUC\" \"$NIXROOT\" zsh -l"
