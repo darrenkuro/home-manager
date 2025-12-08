@@ -8,6 +8,10 @@
 
 > My personal flake.nix for home manager.
 
+```
+. ~/.nix-profile/etc/profile.d/nix.sh
+```
+
 ---
 
 ## 📄 License
