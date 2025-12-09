@@ -19,6 +19,7 @@
     fzf
     rename
     ripgrep
+    bat
 
     taskwarrior3
 
