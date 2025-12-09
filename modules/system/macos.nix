@@ -1,6 +1,8 @@
 { pkgs, ... }:
 {
   imports = [
+    ../apps/tmux.nix
+
     ../apps/vscode.nix
     ../dev/c-cpp.nix
     ../dev/rust.nix
