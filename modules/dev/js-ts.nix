@@ -2,7 +2,8 @@
 {
   home.packages = with pkgs; [
     nodejs_latest # provides node + npm
-    prettierd # Prettier daemon (fast formatter)
+    # prettierd # Prettier daemon (fast formatter) => VS Code unhappy
+    nodePackages.prettier
     typescript # tsc compiler
     nodePackages.typescript-language-server # LSP for both JS + TS
   ];
@@ -53,7 +54,8 @@
       ];
 
       userSettings = {
-        "prettier.prettierPath" = "${pkgs.prettierd}/bin/prettierd";
+        "prettier.prettierPath" = "${pkgs.nodePackages.prettier}/lib/node_modules/prettier";
+        "prettier.resolveGlobalModules" = false;
 
         "[javascript]" = {
           "editor.defaultFormatter" = "esbenp.prettier-vscode";

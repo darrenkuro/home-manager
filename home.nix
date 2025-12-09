@@ -8,12 +8,15 @@
   home.homeDirectory = if tag == "mac" then "/Users/darrenlu" else "/home/dlu";
   home.stateVersion = "25.11"; # Version when started using
 
+  home.packages = with pkgs; [
+    nerd-fonts.hack
+    cachix
+  ];
+
   programs.home-manager.enable = true;
   programs.zsh.enable = true;
   programs.bash.enable = true;
 
-  # Font
-  home.packages = [ pkgs.nerd-fonts.hack ];
   fonts.fontconfig.enable = true;
 
   imports = [
