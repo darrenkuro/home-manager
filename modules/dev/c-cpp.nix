@@ -52,15 +52,15 @@
       ];
 
       userSettings = {
-        "C_Cpp.clang_format_path" = "${pkgs.clang-tools}/bin/clang-format"; # use the Nix binary
-        "clangd.arguments" = [
-          "--background-index"
-          "--clang-tidy"
-          "--completion-style=detailed"
-          "--header-insertion=iwyu"
-        ];
+        "C_Cpp.clang_format_path" = "${pkgs.clang-tools}/bin/clang-format";
 
-        # 🧹 Formatting
+        # "clangd.arguments" = [
+        #   "--background-index"
+        #   "--clang-tidy"
+        #   "--completion-style=detailed"
+        #   "--header-insertion=iwyu"
+        # ];
+
         "[c]" = {
           "editor.formatOnSave" = true;
           "editor.defaultFormatter" = "ms-vscode.cpptools";
@@ -70,7 +70,7 @@
           "editor.defaultFormatter" = "ms-vscode.cpptools";
         };
 
-        "clang-format.style" = "file"; # read .clang-format from repo
+        "clang-format.style" = "file";
       };
     };
   };

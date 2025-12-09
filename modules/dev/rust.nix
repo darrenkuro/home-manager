@@ -28,12 +28,13 @@
 
   programs.vscode = {
     profiles.default = {
-      extensions = with pkgs.vscode-extensions; [
-        rust-lang.rust-analyzer
-      ];
+      # extensions = with pkgs.vscode-extensions; [
+      #   rust-lang.rust-analyzer
+      # ];
 
       userSettings = {
-        "rust-analyzer.server.path" = "rust-analyzer";
+        "rust-analyzer.server.path" = "${pkgs.rust-analyzer}/bin/rust-analyzer";
+        "rust-analyzer.rustfmt.path" = "${pkgs.rustfmt}/bin/rustfmt";
 
         "[rust]" = {
           "editor.formatOnSave" = true;

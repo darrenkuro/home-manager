@@ -34,6 +34,8 @@
       # optional: removes extension suggestions from status bar
       "extensions.autoCheckUpdates" = false;
       "extensions.autoUpdate" = false;
+
+      "explorer.confirmDragAndDrop" = false;
     };
   };
 

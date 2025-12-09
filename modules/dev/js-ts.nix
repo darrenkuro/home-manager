@@ -7,6 +7,23 @@
     nodePackages.typescript-language-server # LSP for both JS + TS
   ];
 
+  xdg.configFile.".config/prettier/config.json".text = ''
+    {
+      "printWidth": 100,
+      "tabWidth": 4,
+      "useTabs": false,
+      "semi": true,
+      "singleQuote": true,
+      "trailingComma": "es5",
+      "bracketSpacing": true,
+      "arrowParens": "avoid"
+    }
+  '';
+
+  home.sessionVariables = {
+    PRETTIERD_DEFAULT_CONFIG = "$XDG_CONFIG_HOME/prettier/config.json";
+  };
+
   programs.helix.languages = {
     language = [
       {
@@ -32,11 +49,12 @@
     profiles.default = {
       extensions = with pkgs.vscode-extensions; [
         esbenp.prettier-vscode # Prettier formatter
-        dbaeumer.vscode-eslint # ESLint
+        # dbaeumer.vscode-eslint # ESLint
       ];
 
       userSettings = {
-        # 🧠 Enable format-on-save for JS + TS
+        "prettier.prettierPath" = "${pkgs.prettierd}/bin/prettierd";
+
         "[javascript]" = {
           "editor.defaultFormatter" = "esbenp.prettier-vscode";
           "editor.formatOnSave" = true;
@@ -46,23 +64,22 @@
           "editor.formatOnSave" = true;
         };
 
-        # 🧹 General Prettier behavior
-        "prettier.requireConfig" = false; # allow default Prettier rules if no config file
-        "prettier.useEditorConfig" = true;
-        "prettier.printWidth" = 100;
-        "prettier.singleQuote" = true;
-        "prettier.trailingComma" = "es5";
-        "prettier.tabWidth" = 2;
+        # # 🧹 General Prettier behavior
+        # "prettier.requireConfig" = false; # allow default Prettier rules if no config file
+        # "prettier.useEditorConfig" = true;
+        # "prettier.printWidth" = 100;
+        # "prettier.singleQuote" = true;
+        # "prettier.trailingComma" = "es5";
+        # "prettier.tabWidth" = 2;
 
-        # 🚨 ESLint integration (optional)
-        "eslint.enable" = true;
-        "eslint.alwaysShowStatus" = true;
-        "eslint.validate" = [
-          "javascript"
-          "javascriptreact"
-          "typescript"
-          "typescriptreact"
-        ];
+        # "eslint.enable" = true;
+        # "eslint.alwaysShowStatus" = true;
+        # "eslint.validate" = [
+        #   "javascript"
+        #   "javascriptreact"
+        #   "typescript"
+        #   "typescriptreact"
+        # ];
 
         "typescript.updateImportsOnFileMove.enabled" = "always";
         "javascript.updateImportsOnFileMove.enabled" = "always";
