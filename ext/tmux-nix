@@ -7,7 +7,7 @@ NIXROOT="${NIXROOT:-\"$HOME/sgoinfre/nix\"}"
 
 # If already in a tmux session
 if [[ -n "${TMUX-}" ]]; then
-	exec "$NUC" "$NIXROOT" zsh -l
+    exec "$NUC" "$NIXROOT" zsh -l
 fi
 
 exec tmux new-session -As dev "exec \"$NUC\" \"$NIXROOT\" zsh -l"
