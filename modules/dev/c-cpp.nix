@@ -25,11 +25,6 @@
     language = [
       {
         name = "c";
-        language-servers = [
-          {
-            command = "${pkgs.clang-tools}/bin/clangd";
-          }
-        ];
         auto-format = true;
         formatter = {
           command = "${pkgs.clang-tools}/bin/clang-format";
@@ -38,11 +33,6 @@
       }
       {
         name = "cpp";
-        language-servers = [
-          {
-            command = "${pkgs.clang-tools}/bin/clangd";
-          }
-        ];
         auto-format = true;
         formatter = {
           command = "${pkgs.clang-tools}/bin/clang-format";
