@@ -29,7 +29,7 @@
     ./modules/apps/starship.nix
     ./modules/apps/git.nix
     ./modules/apps/helix.nix
-    # ./modules/apps/vscode.nix
+    ./modules/apps/vscode.nix
     ./modules/apps/tmux.nix
 
     (if tag == "mac" then ./modules/system/macos.nix else ./modules/system/linux-ft.nix)

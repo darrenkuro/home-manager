@@ -19,9 +19,6 @@
 
   programs.vscode = {
     profiles.default = {
-      extensions = with pkgs.vscode-extensions; [
-        mikestead.dotenv # syntax highlighting + comments + env-file recognition
-      ];
 
       userSettings = {
         "[dotenv]" = {

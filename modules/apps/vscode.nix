@@ -20,6 +20,10 @@
 
       ms-vscode.makefile-tools
       foxundermoon.shell-format # optional formatter frontend for shfmt
+
+      mikestead.dotenv
+      tamasfe.even-better-toml
+
     ];
 
     profiles.default.userSettings = {

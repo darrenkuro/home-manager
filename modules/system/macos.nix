@@ -1,7 +1,7 @@
 { pkgs, ... }:
 {
   imports = [
-    ../apps/vscode.nix
+    # ../apps/vscode.nix
     ../dev/c-cpp.nix
     ../dev/rust.nix
     ../dev/js-ts.nix
