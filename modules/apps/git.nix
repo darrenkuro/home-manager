@@ -7,7 +7,7 @@
   home.packages = [
     pkgs.git
     pkgs.gh
-    inputs.darren-nix-pkgs.packages.${pkgs.system}.git-init
+    #inputs.darren-nix-pkgs.packages.${pkgs.system}.git-init
   ];
   programs.git = {
     enable = true;
