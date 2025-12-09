@@ -1,6 +1,5 @@
 {
   pkgs,
-  inputs,
   ...
 }:
 {
@@ -11,7 +10,6 @@
   ];
   programs.git = {
     enable = true;
-    #user.email = if tag == "ft" then "dlu@student.42berlin.de" else "odon5ht@gmail.com";
     settings = {
       user.name = "darrenkuro";
       user.email = "odon5ht@gmail.com";
