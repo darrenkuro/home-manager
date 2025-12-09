@@ -3,10 +3,10 @@ action = "ToggleFullscreen"
 key = "F11"
 
 [font]
-size = 14.0
+size = 12.0
 
 [font.normal]
-family = "Hack Nerd Font"
+family = "FiraCode Nerd Font"
 style = "Regular"
 
 [window]

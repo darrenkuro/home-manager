@@ -2,15 +2,21 @@
   pkgs,
   tag,
   ...
-}:
-{
-  home.username = if tag == "mac" then "darrenlu" else "dlu";
-  home.homeDirectory = if tag == "mac" then "/Users/darrenlu" else "/home/dlu";
+}: {
+  home.username =
+    if tag == "mac"
+    then "darrenlu"
+    else "dlu";
+  home.homeDirectory =
+    if tag == "mac"
+    then "/Users/darrenlu"
+    else "/home/dlu";
   home.stateVersion = "25.11"; # Version when started using
 
   home.packages = with pkgs; [
-    nerd-fonts.hack
-    cachix
+    #nerd-fonts.hack
+    # cachix
+    # (pkgs.nerd-fonts.override {fonts = ["Hack"];})
 
     # inputs.darren-nix-pkgs.packages.${pkgs.system}.gloc
   ];
@@ -32,6 +38,10 @@
     ./modules/apps/vscode.nix
     ./modules/apps/tmux.nix
 
-    (if tag == "mac" then ./modules/system/macos.nix else ./modules/system/linux-ft.nix)
+    (
+      if tag == "mac"
+      then ./modules/system/macos.nix
+      else ./modules/system/linux-ft.nix
+    )
   ];
 }
