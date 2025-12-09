@@ -1,4 +1,4 @@
-{ ... }:
+{ tag, lib, ... }:
 {
   programs.tmux = {
     enable = true;
@@ -7,6 +7,7 @@
     historyLimit = 100000;
     terminal = "xterm-256color";
     escapeTime = 10;
+
     extraConfig = ''
       unbind C-b
       set-option -g prefix C-Space
@@ -33,7 +34,11 @@
       set-option -g window-status-current-format "#[bg=#a89984,fg=#504945]#[fg=#282828] #{window_index}-#{window_name} #[bg=#504945,fg=#a89984]#{?#{==:#{window_index},#{session_windows}},#[bg=#3c3836],}"
       set-option -g window-status-format "#[bg=#504945,fg=#aaaaaa] #{window_index}-#{window_name} #{?#{==:#{window_index},#{session_windows}},#[bg=#3c3836 fg=#504945],}"
       set-option -g window-status-separator ""
-
+    '';
+  }
+  // lib.mkIf (tag == "ft") {
+    programs.tmux.extraConfig = ''
+      set -g default-command 'exec /home/dlu/bin/nix-user-chroot "$HOME/.nix" zsh -l'
     '';
   };
 
