@@ -59,13 +59,14 @@
 
         "[javascript]" = {
           "editor.defaultFormatter" = "esbenp.prettier-vscode";
-          "editor.formatOnSave" = true;
         };
         "[typescript]" = {
           "editor.defaultFormatter" = "esbenp.prettier-vscode";
-          "editor.formatOnSave" = true;
         };
 
+        "[json]" = {
+          "editor.defaultFormatter" = "esbenp.prettier-vscode";
+        };
         # # 🧹 General Prettier behavior
         # "prettier.requireConfig" = false; # allow default Prettier rules if no config file
         # "prettier.useEditorConfig" = true;

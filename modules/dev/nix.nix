@@ -29,11 +29,9 @@
 
       "[nix]" = {
         "editor.defaultFormatter" = null;
-        "editor.formatOnSave" = true;
       };
 
       "nix.formatterPath" = "alejandra";
-      "nix.formatterArgs" = [ "-q" ]; # quiet mode
     };
   };
 }

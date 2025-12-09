@@ -26,7 +26,6 @@
 
       userSettings = {
         "[asm]" = {
-          "editor.formatOnSave" = true;
           "editor.defaultFormatter" = "13xforever.language-asm";
         };
       };

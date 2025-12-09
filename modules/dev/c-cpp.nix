@@ -62,15 +62,13 @@
         # ];
 
         "[c]" = {
-          "editor.formatOnSave" = true;
           "editor.defaultFormatter" = "ms-vscode.cpptools";
         };
         "[cpp]" = {
-          "editor.formatOnSave" = true;
           "editor.defaultFormatter" = "ms-vscode.cpptools";
         };
 
-        "clang-format.style" = "file";
+        # "clang-format.style" = "file";
       };
     };
   };
