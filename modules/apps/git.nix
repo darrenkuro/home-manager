@@ -1,14 +1,13 @@
 {
   pkgs,
-  git-init,
-  system,
+  inputs,
   ...
 }:
 {
   home.packages = [
     pkgs.git
     pkgs.gh
-    # git-init.packages.${system}.default
+    inputs.darren-nix-pkgs.packages.${pkgs.system}.git-init
   ];
   programs.git = {
     enable = true;

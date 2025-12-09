@@ -11,6 +11,8 @@
   home.packages = with pkgs; [
     nerd-fonts.hack
     cachix
+
+    inputs.darren-nix-pkgs.packages.${pkgs.system}.gloc
   ];
 
   programs.home-manager.enable = true;
