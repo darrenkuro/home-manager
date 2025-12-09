@@ -42,34 +42,24 @@
     ];
   };
 
-  programs.vscode = {
-    profiles.default = {
-      extensions = with pkgs.vscode-extensions; [
-        # Keep only lightweight syntax highlighting and clang-format UI glue
-        ms-vscode.cpptools # required for file associations and debug UI, not IntelliSense
-        # xaver.clang-format # optional; provides VSCode integration only, uses system clang-format
-        # llvm-vs-code-extensions.vscode-clangd # optional: clangd support
-      ];
+  programs.vscode.profiles.default.userSettings = {
 
-      userSettings = {
-        "C_Cpp.clang_format_path" = "${pkgs.clang-tools}/bin/clang-format";
+    "C_Cpp.clang_format_path" = "${pkgs.clang-tools}/bin/clang-format";
 
-        # "clangd.arguments" = [
-        #   "--background-index"
-        #   "--clang-tidy"
-        #   "--completion-style=detailed"
-        #   "--header-insertion=iwyu"
-        # ];
+    # "clangd.arguments" = [
+    #   "--background-index"
+    #   "--clang-tidy"
+    #   "--completion-style=detailed"
+    #   "--header-insertion=iwyu"
+    # ];
 
-        "[c]" = {
-          "editor.defaultFormatter" = "ms-vscode.cpptools";
-        };
-        "[cpp]" = {
-          "editor.defaultFormatter" = "ms-vscode.cpptools";
-        };
-
-        # "clang-format.style" = "file";
-      };
+    "[c]" = {
+      "editor.defaultFormatter" = "ms-vscode.cpptools";
     };
+    "[cpp]" = {
+      "editor.defaultFormatter" = "ms-vscode.cpptools";
+    };
+
+    # "clang-format.style" = "file";
   };
 }

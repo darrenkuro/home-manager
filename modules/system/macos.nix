@@ -1,11 +1,12 @@
 { pkgs, ... }:
 {
   imports = [
+    ../apps/vscode.nix
     ../dev/c-cpp.nix
     ../dev/rust.nix
     ../dev/js-ts.nix
+    ../dev/python.nix
     ../dev/nix.nix
-    ../apps/vscode.nix
   ];
 
   # home.file."Library/Fonts/NixNerdFonts".source = "${pkgs.nerd-fonts.fira-code}/share/fonts";

@@ -25,20 +25,11 @@
     }
   ];
 
-  programs.vscode = {
-    profiles.default = {
-      extensions = with pkgs.vscode-extensions; [
-        ms-vscode.makefile-tools
-        foxundermoon.shell-format # optional formatter frontend for shfmt
-      ];
-
-      userSettings = {
-        "[makefile]" = {
-          "editor.formatOnSave" = true;
-          "editor.defaultFormatter" = "foxundermoon.shell-format";
-        };
-        "makefile.makePath" = "${pkgs.gnumake}/bin/make";
-      };
+  programs.vscode.profiles.default.userSettings = {
+    "[makefile]" = {
+      "editor.formatOnSave" = true;
+      "editor.defaultFormatter" = "foxundermoon.shell-format";
     };
+    "makefile.makePath" = "${pkgs.gnumake}/bin/make";
   };
 }

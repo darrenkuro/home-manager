@@ -46,47 +46,39 @@
     ];
   };
 
-  programs.vscode = {
-    profiles.default = {
-      extensions = with pkgs.vscode-extensions; [
-        esbenp.prettier-vscode # Prettier formatter
-        # dbaeumer.vscode-eslint # ESLint
-      ];
+  programs.vscode.profiles.deafult.userSettings = {
 
-      userSettings = {
-        "prettier.prettierPath" = "${pkgs.nodePackages.prettier}/lib/node_modules/prettier";
-        "prettier.resolveGlobalModules" = false;
+    "prettier.prettierPath" = "${pkgs.nodePackages.prettier}/lib/node_modules/prettier";
+    "prettier.resolveGlobalModules" = false;
 
-        "[javascript]" = {
-          "editor.defaultFormatter" = "esbenp.prettier-vscode";
-        };
-        "[typescript]" = {
-          "editor.defaultFormatter" = "esbenp.prettier-vscode";
-        };
-
-        "[json]" = {
-          "editor.defaultFormatter" = "esbenp.prettier-vscode";
-        };
-        # # 🧹 General Prettier behavior
-        # "prettier.requireConfig" = false; # allow default Prettier rules if no config file
-        # "prettier.useEditorConfig" = true;
-        # "prettier.printWidth" = 100;
-        # "prettier.singleQuote" = true;
-        # "prettier.trailingComma" = "es5";
-        # "prettier.tabWidth" = 2;
-
-        # "eslint.enable" = true;
-        # "eslint.alwaysShowStatus" = true;
-        # "eslint.validate" = [
-        #   "javascript"
-        #   "javascriptreact"
-        #   "typescript"
-        #   "typescriptreact"
-        # ];
-
-        "typescript.updateImportsOnFileMove.enabled" = "always";
-        "javascript.updateImportsOnFileMove.enabled" = "always";
-      };
+    "[javascript]" = {
+      "editor.defaultFormatter" = "esbenp.prettier-vscode";
     };
+    "[typescript]" = {
+      "editor.defaultFormatter" = "esbenp.prettier-vscode";
+    };
+
+    "[json]" = {
+      "editor.defaultFormatter" = "esbenp.prettier-vscode";
+    };
+    # # 🧹 General Prettier behavior
+    # "prettier.requireConfig" = false; # allow default Prettier rules if no config file
+    # "prettier.useEditorConfig" = true;
+    # "prettier.printWidth" = 100;
+    # "prettier.singleQuote" = true;
+    # "prettier.trailingComma" = "es5";
+    # "prettier.tabWidth" = 2;
+
+    # "eslint.enable" = true;
+    # "eslint.alwaysShowStatus" = true;
+    # "eslint.validate" = [
+    #   "javascript"
+    #   "javascriptreact"
+    #   "typescript"
+    #   "typescriptreact"
+    # ];
+
+    "typescript.updateImportsOnFileMove.enabled" = "always";
+    "javascript.updateImportsOnFileMove.enabled" = "always";
   };
 }

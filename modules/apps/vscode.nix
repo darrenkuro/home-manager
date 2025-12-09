@@ -3,9 +3,23 @@
   programs.vscode = {
     enable = true;
 
+    # Extension is NOT mergable
     profiles.default.extensions = with pkgs.vscode-extensions; [
       pkief.material-icon-theme
       github.github-vscode-theme
+
+      ms-python.python # main Python extension
+      ms-python.vscode-pylance # language server (Pylance)
+      ms-toolsai.jupyter # notebook support
+
+      ms-vscode.cpptools # required for file associations and debug UI, not IntelliSense
+      esbenp.prettier-vscode # Prettier formatter
+
+      jnoortheen.nix-ide
+      rust-lang.rust-analyzer
+
+      ms-vscode.makefile-tools
+      foxundermoon.shell-format # optional formatter frontend for shfmt
     ];
 
     profiles.default.userSettings = {
@@ -34,7 +48,7 @@
 
       "editor.fontSize" = 14;
       "editor.tabSize" = 4;
-      "editor.insertSpaces" = false; # Use space for whitespaces
+      "editor.insertSpaces" = true; # Use space for whitespaces
       "editor.minimap.enabled" = false;
       "editor.detectIndentation" = false;
       "editor.formatOnSave" = true;

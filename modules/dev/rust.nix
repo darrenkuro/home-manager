@@ -26,26 +26,16 @@
     ];
   };
 
-  programs.vscode = {
-    profiles.default = {
-      extensions = with pkgs.vscode-extensions; [
-        rust-lang.rust-analyzer
-      ];
-
-      userSettings = {
-        # "rust-analyzer.server.path" = "${pkgs.rust-analyzer}/bin/rust-analyzer";
-
-        "[rust]" = {
-          "editor.defaultFormatter" = "rust-lang.rust-analyzer";
-        };
-
-        "rust-analyzer.cargo.autoreload" = true;
-        "rust-analyzer.procMacro.enable" = true;
-        "rust-analyzer.check.command" = "clippy";
-
-        "rust-analyzer.inlayHints.typeHints.enable" = false;
-        # "rust-analyzer.inlayHints.parameterHints.enable" = false;
-      };
+  programs.vscode.profiles.default.userSettings = {
+    "[rust]" = {
+      "editor.defaultFormatter" = "rust-lang.rust-analyzer";
     };
+
+    "rust-analyzer.cargo.autoreload" = true;
+    "rust-analyzer.procMacro.enable" = true;
+    "rust-analyzer.check.command" = "clippy";
+
+    "rust-analyzer.inlayHints.typeHints.enable" = false;
+    # "rust-analyzer.inlayHints.parameterHints.enable" = false;
   };
 }

@@ -18,20 +18,14 @@
     ];
   };
 
-  programs.vscode = {
-    profiles.default.extensions = with pkgs.vscode-extensions; [
-      jnoortheen.nix-ide
-    ];
+  programs.vscode.profiles.default.userSettings = {
+    "nix.enableLanguageServer" = true;
+    "nix.serverPath" = "nil";
 
-    profiles.default.userSettings = {
-      "nix.enableLanguageServer" = true;
-      "nix.serverPath" = "nil";
-
-      "[nix]" = {
-        "editor.defaultFormatter" = null;
-      };
-
-      "nix.formatterPath" = "alejandra";
+    "[nix]" = {
+      "editor.defaultFormatter" = null;
     };
+
+    "nix.formatterPath" = "alejandra";
   };
 }
