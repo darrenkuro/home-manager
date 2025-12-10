@@ -26,13 +26,20 @@
 
     taskwarrior3
 
-    anki
-    brave
-    the-unarchiver
-    obsidian
-    discord
-    ghostty-bin
-    chatgpt
+    # Nix version locks so for frequently updated apps for which reproducibility is not most important
+    # Shouldn't be managed here, and config files can still though
+    # anki
+    # the-unarchiver
+    # brave
+    # obsidian
+    # discord
+    # ghostty-bin
+    # chatgpt
+    # dropbox
+    # steam
+    # tor
+    # firefox
+    # google-chrome
 
     # Not in active use
     # pnpm
@@ -41,19 +48,11 @@
     # ffmpeg
     # imagemagick
 
-    # The following apps can be managed in theory with nix but will be migrated later
-    # dropbox
-    # steam
-
     # Probably better to spawn it when needed
     # avidemux
     # handbrake
     # audacity
     # blackhole / loopback?
-
-    # tor
-    # firefox
-    # google-chrome
 
     # vlc-bin
   ];
