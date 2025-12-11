@@ -33,7 +33,7 @@
     # brave
     # obsidian
     # discord
-    # ghostty-bin
+    ghostty-bin
     # chatgpt
     # dropbox
     # steam
