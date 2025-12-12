@@ -4,15 +4,10 @@
   lib,
   tag,
   ...
-}: {
-  home.username =
-    if tag == "mac"
-    then "darrenlu"
-    else "dlu";
-  home.homeDirectory =
-    if tag == "mac"
-    then "/Users/darrenlu"
-    else "/home/dlu";
+}:
+{
+  home.username = if tag == "mac" then "darrenlu" else "dlu";
+  home.homeDirectory = if tag == "mac" then "/Users/darrenlu" else "/home/dlu";
   home.stateVersion = "25.11"; # Version when started using
 
   home.packages = with pkgs; [
@@ -31,18 +26,12 @@
     rust-analyzer
     rustfmt
     clippy
-    #   nodePackages.prettier
-    #    python311Packages.black
-    #    python311Packages.flake8
 
     vscode-extensions.pkief.material-icon-theme
     vscode-extensions.github.github-vscode-theme
     vscode-extensions.ms-vscode.cpptools
-    #vscode-extensions.esbenp.prettier-vscode
     vscode-extensions.jnoortheen.nix-ide
     vscode-extensions.rust-lang.rust-analyzer
-    #vscode-extensions.ms-python.python
-    #vscode-extensions.ms-python.vscode-pylance
     vscode-extensions.ms-vscode.makefile-tools
     vscode-extensions.mikestead.dotenv
     vscode-extensions.tamasfe.even-better-toml
@@ -60,15 +49,8 @@
 
   fonts.fontconfig.enable = true;
 
-  # Copy user setting, not symlink, to make it usable
-  home.activation.vscodeSettings = lib.hm.dag.entryAfter ["writeBoundary"] ''
-    mkdir -p "$HOME/Library/Application Support/Code/User"
-    envsubst < ${./ext/settings.json} > "$HOME/Library/Application Support/Code/User/settings.json"
-    chmod u+w "$HOME/Library/Application Support/Code/User/settings.json"
-  '';
-
   # Symlink all extensions
-  home.activation.linkVscodeExtensions = lib.hm.dag.entryAfter ["writeBoundary"] ''
+  home.activation.linkVscodeExtensions = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     for ext in "${config.home.profileDirectory}/share/vscode/extensions/"*; do
       target="${config.home.homeDirectory}/.vscode/extensions/$(basename "$ext")"
       ln -sfn "$ext" "$target"
@@ -110,10 +92,6 @@
     ./modules/apps/git.nix
     ./modules/apps/helix.nix
 
-    (
-      if tag == "mac"
-      then ./modules/system/macos.nix
-      else ./modules/system/linux-ft.nix
-    )
+    (if tag == "mac" then ./modules/system/macos.nix else ./modules/system/linux-ft.nix)
   ];
 }

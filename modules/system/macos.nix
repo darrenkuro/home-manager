@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 {
   # Noise Shell App?
 
@@ -11,11 +11,18 @@
     typescript
     nodePackages.typescript-language-server
 
+    nodePackages.prettier
+    python311Packages.black
+    python311Packages.flake8
     prettierd
 
     python311
     python311Packages.pip
     python311Packages.virtualenv
+
+    vscode-extensions.esbenp.prettier-vscode
+    vscode-extensions.ms-python.python
+    vscode-extensions.ms-python.vscode-pylance
 
     darwin.trash
     taskwarrior3
@@ -50,6 +57,13 @@
 
     # vlc-bin
   ];
+
+  # Copy user setting, not symlink, to make it usable
+  home.activation.vscodeSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    mkdir -p "$HOME/Library/Application Support/Code/User"
+    envsubst < ${./ext/settings.json} > "$HOME/Library/Application Support/Code/User/settings.json"
+    chmod u+w "$HOME/Library/Application Support/Code/User/settings.json"
+  '';
 
   programs.zsh.shellAliases = {
     dbox = "cd $DBOX";
