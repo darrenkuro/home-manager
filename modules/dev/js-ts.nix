@@ -3,7 +3,6 @@
   home.packages = with pkgs; [
     nodejs_latest # provides node + npm
     # prettierd # Prettier daemon (fast formatter) => VS Code unhappy
-    nodePackages.prettier
     typescript # tsc compiler
     nodePackages.typescript-language-server # LSP for both JS + TS
   ];
@@ -23,27 +22,6 @@
 
   home.sessionVariables = {
     PRETTIERD_DEFAULT_CONFIG = "$XDG_CONFIG_HOME/prettier/config.json";
-  };
-
-  programs.helix.languages = {
-    language = [
-      {
-        name = "javascript";
-        auto-format = true;
-        formatter = {
-          command = "prettierd";
-          args = [ "--stdin-filepath" ];
-        };
-      }
-      {
-        name = "typescript";
-        auto-format = true;
-        formatter = {
-          command = "prettierd";
-          args = [ "--stdin-filepath" ];
-        };
-      }
-    ];
   };
 
   programs.vscode.profiles.deafult.userSettings = {
@@ -78,7 +56,5 @@
     #   "typescriptreact"
     # ];
 
-    "typescript.updateImportsOnFileMove.enabled" = "always";
-    "javascript.updateImportsOnFileMove.enabled" = "always";
   };
 }
