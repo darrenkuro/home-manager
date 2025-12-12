@@ -13,7 +13,7 @@
   ];
 
   # Set faster keyboard repeat rate (only on X11)
-  programs.zsh.initExtra = ''
+  programs.zsh.initContent = ''
     if command -v xset >/dev/null 2>&1 && [ -n "$DISPLAY" ]; then
       xset r rate 200 60 2>/dev/null || true
     fi
