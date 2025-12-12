@@ -3,8 +3,7 @@
   lib,
   config,
   ...
-}:
-{
+}: {
   home.packages = with pkgs; [
     # Only add as needed!
     # rustc
@@ -25,7 +24,7 @@
   '';
 
   # Copy user setting, not symlink, to make it usable
-  home.activation.configCopy = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+  home.activation.configCopy = lib.hm.dag.entryAfter ["writeBoundary"] ''
     mkdir -p "$HOME/.config/Code/User"
     envsubst < ${../../ext/settings.json} > "$HOME/.config/Code/User/settings.json"
     chmod u+w "$HOME/.config/Code/User/settings.json"
@@ -50,7 +49,7 @@
     mkdir -p "$dest"
     for ext in "$src"/*; do
       name=$(basename "$ext")
-      cp -Rfn "$ext" "$dest/$name"
+      cp -RL --no-preserve=mode,ownership,timestamps "$ext" "$dest/$name"
     done
   '';
 
