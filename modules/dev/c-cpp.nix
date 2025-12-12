@@ -27,7 +27,7 @@
         name = "c";
         auto-format = true;
         formatter = {
-          command = "${pkgs.clang-tools}/bin/clang-format";
+          command = "~/.nix-profile/bin/clang-format";
           args = [ "-style=file" ]; # respect .clang-format if present
         };
       }
@@ -35,31 +35,31 @@
         name = "cpp";
         auto-format = true;
         formatter = {
-          command = "${pkgs.clang-tools}/bin/clang-format";
+          command = "~/.nix-profile/bin/clang-format";
           args = [ "-style=file" ];
         };
       }
     ];
   };
 
-  programs.vscode.profiles.default.userSettings = {
+  # programs.vscode.profiles.default.userSettings = {
 
-    "C_Cpp.clang_format_path" = "${pkgs.clang-tools}/bin/clang-format";
+  #   "C_Cpp.clang_format_path" = "${pkgs.clang-tools}/bin/clang-format";
 
-    # "clangd.arguments" = [
-    #   "--background-index"
-    #   "--clang-tidy"
-    #   "--completion-style=detailed"
-    #   "--header-insertion=iwyu"
-    # ];
+  #   # "clangd.arguments" = [
+  #   #   "--background-index"
+  #   #   "--clang-tidy"
+  #   #   "--completion-style=detailed"
+  #   #   "--header-insertion=iwyu"
+  #   # ];
 
-    "[c]" = {
-      "editor.defaultFormatter" = "ms-vscode.cpptools";
-    };
-    "[cpp]" = {
-      "editor.defaultFormatter" = "ms-vscode.cpptools";
-    };
+  #   "[c]" = {
+  #     "editor.defaultFormatter" = "ms-vscode.cpptools";
+  #   };
+  #   "[cpp]" = {
+  #     "editor.defaultFormatter" = "ms-vscode.cpptools";
+  #   };
 
-    # "clang-format.style" = "file";
-  };
+  #   # "clang-format.style" = "file";
+  # };
 }
