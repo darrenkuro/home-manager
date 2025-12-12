@@ -1,8 +1,10 @@
 {
   pkgs,
   lib,
+  config,
   ...
-}: {
+}:
+{
   home.packages = with pkgs; [
     # Only add as needed!
     # rustc
@@ -23,7 +25,7 @@
   '';
 
   # Copy user setting, not symlink, to make it usable
-  home.activation.configCopy = lib.hm.dag.entryAfter ["writeBoundary"] ''
+  home.activation.configCopy = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     mkdir -p "$HOME/.config/Code/User"
     envsubst < ${../../ext/settings.json} > "$HOME/.config/Code/User/settings.json"
     chmod u+w "$HOME/.config/Code/User/settings.json"
@@ -41,6 +43,15 @@
 
     cat ${../../ext/tmux-nix} > "/home/dlu/bin/tmux-nix"
     chmod +x "/home/dlu/bin/tmux-nix"
+
+    src="${config.home.profileDirectory}/share/vscode/extensions"
+    dest="$HOME/.vscode/extensions"
+
+    mkdir -p "$dest"
+    for ext in "$src"/*; do
+      name=$(basename "$ext")
+      cp -Rfn "$ext" "$dest/$name"
+    done
   '';
 
   programs.zsh.shellAliases = {
