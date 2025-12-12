@@ -39,6 +39,12 @@
     "[python]": {
         "editor.defaultFormatter": "ms-python.python"
     },
+    "python.formatting.provider": "black",
+    "python.formatting.blackPath": "$HOME/.nix-profile/bin/black",
+    "python.linting.enabled": true,
+    "python.linting.flake8Enabled": true,
+    "python.analysis.typeCheckingMode": "basic",
+    "python.defaultInterpreterPath": "$HOME/.nix-profile/bin/python3",
     //
     "rust-analyzer.cargo.autoreload": true,
     "rust-analyzer.procMacro.enable": true,

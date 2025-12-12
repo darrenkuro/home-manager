@@ -22,7 +22,6 @@
     ripgrep
     bat
 
-    # prettierd
     clang-tools # C, CPP
     alejandra # Nix formatter
     nil # Nix LSP
@@ -30,6 +29,8 @@
     rustfmt
     clippy
     nodePackages.prettier
+    python311Packages.black
+    python311Packages.flake8
 
     vscode-extensions.pkief.material-icon-theme
     vscode-extensions.github.github-vscode-theme
@@ -37,6 +38,12 @@
     vscode-extensions.esbenp.prettier-vscode
     vscode-extensions.jnoortheen.nix-ide
     vscode-extensions.rust-lang.rust-analyzer
+    vscode-extensions.ms-python.python
+    vscode-extensions.ms-python.vscode-pylance
+    vscode-extensions.ms-vscode.makefile-tools
+    vscode-extensions.mikestead.dotenv
+    vscode-extensions.tamasfe.even-better-toml
+
     #nerd-fonts.hack
     # cachix
     # (pkgs.nerd-fonts.override {fonts = ["Hack"];})
@@ -76,6 +83,19 @@
     BreakBeforeBraces: Attach
     AllowShortFunctionsOnASingleLine: Inline
     SpaceBeforeParens: ControlStatements
+  '';
+
+  xdg.configFile.".config/prettier/config.json".text = ''
+    {
+      "printWidth": 100,
+      "tabWidth": 4,
+      "useTabs": false,
+      "semi": true,
+      "singleQuote": true,
+      "trailingComma": "es5",
+      "bracketSpacing": true,
+      "arrowParens": "avoid"
+    }
   '';
 
   imports = [

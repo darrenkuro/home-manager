@@ -1,19 +1,19 @@
 { pkgs, ... }:
 {
-  imports = [
-    #../apps/tmux.nix
-
-    #../apps/vscode.nix
-    #../dev/c-cpp.nix
-    #../dev/rust.nix
-    #../dev/js-ts.nix
-    #../dev/python.nix
-    #../dev/nix.nix
-  ];
+  # Noise Shell App?
 
   # home.file."Library/Fonts/NixNerdFonts".source = "${pkgs.nerd-fonts.fira-code}/share/fonts";
 
   home.packages = with pkgs; [
+
+    rustc
+    nodejs_latest
+    typescript
+    nodePackages.typescript-language-server
+
+    python311
+    python311Packages.pip
+    python311Packages.virtualenv
 
     darwin.trash
     taskwarrior3
