@@ -22,7 +22,7 @@
   # Copy user setting, not symlink, to make it usable
   home.activation.configCopy = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     mkdir -p "$HOME/.config/Code/User"
-    envsubst < ${../../ext/settings.json} > "$HOME//.config/Code/Usersettings.json"
+    envsubst < ${../../ext/settings.json} > "$HOME/.config/Code/Usersettings.json"
     chmod u+w "$HOME/.config/Code/User/settings.json"
 
     mkdir -p "$HOME/.config/alacritty"
