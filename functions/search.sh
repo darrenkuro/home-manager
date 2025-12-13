@@ -15,9 +15,11 @@ done
 if [ ${#_missing_tools[@]} -gt 0 ]; then
   printf '⚠️ Skipping sourcing of %s — missing required tools: %s\n' \
     "$_SCRIPT_NAME" "${_missing_tools[*]}" >&2
-  unset REQUIRED_TOOLS _missing_tools
+  unset REQUIRED_TOOLS _missing_tools _SCRIPT_NAME
   return 1 2>/dev/null || exit 1
 fi
+
+unset REQUIRED_TOOLS _missing_tools _SCRIPT_NAME
 
 # --- Source
 function search() {
