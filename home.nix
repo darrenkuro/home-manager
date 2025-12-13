@@ -13,7 +13,7 @@
   home.packages = with pkgs; [
     tokei
     eza
-    fd
+    # fd
     jq
     fzf
     rename
