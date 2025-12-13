@@ -33,6 +33,7 @@
     gp = "git push";
     ga = "git add -A";
     gpl = "git push --force-with-lease";
+    gcl = "git clone";
     gchp = "gh pr checkout";
   };
 }
