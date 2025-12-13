@@ -23,6 +23,7 @@
     clang-tools # C, CPP
     alejandra # Nix formatter
     nil # Nix LSP
+    cargo
     rust-analyzer
     rustfmt
     clippy
