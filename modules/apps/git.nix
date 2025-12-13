@@ -26,6 +26,7 @@
     gi = "git-init";
     gpa = "git add -A && git commit -m \"Update\" && git push";
     gm = "git commit -m";
+    gd = "git diff";
     gma = "git add -A && git commit -m";
     gch = "git checkout";
     gs = "git status";
