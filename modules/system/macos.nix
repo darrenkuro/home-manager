@@ -33,6 +33,8 @@
     taskwarrior3
     ghostty-bin
 
+    ffmpeg
+
     # Nix version locks so for frequently updated apps for which reproducibility is not most important
     # Shouldn't be managed here, and config files can still though
     # anki
@@ -51,7 +53,6 @@
     # pnpm
     # docker
 
-    # ffmpeg
     # imagemagick
 
     # Probably better to spawn it when needed
