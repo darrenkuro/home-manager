@@ -3,7 +3,8 @@
   lib,
   config,
   ...
-}: {
+}:
+{
   home.packages = with pkgs; [
     # Only add as needed!
     # rustc
@@ -17,14 +18,14 @@
   ];
 
   # Set faster keyboard repeat rate (only on X11)
-  programs.zsh.initContent = ''
+  programs.zsh.initExtra = ''
     if command -v xset >/dev/null 2>&1 && [ -n "$DISPLAY" ]; then
       xset r rate 200 60 2>/dev/null || true
     fi
   '';
 
   # Copy user setting, not symlink, to make it usable
-  home.activation.configCopy = lib.hm.dag.entryAfter ["writeBoundary"] ''
+  home.activation.configCopy = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     mkdir -p "$HOME/.config/Code/User"
     envsubst < ${../../ext/settings.json} > "$HOME/.config/Code/User/settings.json"
     chmod u+w "$HOME/.config/Code/User/settings.json"

@@ -49,6 +49,8 @@
 
   fonts.fontconfig.enable = true;
 
+  home.file.".local/share/functions/search.sh".source = ./functions/search.sh;
+
   # Symlink all extensions
   home.activation.linkVscodeExtensions = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     for ext in "${config.home.profileDirectory}/share/vscode/extensions/"*; do
@@ -81,6 +83,12 @@
       "bracketSpacing": true,
       "arrowParens": "avoid"
     }
+  '';
+
+  programs.zsh.initContent = ''
+    for f in ~/.local/share/functions/*.sh; do
+      [ -r "$f" ] && source "$f"
+    done
   '';
 
   imports = [
