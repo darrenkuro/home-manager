@@ -66,7 +66,7 @@
   # Copy user setting, not symlink, to make it usable
   home.activation.vscodeSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     mkdir -p "$HOME/Library/Application Support/Code/User"
-    envsubst < ${./ext/settings.json} > "$HOME/Library/Application Support/Code/User/settings.json"
+    envsubst < ${../../ext/settings.json} > "$HOME/Library/Application Support/Code/User/settings.json"
     chmod u+w "$HOME/Library/Application Support/Code/User/settings.json"
   '';
 
@@ -87,5 +87,10 @@
     hide = "chflags hidden";
     unhide = "chflags nohidden";
     rm = "echo \"☠️$YELLOW DANGEROUS CMD: using trash instread!$RESET\" && trash";
+
+    readme = "cat $DEV/darren-nix-pkgs/pkgs/git-init/template/README.md | pbcopy";
+    gig = "cat $DEV/darren-nix-pkgs/pkgs/git-init/template/.gitignore | pbcopy";
+    ic = "echo '![C](https://img.shields.io/badge/-C-A8B9CC?style=flat-square&logo=C&logoColor=black)' | pbcopy";
+    imake = "echo '![Make](https://img.shields.io/badge/-Make-000000?style=flat-square&logo=gnu&logoColor=white)' | pbcopy";
   };
 }
