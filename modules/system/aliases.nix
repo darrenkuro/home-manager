@@ -12,5 +12,8 @@
 
     lss = "eza --icons --ignore-glob='*.log|.git|node_modules|.DS_Store'";
     objdump = "objdump --disassembler-options=intel";
+
+    # Copy
+    ijs = "echo '![JavaScript](https://img.shields.io/badge/-JavaScript-f7df1e?style=flat-square&logo=JavaScript&logoColor=black)' | pbcopy";
   };
 }
