@@ -23,5 +23,5 @@ unset REQUIRED_TOOLS _missing_tools _SCRIPT_NAME
 
 # --- Source
 function pull() {
-  git clone "git@github.com:darrenkuro/$1.git" "${2:-$1}"
+  git clone "git@github.com:darrenkuro/$1.git" "${2:-$1}" && cd "${2:-$1}"
 }
