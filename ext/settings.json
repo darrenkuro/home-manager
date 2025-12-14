@@ -70,6 +70,12 @@
     "typescript.updateImportsOnFileMove.enabled": "always",
     "javascript.updateImportsOnFileMove.enabled": "always",
     //
+    "[shellscript]": {
+        "editor.defaultFormatter": "foxundermoon.shell-format"
+    },
+    "shellformat.path": "$HOME/.nix-profile/bin/shfmt",
+    "shellformat.flag": "-i 2 -ci -sr",
+    //
     "material-icon-theme.activeIconPack": "react",
     "material-icon-theme.files.associations": {
         "constants.ts": "tsconfig",

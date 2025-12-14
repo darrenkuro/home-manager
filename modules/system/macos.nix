@@ -89,8 +89,8 @@
     unhide = "chflags nohidden";
     rm = "echo \"☠️$YELLOW DANGEROUS CMD: using trash instread!$RESET\" && trash";
 
-    readme = "cat $DEV/darren-nix-pkgs/pkgs/git-init/template/README.md | pbcopy";
-    gig = "cat $DEV/darren-nix-pkgs/pkgs/git-init/template/.gitignore | pbcopy";
+    readme = "cat $HM/ext/README.md | pbcopy";
+    gig = "cat $HM/ext/.gitignore | pbcopy";
 
     ijs = "echo '![JavaScript](https://img.shields.io/badge/-JavaScript-f7df1e?style=flat-square&logo=JavaScript&logoColor=black)' | pbcopy";
     its = "echo '![TypeScript](https://img.shields.io/badge/-TypeScript-3178c6?style=flat-square&logo=TypeScript&logoColor=white)' | pbcopy";

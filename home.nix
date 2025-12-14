@@ -23,10 +23,13 @@
     clang-tools # C, CPP
     alejandra # Nix formatter
     nil # Nix LSP
+    shfmt
+    shellcheck
     cargo
     rust-analyzer
     rustfmt
     clippy
+    asm-lsp
 
     vscode-extensions.pkief.material-icon-theme
     vscode-extensions.github.github-vscode-theme
@@ -36,6 +39,9 @@
     vscode-extensions.ms-vscode.makefile-tools
     vscode-extensions.mikestead.dotenv
     vscode-extensions.tamasfe.even-better-toml
+    vscode-extensions.foxundermoon.shell-format
+    # 13
+    # xforever.asm-code-lens
 
     #nerd-fonts.hack
     # cachix
