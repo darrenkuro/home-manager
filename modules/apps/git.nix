@@ -17,11 +17,6 @@
       user.signingKey = "~/.ssh/id_rsa";
       gpg.format = "ssh";
       commit.pgpsign = "true";
-      # signing = {
-      #   key = "~/.ssh/id_rsa";
-      #   format = "ssh";
-      #   signByDefault = true;
-      # };
       core.editor = "hx";
       color.ui = "auto";
       init.defaultBranch = "main";
