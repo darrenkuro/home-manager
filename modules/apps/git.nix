@@ -14,6 +14,11 @@
     settings = {
       user.name = "darrenkuro";
       user.email = "odon5ht@gmail.com";
+      signing = {
+        key = "~/.ssh/id_rsa.pub";
+        format = "ssh";
+        signByDefault = true;
+      };
       core.editor = "hx";
       color.ui = "auto";
       init.defaultBranch = "main";
