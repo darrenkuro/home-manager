@@ -16,6 +16,7 @@
       user.email = "odon5ht@gmail.com";
       user.signingKey = "~/.ssh/id_rsa";
       gpg.format = "ssh";
+      commit.pgpsign = "true";
       # signing = {
       #   key = "~/.ssh/id_rsa";
       #   format = "ssh";
