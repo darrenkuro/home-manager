@@ -15,7 +15,7 @@
       user.name = "darrenkuro";
       user.email = "odon5ht@gmail.com";
       signing = {
-        key = "~/.ssh/id_rsa.pub";
+        key = "~/.ssh/id_rsa";
         format = "ssh";
         signByDefault = true;
       };
