@@ -81,6 +81,11 @@
           args = [ "--stdin-filepath" ];
         };
       }
+      {
+        name = "*";
+        auto-format = false;
+        path = "dr-quine/**";
+      }
     ];
   };
 
