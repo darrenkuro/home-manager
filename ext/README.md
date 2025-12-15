@@ -3,8 +3,8 @@
 <p align="center">
     <img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square&logo=opensourceinitiative&logoColor=white" alt="License"/>
     <img src="https://img.shields.io/badge/status-stable-brightgreen?style=flat-square&logo=git&logoColor=white" alt="Status">
-    <img src="https://img.shields.io/badge/score-125%2F100-3CB371?style=flat-square&logo=42&logoColor=white" alt="Score"/>
-    <img src="https://img.shields.io/badge/date-May%2026%2C%202023-ff6984?style=flat-square&logo=Cachet&logoColor=white" alt="Date"/>
+    <!-- <img src="https://img.shields.io/badge/score-125%2F100-3CB371?style=flat-square&logo=42&logoColor=white" alt="Score"/> -->
+    <!-- <img src="https://img.shields.io/badge/date-May%2026,%202023-ff6984?style=flat-square&logo=Cachet&logoColor=white" alt="Date"/> -->
 </p>
 
 > A short, clear one-liner describing what your project does.
@@ -19,9 +19,9 @@ Briefly explain what this project does and why it exists.
 
 ## 📦 Features
 
-- ✅ Feature 1 – brief explanation
-- ✅ Feature 2 – brief explanation
-- ✅ Feature 3 – optional line for advanced/unique capability
+- Feature 1 – brief explanation
+- Feature 2 – brief explanation
+- Feature 3 – optional line for advanced/unique capability
 
 ---
 
@@ -29,11 +29,25 @@ Briefly explain what this project does and why it exists.
 
 ### Prerequisites
 
+- Compiler for C (e.g. `gcc` or `clang`) and `make`
+
 ### Installation & Usage
+
+```bash
+
+```
 
 ### Examples & Demo
 
+```bash
+
+```
+
 ### Development
+
+```bash
+
+```
 
 ---
 
@@ -56,4 +70,5 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 ## 📫 Contact
 
 Darren Kuro – [darren0xa@gmail.com](mailto:darren0xa@gmail.com)
+
 GitHub: [@darrenkuro](https://github.com/darrenkuro)
