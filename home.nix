@@ -17,7 +17,6 @@
     jq
     fzf
     rename
-    ripgrep
     bat
 
     clang-tools # C, CPP
@@ -74,6 +73,13 @@
       share = true;
       extended = true;
     };
+
+    # envExtra = ''
+    #   if [ -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]; then
+    #     . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+    #   fi
+    #   export PATH="/nix/var/nix/profiles/default/bin:$HOME/.nix-profile/bin:$PATH"
+    # '';
   };
 
   # programs.bash = {
@@ -121,6 +127,10 @@
   '';
 
   programs.zsh.initContent = ''
+    # Source Nix (/etc/zshrc breaks after system updates)
+    [[ ! $(command -v nix) && -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]] && source '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+
+    # Source scripts
     for f in $HM/functions/*.sh; do
       [ -r "$f" ] && source "$f"
     done
