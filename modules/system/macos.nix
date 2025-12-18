@@ -33,6 +33,7 @@
 
     ffmpeg
 
+    tmux
     # Nix version locks so for frequently updated apps for which reproducibility is not most important
     # Shouldn't be managed here, and config files can still though
     # anki
@@ -76,6 +77,10 @@
       ln -sfn "$ext" "$target"
      done
   '';
+
+  xdg.configFile."tmux/tmux.conf" = {
+    source = ../../ext/tmux.conf;
+  };
 
   programs.zsh.shellAliases = {
     dbox = "cd $DBOX";
