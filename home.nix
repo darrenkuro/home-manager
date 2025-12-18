@@ -50,9 +50,44 @@
     # inputs.darren-nix-pkgs.packages.${pkgs.system}.gloc
   ];
 
+  # Ensure directories used exist
+  home.activation.createStateDirs = ''
+    mkdir -p \
+      "$HOME/.local/state/zsh" \
+      "$HOME/.local/state/bash" \
+      "$HOME/.local/state/less" \
+      "$HOME/.local/state/sessions" \
+      "$HOME/.cache/zsh"
+  '';
+
   programs.home-manager.enable = true;
-  programs.zsh.enable = true;
-  programs.bash.enable = true;
+  programs.zsh = {
+    enable = true;
+
+    history = {
+      path = "${config.home.homeDirectory}/.local/state/zsh/history";
+      size = 100000;
+      save = 100000;
+      ignoreDups = true;
+      ignoreAllDups = true;
+      share = true;
+      extended = true;
+    };
+
+    # Move zcompdump from Home dir to cache dir
+    initExtra = ''
+      autoload -Uz compinit
+      compinit -d "$XDG_CACHE_HOME/zsh/zcompdump"
+    '';
+  };
+
+  programs.bash = {
+    enable = true;
+
+    historyFile = "${config.home.homeDirectory}/.local/state/bash/history";
+    historySize = 100000;
+    historyFileSize = 100000;
+  };
 
   fonts.fontconfig.enable = true;
 

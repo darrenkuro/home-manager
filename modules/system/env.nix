@@ -21,5 +21,9 @@
     XDG_CACHE_HOME = "$HOME/.cache";
     XDG_DATA_HOME = "$HOME/.local/share";
     XDG_STATE_HOME = "$HOME/.local/state";
+
+    LESSHISTFILE = "$HOME/.local/state/less/history";
+    ZSH_SESSION_DIR = "$HOME/.local/state/zsh/sessions";
+    # HISTFILE = "$HOME/.local/state/bash/history";
   };
 }
