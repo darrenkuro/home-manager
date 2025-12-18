@@ -63,6 +63,7 @@
   programs.home-manager.enable = true;
   programs.zsh = {
     enable = true;
+    dotDir = "${config.home.homeDirectory}/.config";
 
     history = {
       path = "${config.home.homeDirectory}/.local/state/zsh/history";
@@ -73,21 +74,15 @@
       share = true;
       extended = true;
     };
-
-    # Move zcompdump from Home dir to cache dir
-    initExtra = ''
-      autoload -Uz compinit
-      compinit -d "$XDG_CACHE_HOME/zsh/zcompdump"
-    '';
   };
 
-  programs.bash = {
-    enable = true;
+  # programs.bash = {
+  #   enable = true;
 
-    historyFile = "${config.home.homeDirectory}/.local/state/bash/history";
-    historySize = 100000;
-    historyFileSize = 100000;
-  };
+  #   historyFile = "${config.home.homeDirectory}/.local/state/bash/history";
+  #   historySize = 100000;
+  #   historyFileSize = 100000;
+  # };
 
   fonts.fontconfig.enable = true;
 
@@ -129,6 +124,10 @@
     for f in $HM/functions/*.sh; do
       [ -r "$f" ] && source "$f"
     done
+
+    # Move zcompdump from Home dir to cache dir
+    autoload -Uz compinit
+    compinit -d "$XDG_CACHE_HOME/zsh/zcompdump"
   '';
 
   imports = [

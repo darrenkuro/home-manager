@@ -33,6 +33,7 @@
         };
     in
     {
+      nix.settings.use-xdg-base-directories = true;
       homeConfigurations = {
         mac = mkHome {
           system = "aarch64-darwin";

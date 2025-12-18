@@ -24,6 +24,5 @@
 
     LESSHISTFILE = "$HOME/.local/state/less/history";
     ZSH_SESSION_DIR = "$HOME/.local/state/zsh/sessions";
-    # HISTFILE = "$HOME/.local/state/bash/history";
   };
 }

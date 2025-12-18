@@ -55,6 +55,6 @@
   '';
 
   programs.zsh.shellAliases = {
-    re = "home-manager switch --flake ~/.config/home-manager#ft";
+    re = "home-manager switch --flake ~/.config/home-manager#ft && exec zsh";
   };
 }

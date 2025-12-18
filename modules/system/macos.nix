@@ -5,8 +5,6 @@
   ...
 }:
 {
-  # Noise Shell App?
-
   # home.file."Library/Fonts/NixNerdFonts".source = "${pkgs.nerd-fonts.fira-code}/share/fonts";
 
   home.packages = with pkgs; [
@@ -83,7 +81,7 @@
     dbox = "cd $DBOX";
 
     cloc = "tokei";
-    re = "home-manager switch --flake ~/.config/home-manager#mac";
+    re = "home-manager switch --flake ~/.config/home-manager#mac && exec zsh";
 
     hide = "chflags hidden";
     unhide = "chflags nohidden";
