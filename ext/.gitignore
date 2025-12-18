@@ -7,13 +7,13 @@
 Icon?
 
 # VSCode
-.vscode/
+.vscode/*
 !.vscode/launch.json
 !.vscode/tasks.json
 !.vscode/settings.json
 
 # JetBrains IDEs
-.idea/
+.idea/*
 !.idea/codeStyles/
 !.idea/runConfigurations/
 
