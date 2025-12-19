@@ -19,6 +19,8 @@
     rename
     bat
 
+    wakatime-cli
+
     clang-tools # C, CPP
     alejandra # Nix formatter
     nil # Nix LSP
@@ -39,6 +41,7 @@
     vscode-extensions.mikestead.dotenv
     vscode-extensions.tamasfe.even-better-toml
     vscode-extensions.foxundermoon.shell-format
+    vscode-extensions.wakatime.vscode-wakatime
     # 13
     # xforever.asm-code-lens
 
