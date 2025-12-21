@@ -12,7 +12,7 @@
       user.email = "odon5ht@gmail.com";
       user.signingKey = "~/.ssh/id_rsa.pub";
       gpg.format = "ssh";
-      commit.pgpsign = "true";
+      commit.gpgsign = "true";
       core.editor = "hx";
       color.ui = "auto";
       init.defaultBranch = "main";
