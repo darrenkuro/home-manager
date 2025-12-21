@@ -80,7 +80,10 @@
     },
     "material-icon-theme.folders.associations": {
         "obj": "tools",
-        "files": "config"
+        "files": "config",
+        "system": "core",
+        "arm64": "core",
+        "x86_64": "core"
     },
     "material-icon-theme.opacity": 0.8,
     //

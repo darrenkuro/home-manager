@@ -41,7 +41,7 @@
     tmp_conf="$tmux_conf.tmp"
     printf '%s\n' "set -g default-command 'exec /home/dlu/bin/nix-user-chroot "$HOME/sgoinfre/nix" zsh -l'" | cat - "$tmux_conf" > "$tmp_conf" && mv "$tmp_conf" "$tmux_conf"
 
-    cat ${../../files/tmux-nix} > "/home/dlu/bin/tmux-nix"
+    cat ${../../files/tmux-nix.sh} > "/home/dlu/bin/tmux-nix"
     chmod +x "/home/dlu/bin/tmux-nix"
 
     src="${config.home.profileDirectory}/share/vscode/extensions"
