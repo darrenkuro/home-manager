@@ -5,15 +5,12 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
-
-    #darren-nix-pkgs.url = "github:darrenkuro/darren-nix-pkgs";
   };
 
   outputs =
     {
       nixpkgs,
       home-manager,
-      #darren-nix-pkgs,
       ...
     }:
     let
@@ -26,7 +23,6 @@
           pkgs = import nixpkgs {
             inherit system;
             config.allowUnfree = true;
-            #overlays = [ darren-nix-pkgs.overlays.default ];
           };
           extraSpecialArgs = { inherit tag system; };
           modules = [ ./home.nix ];

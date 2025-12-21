@@ -5,17 +5,7 @@
   ...
 }:
 {
-  home.packages = with pkgs; [
-    # Only add as needed!
-    # rustc
-    # nodejs_latest
-    # typescript
-    # nodePackages.typescript-language-server
-
-    # python311
-    # python311Packages.pip
-    # python311Packages.virtualenv
-  ];
+  # home.packages = with pkgs; [ ];
 
   # Set faster keyboard repeat rate (only on X11)
   programs.zsh.initExtra = ''
@@ -43,15 +33,6 @@
 
     cat ${../../configs/tmux-nix.sh} > "/home/dlu/bin/tmux-nix"
     chmod +x "/home/dlu/bin/tmux-nix"
-
-    src="${config.home.profileDirectory}/share/vscode/extensions"
-    dest="$HOME/.vscode/extensions"
-
-    mkdir -p "$dest"
-    for ext in "$src"/*; do
-      name=$(basename "$ext")
-      cp -RL --no-preserve=mode,ownership,timestamps "$ext" "$dest/$name"
-    done
   '';
 
   programs.zsh.shellAliases = {
