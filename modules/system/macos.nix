@@ -67,7 +67,7 @@
   # Copy user setting, not symlink, to make it usable
   home.activation.vscodeSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     mkdir -p "$HOME/Library/Application Support/Code/User"
-    envsubst < ${../../files/settings.json} > "$HOME/Library/Application Support/Code/User/settings.json"
+    envsubst < ${../../configs/settings.json} > "$HOME/Library/Application Support/Code/User/settings.json"
     chmod u+w "$HOME/Library/Application Support/Code/User/settings.json"
   '';
 
@@ -80,7 +80,7 @@
   # '';
 
   xdg.configFile."tmux/tmux.conf" = {
-    source = ../../files/tmux.conf;
+    source = ../../configs/tmux.conf;
   };
 
   programs.zsh.shellAliases = {
@@ -93,8 +93,8 @@
     unhide = "chflags nohidden";
     rm = "echo \"☠️$YELLOW DANGEROUS CMD: using trash instread!$RESET\" && trash";
 
-    readme = "cat $HM/files/README.md | pbcopy";
-    gig = "cat $HM/files/.gitignore | pbcopy";
+    readme = "cat $HM/templates/README.md | pbcopy";
+    gig = "cat $HM/templates/.gitignore | pbcopy";
 
     ijs = "echo '![JavaScript](https://img.shields.io/badge/-JavaScript-f7df1e?style=flat-square&logo=JavaScript&logoColor=black)' | pbcopy";
     its = "echo '![TypeScript](https://img.shields.io/badge/-TypeScript-3178c6?style=flat-square&logo=TypeScript&logoColor=white)' | pbcopy";
