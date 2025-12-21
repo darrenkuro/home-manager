@@ -17,6 +17,7 @@
     fzf
     rename
     bat
+    gettext # envsubst
 
     wakatime-cli
 
@@ -46,6 +47,7 @@
       "$HOME/.local/state/bash" \
       "$HOME/.local/state/less" \
       "$HOME/.local/state/sessions" \
+      "$HOME/.local/state/wakatime" \
       "$HOME/.cache/zsh"
   '';
 

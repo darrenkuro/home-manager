@@ -29,55 +29,28 @@
     "git.decorations.enabled": true,
     "git.enabled": true,
     //
-    "C_Cpp.clang_format_path": "$HOME/.nix-profile/bin/clang-format",
-    "C_Cpp.formatting": "clangFormat",
-    //
     "nix.enableLanguageServer": true,
-    "nix.formatterPath": "alejandra",
     "nix.serverPath": "nil",
     //
     "[python]": {
         "editor.defaultFormatter": "ms-python.python"
     },
     "python.formatting.provider": "black",
-    "python.formatting.blackPath": "$HOME/.nix-profile/bin/black",
+    //   "python.formatting.blackPath": "$HOME/.nix-profile/bin/black",
     "python.linting.enabled": true,
     "python.linting.flake8Enabled": true,
     "python.analysis.typeCheckingMode": "basic",
-    "python.defaultInterpreterPath": "$HOME/.nix-profile/bin/python3",
+    //   "python.defaultInterpreterPath": "$HOME/.nix-profile/bin/python3",
     //
     "rust-analyzer.cargo.autoreload": true,
     "rust-analyzer.procMacro.enable": true,
     "rust-analyzer.check.command": "clippy",
     "rust-analyzer.inlayHints.typeHints.enable": false,
     "rust-analyzer.inlayHints.parameterHints.enable": false,
-    "[rust]": {
-        "editor.defaultFormatter": "rust-lang.rust-analyzer"
-    },
-    //
-    "prettier.prettierPath": "$HOME/.nix-profile/lib/node_modules/prettier",
-    "prettier.prettierPathFallback": "$HOME/.nix-profile/bin/prettier",
-    "prettier.resolveGlobalModules": false,
-    "[javascript]": {
-        "editor.defaultFormatter": "esbenp.prettier-vscode"
-    },
-    "[typescript]": {
-        "editor.defaultFormatter": "esbenp.prettier-vscode"
-    },
-    "[json]": {
-        "editor.defaultFormatter": "esbenp.prettier-vscode"
-    },
     "typescript.updateImportsOnFileMove.enabled": "always",
     "javascript.updateImportsOnFileMove.enabled": "always",
     //
-    "[shellscript]": {
-        "editor.defaultFormatter": "foxundermoon.shell-format"
-    },
-    "shellformat.path": "$HOME/.nix-profile/bin/shfmt",
-    "shellformat.flag": "-i 2 -ci -sr",
-    //
-    "material-icon-theme.files.associations": {
-    },
+    "material-icon-theme.files.associations": {},
     "material-icon-theme.folders.associations": {
         "obj": "tools",
         "files": "config",
@@ -88,5 +61,33 @@
     "material-icon-theme.opacity": 0.8,
     //
     "security.workspace.trust.enabled": true,
-    "security.workspace.trust.startupPrompt": "never"
+    "security.workspace.trust.startupPrompt": "never",
+    //
+    "42header.username": "dlu",
+    "42header.email": "dlu@student.42berlin.de",
+    "emeraldwalk.runonsave": {
+        "commands": [
+            {
+                // "match": ".*",
+                "match": "\\.(js|ts|jsx|tsx|json|css|md)$",
+                "cmd": "prettier -w '${${q}file}'"
+            },
+            {
+                "match": "\\.(c|h|cpp|hpp)$",
+                "cmd": "clang-format -i '${${q}file}'"
+            },
+            {
+                "match": "\\.(sh)$",
+                "cmd": "shfmt -i 2 -ci -sr -w '${${q}file}'"
+            },
+            {
+                "match": "\\.(rs)$",
+                "cmd": "rustfmt '${${q}file}'"
+            },
+            {
+                "match": "\\.(nix)$",
+                "cmd": "alejandra '${${q}file}'"
+            }
+        ]
+    }
 }

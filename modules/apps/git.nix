@@ -1,8 +1,4 @@
-{
-  pkgs,
-  ...
-}:
-{
+{pkgs, ...}: {
   home.packages = [
     pkgs.git
     pkgs.gh
@@ -14,7 +10,7 @@
     settings = {
       user.name = "darrenkuro";
       user.email = "odon5ht@gmail.com";
-      user.signingKey = "~/.ssh/id_rsa";
+      user.signingKey = "~/.ssh/id_rsa.pub";
       gpg.format = "ssh";
       commit.pgpsign = "true";
       core.editor = "hx";

@@ -1,7 +1,6 @@
 {
   pkgs,
   lib,
-  config,
   ...
 }:
 {
@@ -70,14 +69,6 @@
     envsubst < ${../../configs/settings.json} > "$HOME/Library/Application Support/Code/User/settings.json"
     chmod u+w "$HOME/Library/Application Support/Code/User/settings.json"
   '';
-
-  # # Symlink all extensions
-  # home.activation.linkVscodeExtensions = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-  #   for ext in "${config.home.profileDirectory}/share/vscode/extensions/"*; do
-  #     target="${config.home.homeDirectory}/.vscode/extensions/$(basename "$ext")"
-  #     ln -sfn "$ext" "$target"
-  #    done
-  # '';
 
   xdg.configFile."tmux/tmux.conf" = {
     source = ../../configs/tmux.conf;
