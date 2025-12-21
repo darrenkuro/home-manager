@@ -27,21 +27,21 @@
   # Copy user setting, not symlink, to make it usable
   home.activation.configCopy = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     mkdir -p "$HOME/.config/Code/User"
-    envsubst < ${../../ext/settings.json} > "$HOME/.config/Code/User/settings.json"
+    envsubst < ${../../files/settings.json} > "$HOME/.config/Code/User/settings.json"
     chmod u+w "$HOME/.config/Code/User/settings.json"
 
     mkdir -p "$HOME/.config/alacritty"
-    envsubst < ${../../ext/alacritty.toml} > "$HOME/.config/alacritty/alacritty.toml"
+    envsubst < ${../../files/alacritty.toml} > "$HOME/.config/alacritty/alacritty.toml"
     chmod u+w "$HOME/.config/alacritty/alacritty.toml"
 
     mkdir -p "$HOME/.config/tmux"
-    envsubst < ${../../ext/tmux.conf} > "$HOME/.config/tmux/tmux.conf"
+    envsubst < ${../../files/tmux.conf} > "$HOME/.config/tmux/tmux.conf"
     chmod u+w "$HOME/.config/tmux/tmux.conf"
     tmux_conf="$HOME/.config/tmux/tmux.conf"
     tmp_conf="$tmux_conf.tmp"
     printf '%s\n' "set -g default-command 'exec /home/dlu/bin/nix-user-chroot "$HOME/sgoinfre/nix" zsh -l'" | cat - "$tmux_conf" > "$tmp_conf" && mv "$tmp_conf" "$tmux_conf"
 
-    cat ${../../ext/tmux-nix} > "/home/dlu/bin/tmux-nix"
+    cat ${../../files/tmux-nix} > "/home/dlu/bin/tmux-nix"
     chmod +x "/home/dlu/bin/tmux-nix"
 
     src="${config.home.profileDirectory}/share/vscode/extensions"

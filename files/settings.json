@@ -76,29 +76,14 @@
     "shellformat.path": "$HOME/.nix-profile/bin/shfmt",
     "shellformat.flag": "-i 2 -ci -sr",
     //
-    "material-icon-theme.activeIconPack": "react",
     "material-icon-theme.files.associations": {
-        "constants.ts": "tsconfig",
-        "playground.ts": "test-ts",
-        "svg.tsx": "svgr"
     },
     "material-icon-theme.folders.associations": {
-        "commands": "functions",
-        "component": "react-components",
-        "data-fetching": "Api",
-        "data-models": "database",
-        "entry-model": "database",
-        "experiment": "project",
-        "modals": "interface",
-        "to-process": "error"
+        "obj": "tools",
+        "files": "config"
     },
     "material-icon-theme.opacity": 0.8,
-    "material-icon-theme.saturation": 0.8,
     //
     "security.workspace.trust.enabled": true,
-    "security.workspace.trust.startupPrompt": "never",
-    "security.workspace.trust.trustedFolders": [
-        "~/Documents/dev",
-        "~/.config/home-manager"
-    ]
+    "security.workspace.trust.startupPrompt": "never"
 }

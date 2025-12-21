@@ -34,6 +34,7 @@
     ffmpeg
 
     tmux
+    poppler-utils # pdf tools
     # Nix version locks so for frequently updated apps for which reproducibility is not most important
     # Shouldn't be managed here, and config files can still though
     # anki
@@ -66,20 +67,20 @@
   # Copy user setting, not symlink, to make it usable
   home.activation.vscodeSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     mkdir -p "$HOME/Library/Application Support/Code/User"
-    envsubst < ${../../ext/settings.json} > "$HOME/Library/Application Support/Code/User/settings.json"
+    envsubst < ${../../files/settings.json} > "$HOME/Library/Application Support/Code/User/settings.json"
     chmod u+w "$HOME/Library/Application Support/Code/User/settings.json"
   '';
 
-  # Symlink all extensions
-  home.activation.linkVscodeExtensions = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    for ext in "${config.home.profileDirectory}/share/vscode/extensions/"*; do
-      target="${config.home.homeDirectory}/.vscode/extensions/$(basename "$ext")"
-      ln -sfn "$ext" "$target"
-     done
-  '';
+  # # Symlink all extensions
+  # home.activation.linkVscodeExtensions = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+  #   for ext in "${config.home.profileDirectory}/share/vscode/extensions/"*; do
+  #     target="${config.home.homeDirectory}/.vscode/extensions/$(basename "$ext")"
+  #     ln -sfn "$ext" "$target"
+  #    done
+  # '';
 
   xdg.configFile."tmux/tmux.conf" = {
-    source = ../../ext/tmux.conf;
+    source = ../../files/tmux.conf;
   };
 
   programs.zsh.shellAliases = {
@@ -92,8 +93,8 @@
     unhide = "chflags nohidden";
     rm = "echo \"☠️$YELLOW DANGEROUS CMD: using trash instread!$RESET\" && trash";
 
-    readme = "cat $HM/ext/README.md | pbcopy";
-    gig = "cat $HM/ext/.gitignore | pbcopy";
+    readme = "cat $HM/files/README.md | pbcopy";
+    gig = "cat $HM/files/.gitignore | pbcopy";
 
     ijs = "echo '![JavaScript](https://img.shields.io/badge/-JavaScript-f7df1e?style=flat-square&logo=JavaScript&logoColor=black)' | pbcopy";
     its = "echo '![TypeScript](https://img.shields.io/badge/-TypeScript-3178c6?style=flat-square&logo=TypeScript&logoColor=white)' | pbcopy";

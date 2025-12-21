@@ -1,7 +1,7 @@
 {
   pkgs,
   config,
-  lib,
+  # lib,
   tag,
   ...
 }:
@@ -31,17 +31,19 @@
     rustfmt
     clippy
     asm-lsp
+    asmfmt
 
-    vscode-extensions.pkief.material-icon-theme
-    vscode-extensions.github.github-vscode-theme
-    vscode-extensions.ms-vscode.cpptools
-    vscode-extensions.jnoortheen.nix-ide
-    vscode-extensions.rust-lang.rust-analyzer
-    vscode-extensions.ms-vscode.makefile-tools
-    vscode-extensions.mikestead.dotenv
-    vscode-extensions.tamasfe.even-better-toml
-    vscode-extensions.foxundermoon.shell-format
-    vscode-extensions.wakatime.vscode-wakatime
+    # let vscode manage its own settings
+    # vscode-extensions.pkief.material-icon-theme
+    # vscode-extensions.github.github-vscode-theme
+    # vscode-extensions.ms-vscode.cpptools
+    # vscode-extensions.jnoortheen.nix-ide
+    # vscode-extensions.rust-lang.rust-analyzer
+    # vscode-extensions.ms-vscode.makefile-tools
+    # vscode-extensions.mikestead.dotenv
+    # vscode-extensions.tamasfe.even-better-toml
+    # vscode-extensions.foxundermoon.shell-format
+    # vscode-extensions.wakatime.vscode-wakatime
     # 13
     # xforever.asm-code-lens
 
@@ -95,13 +97,13 @@
 
   fonts.fontconfig.enable = true;
 
-  # Symlink all extensions
-  home.activation.linkVscodeExtensions = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    for ext in "${config.home.profileDirectory}/share/vscode/extensions/"*; do
-      target="${config.home.homeDirectory}/.vscode/extensions/$(basename "$ext")"
-      ln -sfn "$ext" "$target"
-     done
-  '';
+  # # Symlink all extensions
+  # home.activation.linkVscodeExtensions = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+  #   for ext in "${config.home.profileDirectory}/share/vscode/extensions/"*; do
+  #     target="${config.home.homeDirectory}/.vscode/extensions/$(basename "$ext")"
+  #     ln -sfn "$ext" "$target"
+  #    done
+  # '';
 
   # Format: C, CPP
   home.file.".clang-format".text = ''
