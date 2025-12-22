@@ -26,7 +26,7 @@
         name = "c";
         auto-format = true;
         formatter = {
-          command = "~/.nix-profile/bin/clang-format";
+          command = "clang-format";
           args = [ "-style=file" ];
         };
       }
@@ -34,7 +34,7 @@
         name = "cpp";
         auto-format = true;
         formatter = {
-          command = "~/.nix-profile/bin/clang-format";
+          command = "clang-format";
           args = [ "-style=file" ];
         };
       }

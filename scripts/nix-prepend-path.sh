@@ -1,3 +1,5 @@
+# Reorder PATH to ensure nix path is at the very front
+
 # Deduplicate PATH and keep order stable
 typeset -gU path PATH
 

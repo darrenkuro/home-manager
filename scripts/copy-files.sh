@@ -1,9 +1,20 @@
 # Copy files in Place since these are important outside of nix env
 
+case ${HM_TAG-} in
+  MAC)
+    VSCODE_DIR="$HOME/Library/Application Support/Code/User";;
+  FT)
+    VSCODE_DIR="$HOME/.config/Code/User";;
+esac
+
 # VS code settings
-mkdir -p "$HOME/.config/Code/User"
-envsubst < ${../../configs/vscode-settings.jsonc} > "$HOME/.config/Code/User/settings.json"
-chmod u+w "$HOME/.config/Code/User/settings.json"
+mkdir -p "$VSCODE_DIR"
+envsubst < ${../../configs/vscode-settings.jsonc} > "$VSCODE_DIR/settings.json"
+chmod u+w "$VSCODE_DIR/settings.json"
+
+if [[ ${HM_TAG-} != "FT" ]]; then
+  return 0 2>/dev/null || exit 0
+fi
 
 # Alacritty
 mkdir -p "$HOME/.config/alacritty"

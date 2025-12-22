@@ -1,4 +1,5 @@
 # ChatGPT really seems to believe that sourcing this in .env is very important
+
 if [[ ${HM_TAG-} == "MAC" ]] &&
   ! command -v nix > /dev/null 2>&1 &&
   [[ -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]]; then
