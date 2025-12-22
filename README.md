@@ -16,6 +16,12 @@
 
 ---
 
+## Notes
+
+- You cannot define the same attribute twice in a single Nix file, that is a Nix language thing. But same attribute in different files tend to merge (barring some exceptions?) and that is a home-manager thing.
+
+---
+
 ## 📄 License
 
 This project is licensed under the [MIT License](LICENSE).

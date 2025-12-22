@@ -1,8 +1,7 @@
 {pkgs, ...}: {
-  home.packages = [
-    pkgs.git
-    pkgs.gh
-    #inputs.darren-nix-pkgs.packages.${pkgs.system}.git-init
+  home.packages = with pkgs; [
+    git
+    gh
   ];
 
   programs.git = {

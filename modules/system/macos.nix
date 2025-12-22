@@ -1,70 +1,10 @@
-{
-  pkgs,
-  lib,
-  ...
-}: {
+{lib, ...}: {
   # home.file."Library/Fonts/NixNerdFonts".source = "${pkgs.nerd-fonts.fira-code}/share/fonts";
-
-  home.packages = with pkgs; [
-    rustc
-    nodejs_latest
-    typescript
-    nodePackages.typescript-language-server
-
-    nodePackages.prettier
-    python311Packages.black
-    python311Packages.flake8
-    prettierd
-
-    python311
-    python311Packages.pip
-    python311Packages.virtualenv
-
-    vscode-extensions.esbenp.prettier-vscode
-    vscode-extensions.ms-python.python
-    vscode-extensions.ms-python.vscode-pylance
-
-    darwin.trash
-    taskwarrior3
-    ghostty-bin
-
-    ffmpeg
-
-    tmux
-    poppler-utils # pdf tools
-    # Nix version locks so for frequently updated apps for which reproducibility is not most important
-    # Shouldn't be managed here, and config files can still though
-    # anki
-    # the-unarchiver
-    # brave
-    # obsidian
-    # discord
-    # chatgpt
-    # dropbox
-    # steam
-    # tor
-    # firefox
-    # google-chrome
-
-    # Not in active use
-    # pnpm
-    # docker
-
-    # imagemagick
-
-    # Probably better to spawn it when needed
-    # avidemux
-    # handbrake
-    # audacity
-    # blackhole / loopback?
-
-    # vlc-bin
-  ];
 
   # Copy user setting, not symlink, to make it usable
   home.activation.vscodeSettings = lib.hm.dag.entryAfter ["writeBoundary"] ''
     mkdir -p "$HOME/Library/Application Support/Code/User"
-    envsubst < ${../../configs/settings.json} > "$HOME/Library/Application Support/Code/User/settings.json"
+    envsubst < ${../../configs/vscode-settings.jsonc} > "$HOME/Library/Application Support/Code/User/settings.json"
     chmod u+w "$HOME/Library/Application Support/Code/User/settings.json"
   '';
 

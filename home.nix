@@ -5,46 +5,82 @@
   lib,
   ...
 }: {
+  # ----------- Base Settings
   home.username =
     if tag == "mac"
     then "darrenlu"
-    else "dlu";
+    else if tag == "ft"
+    then "dlu"
+    else throw "Unknown tag: ${tag}";
   home.homeDirectory =
     if tag == "mac"
     then "/Users/darrenlu"
-    else "/home/dlu";
+    else if tag == "ft"
+    then "/home/dlu"
+    else throw "Unknown tag: ${tag}";
   home.stateVersion = "25.11"; # Version when started using
 
-  home.packages = with pkgs; [
-    tokei
-    eza
-    fd
-    jq
-    fzf
-    rename
-    bat
-    gettext # envsubst
+  home.packages = with pkgs;
+    [
+      tokei
+      eza
+      fd
+      jq
+      fzf
+      rename
+      bat
+      gettext # envsubst
 
-    wakatime-cli
+      wakatime-cli
 
-    clang-tools # C, CPP
-    alejandra # Nix formatter
-    nil # Nix LSP
-    shfmt
-    shellcheck
-    cargo
-    rust-analyzer
-    rustfmt
-    clippy
-    asm-lsp
-    asmfmt
+      clang-tools # C, CPP
+      alejandra # Nix formatter
+      nil # Nix LSP
+      shfmt
+      shellcheck
+      cargo
+      rust-analyzer
+      rustfmt
+      clippy
+      asm-lsp
+      asmfmt
 
-    #nerd-fonts.hack
-    # cachix
-    # (pkgs.nerd-fonts.override {fonts = ["Hack"];})
+      #nerd-fonts.hack
+      # cachix
+      # (pkgs.nerd-fonts.override {fonts = ["Hack"];})
 
-    # inputs.darren-nix-pkgs.packages.${pkgs.system}.gloc
-  ];
+      # inputs.darren-nix-pkgs.packages.${pkgs.system}.gloc
+    ]
+    ++ lib.optionals (tag == "mac") [
+      rustc
+      nodejs_latest
+      typescript
+      nodePackages.typescript-language-server
+
+      nodePackages.prettier
+      python311Packages.black
+      python311Packages.flake8
+      prettierd
+
+      python311
+      python311Packages.pip
+      python311Packages.virtualenv
+
+      vscode-extensions.esbenp.prettier-vscode
+      vscode-extensions.ms-python.python
+      vscode-extensions.ms-python.vscode-pylance
+
+      darwin.trash
+      taskwarrior3
+      ghostty-bin
+
+      ffmpeg
+
+      tmux
+      poppler-utils # pdf tools
+    ]
+    ++ lib.optionals (tag == "ft") [
+    ];
 
   # Ensure directories used exist
   home.activation.createStateDirs = ''
@@ -75,31 +111,9 @@
 
   fonts.fontconfig.enable = true;
 
-  # Format: C, CPP
-  home.file.".clang-format".text = ''
-    BasedOnStyle: LLVM
-    IndentWidth: 4
-    TabWidth: 4
-    UseTab: Never
-    ColumnLimit: 100
-    AlwaysBreakTemplateDeclarations: true
-    BreakBeforeBraces: Attach
-    AllowShortFunctionsOnASingleLine: Inline
-    SpaceBeforeParens: ControlStatements
-  '';
+  home.file.".clang-format".source = ./configs/clang-format.yml;
 
-  xdg.configFile.".config/prettier/config.json".text = ''
-    {
-      "printWidth": 100,
-      "tabWidth": 4,
-      "useTabs": false,
-      "semi": true,
-      "singleQuote": true,
-      "trailingComma": "es5",
-      "bracketSpacing": true,
-      "arrowParens": "avoid"
-    }
-  '';
+  xdg.configFile.".config/prettier/config.json".source = ./configs/prettier-config.json;
 
   programs.zsh.initContent = ''
     # Source scripts

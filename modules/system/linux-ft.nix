@@ -1,6 +1,4 @@
 {lib, ...}: {
-  # home.packages = with pkgs; [ ];
-
   programs.zsh.initContent = ''
     # # Source Nix (42 dir)
     #   [[ ! $(command -v nix) && -e '. ~/.nix-profile/etc/profile.d/nix.sh' ]] && source '~/.nix-profile/etc/profile.d/nix.sh'
@@ -14,7 +12,7 @@
   # Copy user setting, not symlink, to make it usable outside of nix env
   home.activation.configCopy = lib.hm.dag.entryAfter ["writeBoundary"] ''
     mkdir -p "$HOME/.config/Code/User"
-    envsubst < ${../../configs/settings.json} > "$HOME/.config/Code/User/settings.json"
+    envsubst < ${../../configs/vscode-settings.jsonc} > "$HOME/.config/Code/User/settings.json"
     chmod u+w "$HOME/.config/Code/User/settings.json"
 
     mkdir -p "$HOME/.config/alacritty"
@@ -30,8 +28,6 @@
 
     cat ${../../configs/tmux-nix.sh} > "/home/dlu/bin/tmux-nix"
     chmod +x "/home/dlu/bin/tmux-nix"
-
-
   '';
 
   programs.zsh.shellAliases = {
