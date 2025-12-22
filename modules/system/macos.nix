@@ -1,15 +1,6 @@
 { lib, ... }: {
   # home.file."Library/Fonts/NixNerdFonts".source = "${pkgs.nerd-fonts.fira-code}/share/fonts";
 
-  # Copy user setting, not symlink, to make it usable
-  home.activation.configCopy =
-    lib.hm.dag.entryAfter [ "writeBoundary" ]
-      (lib.concatStringsSep "\n"
-      [
-        (builtins.readFile ../../scripts/copy-files.sh)
-        (builtins.readFile ../../scripts/unset-env.sh)
-      ]);
-
   xdg.configFile."tmux/tmux.conf" = {
     source = ../../configs/tmux.conf;
   };

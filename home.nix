@@ -20,9 +20,7 @@
     else throw "Unknown tag: ${tag}";
   home.stateVersion = "25.11"; # Version when started using
 
-  home.packages = with pkgs;
-    [
-      tokei
+  home.packages = with pkgs; [ tokei
       eza
       fd
       jq
@@ -30,9 +28,7 @@
       rename
       bat
       gettext # envsubst
-
       wakatime-cli
-
       clang-tools # C, CPP
       alejandra # Nix formatter
       nil # Nix LSP
@@ -66,18 +62,12 @@
       python311Packages.pip
       python311Packages.virtualenv
 
-      vscode-extensions.esbenp.prettier-vscode
-      vscode-extensions.ms-python.python
-      vscode-extensions.ms-python.vscode-pylance
-
-      darwin.trash
+      darwin.trash # Replace rm (safer)
       taskwarrior3
       ghostty-bin
-
       ffmpeg
-
       tmux
-      poppler-utils # pdf tools
+      poppler-utils # PDF tools
     ]
     ++ lib.optionals (tag == "ft") [
     ];
@@ -107,10 +97,12 @@
     };
     envExtra = builtins.readFile ./scripts/load-nix.sh;
     profileExtra = builtins.readFile ./scripts/nix-prepend-path.sh;
-    initContent = lib.concatStringsSep "\n" [
+    initContent = lib.concatStringsSep "\n" ([
       (builtins.readFile ./scripts/source-functions.sh)
       (builtins.readFile ./scripts/hygiene.sh)
-    ];
+    ] ++ lib.optionals (tag=="ft") [
+      (builtins.readFile ./scripts/repeat-rate.sh)
+    ]);
   };
 
   fonts.fontconfig.enable = true;
@@ -118,9 +110,12 @@
   xdg.configFile."clang-format".source = ./configs/clang-format.yml;
   xdg.configFile."prettier.json".source = ./configs/prettier-config.json;
 
+  home.activation.configCopy = lib.hm.dag.entryAfter [ "writeBoundary" ]
+      (lib.concatStringsSep "\n"
+      [ (builtins.readFile ./scripts/copy-files.sh) ]);
+
   imports =
     [
-      # Shared across all profiles
       ./modules/system/aliases.nix
       ./modules/system/env.nix
 

@@ -6,6 +6,7 @@
       if tag == "mac" then "hx $HM/modules/system/macos.nix" else "hx $HM/modules/system/linux-ft.nix";
     hm = if tag == "mac" then "code $HM" else "cd $HM";
     dev = "cd $DEV";
+    re = if tag == "mac" then "home-manager switch --flake ~/.config/home-manager#mac && exec zsh" else "home-manager switch --flake ~/.config/home-manager#ft && exec zsh";
 
     ncg = "nix-collect-garbage -d";
 

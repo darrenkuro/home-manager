@@ -33,7 +33,7 @@
     "nix.serverPath": "nil",
     //
     "[python]": {
-        "editor.defaultFormatter": "ms-python.python"
+        "editor.defaultFormatter": "ms-python.python",
     },
     "python.formatting.provider": "black",
     //   "python.formatting.blackPath": "$HOME/.nix-profile/bin/black",
@@ -56,7 +56,7 @@
         "files": "config",
         "system": "core",
         "arm64": "core",
-        "x86_64": "core"
+        "x86_64": "core",
     },
     "material-icon-theme.opacity": 0.8,
     //
@@ -69,25 +69,28 @@
         "commands": [
             {
                 // "match": ".*",
-                "match": "\\.(js|ts|jsx|tsx|json|css|md)$",
-                "cmd": "prettier -w --config ~/.config/prettier.json '${${q}file}'"
+                "match": "\\.(js|ts|jsx|tsx|json|jsonc|css|md)$",
+                "cmd": "prettier -w --config ~/.config/prettier.json '${${q}file}'",
             },
             {
                 "match": "\\.(c|h|cpp|hpp)$",
-                "cmd": "clang-format -style=file:$HOME/.config/clang-format -i '${${q}file}'"
+                "cmd": "clang-format -style=file:$HOME/.config/clang-format -i '${${q}file}'",
             },
             {
                 "match": "\\.(sh)$",
-                "cmd": "shfmt -i 2 -ci -sr -w '${${q}file}'"
+                "cmd": "shfmt -i 2 -ci -sr -w '${${q}file}'",
             },
             {
                 "match": "\\.(rs)$",
-                "cmd": "rustfmt '${${q}file}'"
-            }
+                "cmd": "rustfmt '${${q}file}'",
+            },
             // {
             //     "match": "\\.(nix)$",
             //     "cmd": "alejandra '${${q}file}'"
             // }
-        ]
-    }
+        ],
+    },
+    "[shellscript]": {
+        "editor.bracketPairColorization.enabled": false, // For case syntax token )
+    },
 }
