@@ -1,3 +1,19 @@
+INSTALL_TAG=()
+
+# --- Installation check
+install=false
+for tag in "${INSTALL_TAG[@]}"; do
+  if [ "$tag" = "$HM_TAG" ]; then
+    install=true
+    break
+  fi
+done
+
+$install || {
+  unset INSTALL_TAG install
+  return 0 2> /dev/null || exit 0 # Context-aware exit
+}
+
 # --- Dependency check
 REQUIRED_TOOLS=(iconutil magick)
 _missing_tools=()
