@@ -1,6 +1,12 @@
-{ ... }:
-{
+{tag, ...}: {
   home.sessionVariables = {
+    HM_TAG =
+      if tag == "mac"
+      then "MAC"
+      else if tag == "ft"
+      then "FT"
+      else "UNKNOWN";
+
     # Directories
     DBOX = "$HOME/Dropbox";
     DEV = "$HOME/Documents/dev";

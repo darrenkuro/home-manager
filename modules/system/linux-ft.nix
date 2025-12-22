@@ -16,7 +16,7 @@
     fi
   '';
 
-  # Copy user setting, not symlink, to make it usable
+  # Copy user setting, not symlink, to make it usable outside of nix env
   home.activation.configCopy = lib.hm.dag.entryAfter ["writeBoundary"] ''
     mkdir -p "$HOME/.config/Code/User"
     envsubst < ${../../configs/settings.json} > "$HOME/.config/Code/User/settings.json"
@@ -35,6 +35,8 @@
 
     cat ${../../configs/tmux-nix.sh} > "/home/dlu/bin/tmux-nix"
     chmod +x "/home/dlu/bin/tmux-nix"
+
+
   '';
 
   programs.zsh.shellAliases = {

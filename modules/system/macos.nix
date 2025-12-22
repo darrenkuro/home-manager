@@ -72,7 +72,8 @@
     source = ../../configs/tmux.conf;
   };
 
-  programs.zsh.initContent = ''
+  # ChatGPT really seems to believe that sourcing this in .env is very important
+  programs.zsh.envExtra = ''
     # Source Nix (/etc/zshrc breaks after system updates)
       [[ ! $(command -v nix) && -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]] && source '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
   '';
