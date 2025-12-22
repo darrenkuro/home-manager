@@ -14,8 +14,7 @@
 
   # ChatGPT really seems to believe that sourcing this in .env is very important
   programs.zsh.envExtra = ''
-    # Source Nix (/etc/zshrc breaks after system updates)
-      [[ ! $(command -v nix) && -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]] && source '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+    [[ ! $(command -v nix) && -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]] && source '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
   '';
 
   programs.zsh.shellAliases = {

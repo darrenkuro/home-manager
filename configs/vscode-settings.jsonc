@@ -70,11 +70,11 @@
             {
                 // "match": ".*",
                 "match": "\\.(js|ts|jsx|tsx|json|css|md)$",
-                "cmd": "prettier -w '${${q}file}'"
+                "cmd": "prettier -w --config ~/.config/prettier.json '${${q}file}'"
             },
             {
                 "match": "\\.(c|h|cpp|hpp)$",
-                "cmd": "clang-format -i '${${q}file}'"
+                "cmd": "clang-format -style=file:$HOME/.config/clang-format -i '${${q}file}'"
             },
             {
                 "match": "\\.(sh)$",

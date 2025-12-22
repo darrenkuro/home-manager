@@ -107,24 +107,23 @@
       share = true;
       extended = true;
     };
+
+    profileExtra = builtins.readFile ./scripts/nix-prepend-path.sh;
+
+    initContent = ''
+      for f in $HM/functions/*.sh; do
+         [ -r "$f" ] && source "$f"
+      done
+
+      autoload -Uz compinit
+      compinit -d "$XDG_CACHE_HOME/zsh/zcompdump"
+    ''; # zshrc
   };
 
   fonts.fontconfig.enable = true;
 
-  home.file.".clang-format".source = ./configs/clang-format.yml;
-
-  xdg.configFile.".config/prettier/config.json".source = ./configs/prettier-config.json;
-
-  programs.zsh.initContent = ''
-    # Source scripts
-       for f in $HM/functions/*.sh; do
-         [ -r "$f" ] && source "$f"
-       done
-
-    # Move zcompdump from Home dir to cache dir
-      autoload -Uz compinit
-      compinit -d "$XDG_CACHE_HOME/zsh/zcompdump"
-  '';
+  xdg.configFile."clang-format".source = ./configs/clang-format.yml;
+  xdg.configFile."prettier.json".source = ./configs/prettier-config.json;
 
   imports =
     [

@@ -152,6 +152,7 @@
     #     };
     #   };
   };
+  xdg.configFile."starship.toml".source = ../../configs/starship.toml;
   programs.zsh.shellAliases = {
     hmss = "hx $HM/modules/apps/starship.nix";
   };
