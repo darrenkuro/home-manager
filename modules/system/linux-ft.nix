@@ -7,8 +7,8 @@
   # home.packages = with pkgs; [ ];
 
   programs.zsh.initContent = ''
-    # Source Nix (/etc/zshrc breaks after system updates)
-      [[ ! $(command -v nix) && -e '. ~/.nix-profile/etc/profile.d/nix.sh' ]] && source '~/.nix-profile/etc/profile.d/nix.sh'
+    # # Source Nix (42 dir)
+    #   [[ ! $(command -v nix) && -e '. ~/.nix-profile/etc/profile.d/nix.sh' ]] && source '~/.nix-profile/etc/profile.d/nix.sh'
 
     # Set faster keyboard repeat rate (only on X11)
     if command -v xset >/dev/null 2>&1 && [ -n "$DISPLAY" ]; then
