@@ -1,9 +1,4 @@
-{
-  pkgs,
-  lib,
-  config,
-  ...
-}: {
+{lib, ...}: {
   # home.packages = with pkgs; [ ];
 
   programs.zsh.initContent = ''
