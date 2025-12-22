@@ -97,19 +97,16 @@
   programs.zsh = {
     enable = true;
     dotDir = "${config.home.homeDirectory}/.config";
-
     history = {
       path = "${config.home.homeDirectory}/.local/state/zsh/history";
       size = 100000;
       save = 100000;
-      ignoreDups = true;
-      ignoreAllDups = true;
-      share = true;
+      ignoreDups = true; # Ignore when same cmd twice in a row
+      share = true; # Share across terminal
       extended = true;
     };
-
+    envExtra = builtins.readFile ./scripts/load-nix.sh;
     profileExtra = builtins.readFile ./scripts/nix-prepend-path.sh;
-
     initContent = lib.concatStringsSep "\n" [
       (builtins.readFile ./scripts/source-functions.sh)
       (builtins.readFile ./scripts/hygiene.sh)
