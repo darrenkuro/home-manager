@@ -110,14 +110,10 @@
 
     profileExtra = builtins.readFile ./scripts/nix-prepend-path.sh;
 
-    initContent = ''
-      for f in $HM/functions/*.sh; do
-         [ -r "$f" ] && source "$f"
-      done
-
-      autoload -Uz compinit
-      compinit -d "$XDG_CACHE_HOME/zsh/zcompdump"
-    ''; # zshrc
+    initContent = lib.concatStringsSep "\n" [
+      (builtins.readFile ./scripts/source-functions.sh)
+      (builtins.readFile ./scripts/hygiene.sh)
+    ];
   };
 
   fonts.fontconfig.enable = true;
