@@ -2,6 +2,7 @@
   pkgs,
   config,
   tag,
+  lib,
   ...
 }: {
   home.username =
@@ -111,19 +112,20 @@
       compinit -d "$XDG_CACHE_HOME/zsh/zcompdump"
   '';
 
-  imports = [
-    # Shared across all profiles
-    ./modules/system/aliases.nix
-    ./modules/system/env.nix
+  imports =
+    [
+      # Shared across all profiles
+      ./modules/system/aliases.nix
+      ./modules/system/env.nix
 
-    ./modules/apps/starship.nix
-    ./modules/apps/git.nix
-    ./modules/apps/helix.nix
-
-    (
-      if tag == "mac"
-      then ./modules/system/macos.nix
-      else ./modules/system/linux-ft.nix
-    )
-  ];
+      ./modules/apps/starship.nix
+      ./modules/apps/git.nix
+      ./modules/apps/helix.nix
+    ]
+    ++ lib.optionals (tag == "mac") [
+      ./modules/system/macos.nix
+    ]
+    ++ lib.optionals (tag == "ft") [
+      ./modules/system/linux-ft.nix
+    ];
 }
