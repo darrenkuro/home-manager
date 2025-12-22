@@ -3,19 +3,21 @@
   lib,
   config,
   ...
-}:
-{
+}: {
   # home.packages = with pkgs; [ ];
 
-  # Set faster keyboard repeat rate (only on X11)
-  programs.zsh.initExtra = ''
+  programs.zsh.initContent = ''
+    # Source Nix (/etc/zshrc breaks after system updates)
+      [[ ! $(command -v nix) && -e '. ~/.nix-profile/etc/profile.d/nix.sh' ]] && source '~/.nix-profile/etc/profile.d/nix.sh'
+
+    # Set faster keyboard repeat rate (only on X11)
     if command -v xset >/dev/null 2>&1 && [ -n "$DISPLAY" ]; then
       xset r rate 200 60 2>/dev/null || true
     fi
   '';
 
   # Copy user setting, not symlink, to make it usable
-  home.activation.configCopy = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+  home.activation.configCopy = lib.hm.dag.entryAfter ["writeBoundary"] ''
     mkdir -p "$HOME/.config/Code/User"
     envsubst < ${../../configs/settings.json} > "$HOME/.config/Code/User/settings.json"
     chmod u+w "$HOME/.config/Code/User/settings.json"

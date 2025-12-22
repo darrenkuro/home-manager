@@ -2,12 +2,10 @@
   pkgs,
   lib,
   ...
-}:
-{
+}: {
   # home.file."Library/Fonts/NixNerdFonts".source = "${pkgs.nerd-fonts.fira-code}/share/fonts";
 
   home.packages = with pkgs; [
-
     rustc
     nodejs_latest
     typescript
@@ -64,7 +62,7 @@
   ];
 
   # Copy user setting, not symlink, to make it usable
-  home.activation.vscodeSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+  home.activation.vscodeSettings = lib.hm.dag.entryAfter ["writeBoundary"] ''
     mkdir -p "$HOME/Library/Application Support/Code/User"
     envsubst < ${../../configs/settings.json} > "$HOME/Library/Application Support/Code/User/settings.json"
     chmod u+w "$HOME/Library/Application Support/Code/User/settings.json"
@@ -73,6 +71,11 @@
   xdg.configFile."tmux/tmux.conf" = {
     source = ../../configs/tmux.conf;
   };
+
+  programs.zsh.initContent = ''
+    # Source Nix (/etc/zshrc breaks after system updates)
+      [[ ! $(command -v nix) && -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]] && source '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+  '';
 
   programs.zsh.shellAliases = {
     dbox = "cd $DBOX";

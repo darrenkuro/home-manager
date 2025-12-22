@@ -3,10 +3,15 @@
   config,
   tag,
   ...
-}:
-{
-  home.username = if tag == "mac" then "darrenlu" else "dlu";
-  home.homeDirectory = if tag == "mac" then "/Users/darrenlu" else "/home/dlu";
+}: {
+  home.username =
+    if tag == "mac"
+    then "darrenlu"
+    else "dlu";
+  home.homeDirectory =
+    if tag == "mac"
+    then "/Users/darrenlu"
+    else "/home/dlu";
   home.stateVersion = "25.11"; # Version when started using
 
   home.packages = with pkgs; [
@@ -96,17 +101,14 @@
   '';
 
   programs.zsh.initContent = ''
-    # Source Nix (/etc/zshrc breaks after system updates)
-    [[ ! $(command -v nix) && -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]] && source '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
-
     # Source scripts
-    for f in $HM/functions/*.sh; do
-      [ -r "$f" ] && source "$f"
-    done
+       for f in $HM/functions/*.sh; do
+         [ -r "$f" ] && source "$f"
+       done
 
     # Move zcompdump from Home dir to cache dir
-    autoload -Uz compinit
-    compinit -d "$XDG_CACHE_HOME/zsh/zcompdump"
+      autoload -Uz compinit
+      compinit -d "$XDG_CACHE_HOME/zsh/zcompdump"
   '';
 
   imports = [
@@ -118,6 +120,10 @@
     ./modules/apps/git.nix
     ./modules/apps/helix.nix
 
-    (if tag == "mac" then ./modules/system/macos.nix else ./modules/system/linux-ft.nix)
+    (
+      if tag == "mac"
+      then ./modules/system/macos.nix
+      else ./modules/system/linux-ft.nix
+    )
   ];
 }
