@@ -14,8 +14,8 @@
       objdump = "objdump --disassembler-options=intel";
       clean = "rm -rf $HOME/.npm $HOME/.zcompdump $HOME/.cache $HOME/.lesshst";
 
-      taskpull = "cd $XDG_DATA_HOME/task && git pull && cd -";
-      taskpush = "cd $XDG_DATA_HOME/task && git add . && git commit -m 'Auto-sync' && git push && cd -";
+      tpll= "git -C $XDG_DATA_HOME/task pull";
+      tpsh = "git -C $XDG_DATA_HOME/task add . && git -C $XDG_DATA_HOME/task commit -m 'Auto-sync' && git -C $XDG_DATA_HOME/task push";
     }
 
     # ---- mac-only aliases
