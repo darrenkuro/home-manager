@@ -1,6 +1,8 @@
 # Env
 .env
-.env.*
+.envrc
+!.env.example
+!.envrc.example
 
 # macOS
 .DS_Store

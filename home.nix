@@ -4,7 +4,12 @@
   tag,
   lib,
   ...
-}: {
+}:
+# let
+#   wakatimeKey = builtins.getEnv "WAKATIME_API_KEY";
+# in
+# assert wakatimeKey != "";
+{
   # ----------- Base Settings
   home.username =
     if tag == "mac"
@@ -104,6 +109,10 @@
     ] ++ lib.optionals (tag == "ft") [
       (builtins.readFile ./scripts/repeat-rate.sh)
     ]);
+  };
+  programs.direnv = {
+    enable = true;
+    nix-direnv.enable = true;
   };
 
   fonts.fontconfig.enable = true;
