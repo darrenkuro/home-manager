@@ -20,7 +20,9 @@
     else throw "Unknown tag: ${tag}";
   home.stateVersion = "25.11"; # Version when started using
 
-  home.packages = with pkgs; [ tokei
+  home.packages = with pkgs; [
+    hello
+      tokei
       eza
       fd
       jq
@@ -100,7 +102,7 @@
     initContent = lib.concatStringsSep "\n" ([
       (builtins.readFile ./scripts/source-functions.sh)
       (builtins.readFile ./scripts/hygiene.sh)
-    ] ++ lib.optionals (tag=="ft") [
+    ] ++ lib.optionals (tag == "ft") [
       (builtins.readFile ./scripts/repeat-rate.sh)
     ]);
   };
@@ -108,8 +110,7 @@
   fonts.fontconfig.enable = true;
 
   xdg.configFile."clang-format".source = ./configs/clang-format.yml;
-  home.file.".config/prettier.json".text = builtins.readFile ./configs/prettier-config.json;
-  home.file.".prettier.json".text = builtins.readFile ./configs/prettier-config.json;
+  xdg.configFile."prettier.json".source =./configs/prettier-config.json;
 
   home.activation.configCopy = lib.hm.dag.entryAfter [ "writeBoundary" ]
       (lib.concatStringsSep "\n"
@@ -125,7 +126,7 @@
       ./modules/apps/helix.nix
     ]
     ++ lib.optionals (tag == "mac") [
-      # ./modules/system/macos.nix
+      ./modules/system/macos.nix
     ]
     ++ lib.optionals (tag == "ft") [
       ./modules/system/linux-ft.nix
