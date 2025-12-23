@@ -76,6 +76,7 @@
       poppler-utils # PDF tools
     ]
     ++ lib.optionals (tag == "ft") [
+      ghostty
     ];
 
   # Ensure directories used exist
