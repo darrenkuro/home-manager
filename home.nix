@@ -109,6 +109,7 @@
 
   xdg.configFile."clang-format".source = ./configs/clang-format.yml;
   home.file.".config/prettier.json".text = builtins.readFile ./configs/prettier-config.json;
+  home.file.".prettier.json".text = builtins.readFile ./configs/prettier-config.json;
 
   home.activation.configCopy = lib.hm.dag.entryAfter [ "writeBoundary" ]
       (lib.concatStringsSep "\n"
