@@ -1,9 +1,9 @@
 { ... }: {
   # home.file."Library/Fonts/NixNerdFonts".source = "${pkgs.nerd-fonts.fira-code}/share/fonts";
 
-  xdg.configFile."tmux/tmux.conf" = {
-    source = ../../configs/tmux.conf;
-  };
+  # xdg.configFile."tmux/tmux.conf" = {
+  #   source = ../../configs/tmux.conf;
+  # };
 
   programs.zsh.shellAliases = {
     dbox = "cd $DBOX";
