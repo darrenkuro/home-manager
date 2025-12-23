@@ -46,6 +46,7 @@
       clippy
       asm-lsp
       asmfmt
+      taskwarrior3
 
       #nerd-fonts.hack
       # cachix
@@ -69,7 +70,6 @@
       python311Packages.virtualenv
 
       darwin.trash # Replace rm (safer)
-      taskwarrior3
       ghostty-bin
       ffmpeg
       tmux
