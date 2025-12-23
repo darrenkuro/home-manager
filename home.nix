@@ -48,6 +48,7 @@
       asm-lsp
       asmfmt
       taskwarrior3
+      nodePackages.prettier
 
       #nerd-fonts.hack
       # cachix
@@ -61,7 +62,6 @@
       typescript
       nodePackages.typescript-language-server
 
-      nodePackages.prettier
       python311Packages.black
       python311Packages.flake8
       prettierd
@@ -77,10 +77,6 @@
       poppler-utils # PDF tools
     ]
     ++ lib.optionals (tag == "ft") [
-      ghostty
-      xorg.xeyes
-      gtk4
-      foot
     ];
 
   # Ensure directories used exist
