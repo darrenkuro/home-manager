@@ -1,6 +1,9 @@
-{ tag, lib, ... }:
 {
-    programs.zsh.shellAliases = lib.mkMerge [
+  tag,
+  lib,
+  ...
+}: {
+  programs.zsh.shellAliases = lib.mkMerge [
     # ---- common aliases (always enabled)
     {
       ls = "eza --icons --ignore-glob='.DS_Store'";
@@ -14,7 +17,7 @@
       objdump = "objdump --disassembler-options=intel";
       clean = "rm -rf $HOME/.npm $HOME/.zcompdump $HOME/.cache $HOME/.lesshst";
 
-      tpll= "git -C $XDG_DATA_HOME/task pull";
+      tpll = "git -C $XDG_DATA_HOME/task pull";
       tpsh = "git -C $XDG_DATA_HOME/task add . && git -C $XDG_DATA_HOME/task commit -m 'Auto-sync' && git -C $XDG_DATA_HOME/task push";
     }
 
@@ -35,8 +38,10 @@
       p = "hx $HM/modules/system/linux-ft.nix";
       hm = "cd $HM";
       re = "home-manager switch --flake $HM#ft && exec zsh";
+
+      code = "code --no-sandbox"; # VSCode requires --no-sandbox to run in nix env on 42
     })
   ];
 
-  imports = [ ./aliases-cp.nix ];
+  imports = [./aliases-cp.nix];
 }

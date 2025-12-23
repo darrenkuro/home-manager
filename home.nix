@@ -25,7 +25,8 @@
     else throw "Unknown tag: ${tag}";
   home.stateVersion = "25.11"; # Version when started using
 
-  home.packages = with pkgs; [
+  home.packages = with pkgs;
+    [
       tokei
       eza
       fd
@@ -77,6 +78,9 @@
     ]
     ++ lib.optionals (tag == "ft") [
       ghostty
+      xorg.xeyes
+      gtk4
+      foot
     ];
 
   # Ensure directories used exist
@@ -105,11 +109,12 @@
     envExtra = builtins.readFile ./scripts/load-nix.sh;
     profileExtra = builtins.readFile ./scripts/nix-prepend-path.sh;
     initContent = lib.concatStringsSep "\n" ([
-      (builtins.readFile ./scripts/source-functions.sh)
-      (builtins.readFile ./scripts/hygiene.sh)
-    ] ++ lib.optionals (tag == "ft") [
-      (builtins.readFile ./scripts/repeat-rate.sh)
-    ]);
+        (builtins.readFile ./scripts/source-functions.sh)
+        (builtins.readFile ./scripts/hygiene.sh)
+      ]
+      ++ lib.optionals (tag == "ft") [
+        (builtins.readFile ./scripts/repeat-rate.sh)
+      ]);
   };
   programs.direnv = {
     enable = true;
@@ -119,12 +124,13 @@
   fonts.fontconfig.enable = true;
 
   xdg.configFile."clang-format".source = ./configs/clang-format.yml;
-  xdg.configFile."prettier.json".source =./configs/prettier-config.json;
+  xdg.configFile."prettier.json".source = ./configs/prettier-config.json;
   xdg.configFile."task/taskrc".source = ./configs/taskrc;
 
-  home.activation.configCopy = lib.hm.dag.entryAfter [ "writeBoundary" ]
-      (lib.concatStringsSep "\n"
-      [ (builtins.readFile ./scripts/copy-files.sh) ]);
+  home.activation.configCopy =
+    lib.hm.dag.entryAfter ["writeBoundary"]
+    (lib.concatStringsSep "\n"
+      [(builtins.readFile ./scripts/copy-files.sh)]);
 
   imports =
     [
