@@ -16,7 +16,7 @@ $install || {
 
 function run() {
   if [ $# -eq 0 ]; then
-    cc -Wall -Wextra -Werror -x c <(grep -v "////" *.c)
+    cc -Wall -Wextra -Werror -x c <(grep -hv "////" *.c)
     ./a.out
     ret=$?
     /bin/rm a.out
