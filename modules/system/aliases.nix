@@ -1,21 +1,39 @@
-{ tag, ... }:
+{ tag, lib, ... }:
 {
-  programs.zsh.shellAliases = {
-    a = "hx $HM/modules/system/aliases.nix"; # Aliases (shared)
-    p =
-      if tag == "mac" then "hx $HM/modules/system/macos.nix" else "hx $HM/modules/system/linux-ft.nix";
-    hm = if tag == "mac" then "code $HM" else "cd $HM";
-    dev = "cd $DEV";
-    re = if tag == "mac" then "home-manager switch --flake ~/.config/home-manager#mac && exec zsh" else "home-manager switch --flake ~/.config/home-manager#ft && exec zsh";
+    programs.zsh.shellAliases = lib.mkMerge [
+    # ---- common aliases (always enabled)
+    {
+      ls = "eza --icons --ignore-glob='.DS_Store'";
+      cloc = "tokei";
 
-    ncg = "nix-collect-garbage -d";
+      a = "hx $HM/modules/system/aliases.nix"; # Aliases (shared)
 
-    # lss = "eza --icons --ignore-glob='*.log|.git|node_modules|.DS_Store'";
-    ls = "eza";
-    objdump = "objdump --disassembler-options=intel";
+      dev = "cd $DEV";
 
-    clean = "rm -rf $HOME/.npm $HOME/.zcompdump $HOME/.cache $HOME/.lesshst";
-    # Copy
-    ijs = "echo '![JavaScript](https://img.shields.io/badge/-JavaScript-f7df1e?style=flat-square&logo=JavaScript&logoColor=black)' | pbcopy";
-  };
+      ncg = "nix-collect-garbage -d";
+      objdump = "objdump --disassembler-options=intel";
+      clean = "rm -rf $HOME/.npm $HOME/.zcompdump $HOME/.cache $HOME/.lesshst";
+    }
+
+    # ---- mac-only aliases
+    (lib.mkIf (tag == "mac") {
+      p = "hx $HM/modules/system/macos.nix";
+      hm = "code $HM";
+      re = "home-manager switch --flake ~/.config/home-manager#mac && exec zsh";
+
+      dbox = "cd $DBOX";
+      hide = "chflags hidden";
+      unhide = "chflags nohidden";
+      rm = "echo \"☠️$YELLOW DANGEROUS CMD: using trash instread!$RESET\" && trash";
+    })
+
+    # ---- ft-only aliases
+    (lib.mkIf (tag == "ft") {
+      p = "hx $HM/modules/system/linux-ft.nix";
+      hm = "cd $HM";
+      re = "home-manager switch --flake ~/.config/home-manager#ft && exec zsh";
+    })
+  ];
+
+  imports = [ ./aliases-cp.nix ];
 }

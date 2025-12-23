@@ -21,7 +21,6 @@
   home.stateVersion = "25.11"; # Version when started using
 
   home.packages = with pkgs; [
-    hello
       tokei
       eza
       fd
