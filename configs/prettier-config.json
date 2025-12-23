@@ -9,13 +9,7 @@
     "arrowParens": "avoid",
     "overrides": [
         {
-            "files": "*.json",
-            "options": {
-                "trailingComma": "none"
-            }
-        },
-        {
-            "files": "*.jsonc",
+            "files": "*.{json,jsonc}",
             "options": {
                 "trailingComma": "none"
             }
