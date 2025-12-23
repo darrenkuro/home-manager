@@ -13,6 +13,9 @@
       ncg = "nix-collect-garbage -d";
       objdump = "objdump --disassembler-options=intel";
       clean = "rm -rf $HOME/.npm $HOME/.zcompdump $HOME/.cache $HOME/.lesshst";
+
+      taskpull = "cd $XDG_DATA_HOME/task && git pull && cd -";
+      taskpush = "cd $XDG_DATA_HOME/task && git add . && git commit -m 'Auto-sync' && git push && cd -";
     }
 
     # ---- mac-only aliases
