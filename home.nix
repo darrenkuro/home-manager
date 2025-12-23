@@ -108,7 +108,7 @@
   fonts.fontconfig.enable = true;
 
   xdg.configFile."clang-format".source = ./configs/clang-format.yml;
-  xdg.configFile."prettier.json".source = ./configs/prettier-config.json;
+  home.file.".config/prettier.json".text = builtins.readFile ./configs/prettier-config.json;
 
   home.activation.configCopy = lib.hm.dag.entryAfter [ "writeBoundary" ]
       (lib.concatStringsSep "\n"
@@ -124,7 +124,7 @@
       ./modules/apps/helix.nix
     ]
     ++ lib.optionals (tag == "mac") [
-      ./modules/system/macos.nix
+      # ./modules/system/macos.nix
     ]
     ++ lib.optionals (tag == "ft") [
       ./modules/system/linux-ft.nix
