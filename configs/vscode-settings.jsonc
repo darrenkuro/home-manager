@@ -1,5 +1,6 @@
 {
     "workbench.colorTheme": "GitHub Dark",
+    "terminal.integrated.minimumContrastRatio": 1, // So terminal stick to original colors
     "workbench.iconTheme": "material-icon-theme",
     //
     "editor.fontFamily": "Hack Nerd Font Mono, monospace",
