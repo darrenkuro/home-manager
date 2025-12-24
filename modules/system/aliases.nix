@@ -49,5 +49,8 @@
     })
   ];
 
-  imports = [./aliases-cp.nix];
+  imports = [
+    ./aliases-cp.nix
+    ./aliases-man.nix
+     ];
 }
