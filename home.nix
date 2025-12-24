@@ -5,10 +5,6 @@
   lib,
   ...
 }:
-# let
-#   wakatimeKey = builtins.getEnv "WAKATIME_API_KEY";
-# in
-# assert wakatimeKey != "";
 {
   # ----------- Base Settings
   home.username =
@@ -53,8 +49,6 @@
       #nerd-fonts.hack
       # cachix
       # (pkgs.nerd-fonts.override {fonts = ["Hack"];})
-
-      # inputs.darren-nix-pkgs.packages.${pkgs.system}.gloc
     ]
     ++ lib.optionals (tag == "mac") [
       rustc
@@ -91,6 +85,12 @@
   '';
 
   programs.home-manager.enable = true;
+  programs.bash = {
+    enable = true;
+    historyFile = "${config.home.homeDirectory}/.local/state/bash/history";
+    historySize = 100000;
+    historyFileSize = 100000;
+  };
   programs.zsh = {
     enable = true;
     dotDir = "${config.home.homeDirectory}/.config";
