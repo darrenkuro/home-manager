@@ -10,6 +10,11 @@ mkdir -p "$VSCODE_DIR"
 envsubst < "$HM/configs/vscode-settings.jsonc" > "$VSCODE_DIR/settings.json"
 chmod u+w "$VSCODE_DIR/settings.json"
 
+# taskrc, so task can change it freely without nix interfering
+mkdir -p "$XDG_CONFIG_HOME/task"
+envsubst < "$HM/configs/taskrc.conf" > "$XDG_CONFIG_HOME/task/taskrc"
+chmod u+w "$XDG_CONFIG_HOME/task/taskrc"
+
 # Tmux, since we ft-linux needs it outside anyway
 mkdir -p "$XDG_CONFIG_HOME/tmux"
 envsubst < "$HM/configs/tmux.conf" > "$XDG_CONFIG_HOME/tmux/tmux.conf"
