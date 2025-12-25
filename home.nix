@@ -121,7 +121,7 @@
 
   xdg.configFile."clang-format".source = ./configs/clang-format.yml;
   xdg.configFile."prettier.json".source = ./configs/prettier-config.json;
-  xdg.configFile."task/taskrc".source = ./configs/taskrc;
+  # xdg.configFile."task/taskrc".source = ./configs/taskrc;
 
   home.activation.configCopy =
     lib.hm.dag.entryAfter ["writeBoundary"]
