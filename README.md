@@ -14,6 +14,8 @@
 . ~/.nix-profile/etc/profile.d/nix.sh
 ```
 
+`nix flake update`
+
 ---
 
 ## Notes

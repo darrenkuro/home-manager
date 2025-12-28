@@ -46,6 +46,10 @@
       taskwarrior3
       nodePackages.prettier
 
+      # Ensure Consistency
+      openssl # Apple ships LibreSSL
+      gnused  # Apple ships BSD-sed
+      cmake
       #nerd-fonts.hack
       # cachix
       # (pkgs.nerd-fonts.override {fonts = ["Hack"];})
