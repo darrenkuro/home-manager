@@ -8,13 +8,32 @@
 
 > My personal flake.nix for home manager.
 
-./modules/apps/vscode.nix
+---
 
-```
+## 🚀 Overview
+
+This repository contains my personal Home Manager configuration, used to declaratively define my user-level environment across multiple machines (macOS and Linux). Linux has no root privilege and therefore is used as rootless.
+
+## 🧰 Tech Stack: ![Nix](https://img.shields.io/badge/-Nix-3f3f3f?style=flat-square&logo=nixos&logoColor=white)
+
+---
+
+## 🛠️ Configuration
+
+### Installation & Usage
+
+```bash
 . ~/.nix-profile/etc/profile.d/nix.sh
+
+# To update run:
+nix flake update
 ```
 
-`nix flake update`
+### Examples & Demo
+
+```bash
+
+```
 
 ---
 
@@ -23,6 +42,7 @@
 - You cannot define the same attribute twice in a single Nix file, that is a Nix language thing. But same attribute in different files tend to merge (barring some exceptions?) and that is a home-manager thing.
 - On MacOS: /etc/zshenv -> user zshenv -> /etc/zprofile (This is where Apple handle PATH) -> user zprofile -> (/etc/zshrc_Apple_Terminal) -> /etc/zshrc -> user zshrc -> /etc/zlogin -> user zlogin.
 - GUI apps highly dependent on the env and the kind of rendering it uses; on 42 machines, GLX lib is dead on rootless it seems, only X11 and GTK4 working; DO NOT TRY OPENGL! Too much work.
+- In the rootless nix environment, `code` does not work and fail silently, fix is run `code -no-sandbox` instead; be aware of that this runs vs code with user privilege and could potentially be dangerous.
 
 ---
 
