@@ -23,16 +23,18 @@ This repository contains my personal Home Manager configuration, used to declara
 ### Installation & Usage
 
 ```bash
-. ~/.nix-profile/etc/profile.d/nix.sh
+# Install nix
+sh <(curl -L https://nixos.org/nix/install)
+
+# Allow nix flakes
+mkdir -p ~/.config/nix
+echo 'experimental-features = nix-command flakes' >> ~/.config/nix/nix.conf
+
+# Run home-manager, current [tag] include mac and ft
+nix run home-manager/master -- switch --flake ~/.config/home-manager#[tag]
 
 # To update run:
 nix flake update
-```
-
-### Examples & Demo
-
-```bash
-
 ```
 
 ---
@@ -43,6 +45,9 @@ nix flake update
 - On MacOS: /etc/zshenv -> user zshenv -> /etc/zprofile (This is where Apple handle PATH) -> user zprofile -> (/etc/zshrc_Apple_Terminal) -> /etc/zshrc -> user zshrc -> /etc/zlogin -> user zlogin.
 - GUI apps highly dependent on the env and the kind of rendering it uses; on 42 machines, GLX lib is dead on rootless it seems, only X11 and GTK4 working; DO NOT TRY OPENGL! Too much work.
 - In the rootless nix environment, `code` does not work and fail silently, fix is run `code -no-sandbox` instead; be aware of that this runs vs code with user privilege and could potentially be dangerous.
+- Note that nix adds sourcing the env during installation place but may not always be visible. On MacOS for instance that system update could overwrite `/etc/zshrc` and erase the sourcing; manually add `source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh` somewhere if that were to happen; for rootless (single user) `source ~/.nix-profile/etc/profile.d/nix.sh`.
+- In many use cases, copying files in place could be better; for example, in rootless env sometimes config needs to be loaded outside of the nix env and copying in place can ensure correctness. And for vs code settings, where experiments should be allowed, and the app will often try to change it as well.
+- Do not over do it with apps that clearly shouldn't be managed by nix! (Basically any GUI, especially ones that updates often, i.e. broswers, Discord, etc.)
 
 ---
 
