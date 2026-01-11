@@ -73,6 +73,7 @@
       ffmpeg
       tmux
       poppler-utils # PDF tools
+      yt-dlp # Youtube download
     ]
     ++ lib.optionals (tag == "ft") [
     ];

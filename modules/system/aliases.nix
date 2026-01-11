@@ -37,6 +37,7 @@
       hide = "chflags hidden";
       unhide = "chflags nohidden";
       rm = "echo \"☠️$YELLOW DANGEROUS CMD: using trash instread!$RESET\" && trash";
+      ytd = "yt-dlp -t mp4 --cookies-from-browser brave";
     })
 
     # ---- ft-only aliases
