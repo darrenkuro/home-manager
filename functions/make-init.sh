@@ -54,6 +54,6 @@ function make-init() {
   cp "$tmpl_file" "$target_file"
 
   # Replace placeholders, with portable version for both gnu and bsd sed
-  sed -i'' -e 's/{{REPO_NAME}}/$repo_name/g' "$target_file" 2> /dev/null || true
+  sed -i'' -e "s/{{REPO_NAME}}/$repo_name/g" "$target_file" 2> /dev/null || true
 
 }
