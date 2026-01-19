@@ -110,7 +110,7 @@
     envExtra = builtins.readFile ./scripts/load-nix.sh;
     profileExtra = builtins.readFile ./scripts/nix-prepend-path.sh;
     initContent = lib.concatStringsSep "\n" ([
-        (builtins.readFile ./scripts/source-functions.sh)
+        (builtins.readFile ./scripts/source.sh)
         (builtins.readFile ./scripts/hygiene.sh)
       ]
       ++ lib.optionals (tag == "ft") [
