@@ -82,7 +82,7 @@ function git-init() {
   git add .
   git commit -m "Initial commit"
 
-  gh repo create "$repo_name" $visibility --confirm
+  gh repo create "$repo_name" $visibility .
   git remote add origin "https://github.com/darrenkuro/$repo_name.git"
   git push -u origin main
 
