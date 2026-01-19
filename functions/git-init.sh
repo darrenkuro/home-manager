@@ -74,9 +74,9 @@ function git-init() {
     fi
   done
 
-  # Replace placeholders
-  sed -i "" "s/{{REPO_NAME}}/$repo_name/g" README.md 2> /dev/null || true
-  sed -i "" "s/{{YEAR}}/$year/g" LICENSE 2> /dev/null || true
+  # Replace placeholders, with portable version for both gnu and bsd sed
+  sed -i'' -e 's/{{REPO_NAME}}/$repo_name/g' README.md 2> /dev/null || true
+  sed -i'' -e 's/{{YEAR}}/$year/g' LICENSE 2> /dev/null || true
 
   git init
   git add .
