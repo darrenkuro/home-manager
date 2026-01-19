@@ -9,6 +9,7 @@
       objdump = "objdump --disassembler-options=intel";
       ls = "eza --icons --ignore-glob='.DS_Store'";
       cloc = "tokei";
+      mi = "make-init";
 
       a = "hx $HM/modules/system/aliases.nix"; # Aliases (shared)
 
