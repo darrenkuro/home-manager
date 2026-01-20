@@ -74,6 +74,8 @@
       tmux
       poppler-utils # PDF tools
       yt-dlp # Youtube download
+
+      pnpm
     ]
     ++ lib.optionals (tag == "ft") [
     ];
