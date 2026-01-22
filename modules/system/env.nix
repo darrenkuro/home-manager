@@ -32,5 +32,6 @@
     LESSHISTFILE = "$HOME/.local/state/less/history";
     ZSH_SESSION_DIR = "$HOME/.local/state/zsh/sessions";
     WAKATIME_HOME = "$HOME/.local/state/wakatime";
+    CLAUDE_CONFIG_DIR = "$HOME/.config/claude";
   };
 }
