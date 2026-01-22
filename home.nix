@@ -76,6 +76,7 @@
       yt-dlp # Youtube download
 
       pnpm
+      bun
     ]
     ++ lib.optionals (tag == "ft") [
     ];
