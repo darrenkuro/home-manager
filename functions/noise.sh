@@ -15,7 +15,7 @@ $install || {
 }
 
 # --- Dependency check
-REQUIRED_TOOLS=(ffplay)
+REQUIRED_TOOLS=(afplay)
 _missing_tools=()
 
 # Determine script name (works in both bash and zsh)
@@ -40,7 +40,7 @@ unset REQUIRED_TOOLS _missing_tools _SCRIPT_NAME
 # --- Source
 
 function noise {
-    AUDIO_PATH="$DBOX/audio/ambience-noise.mp3"
+    AUDIO_PATH="$DBOX/audio/ambience-noise-30m.aiff"
     PID_FILE="/tmp/loop_audio.pid"
 
     # Ensure the audio file exists
@@ -54,7 +54,9 @@ function noise {
     if [ -f "$PID_FILE" ]; then
         PID=$(cat "$PID_FILE")
         if kill -0 "$PID" 2>/dev/null; then
-            kill "$PID"
+            # Kill afplay child first, then the subshell
+            pkill -P "$PID" 2>/dev/null
+            kill "$PID" 2>/dev/null
             /bin/rm "$PID_FILE"
             # osascript -e 'display notification "Stopped audio loop 🔇"'
             return 0
@@ -64,7 +66,16 @@ function noise {
         fi
     fi
 
-    ffplay -nodisp -loop 0 "$AUDIO_PATH" </dev/null &> /dev/null &!
+    # ffplay -nodisp -loop 0 "$AUDIO_PATH" </dev/null &> /dev/null &!
+    # afplay has no loop option, so use a shell loop with trap to kill child on exit
+    (
+        trap 'kill $PID 2>/dev/null; exit' TERM
+        while true; do
+            afplay -v 0.3 "$AUDIO_PATH" &
+            PID=$!
+            wait $PID
+        done
+    ) >/dev/null 2>&1 &!
     echo $! > "$PID_FILE"
     # osascript -e 'display notification "Started audio loop 🔁"'
 }
