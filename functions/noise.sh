@@ -71,7 +71,7 @@ function noise {
     (
         trap 'kill $PID 2>/dev/null; exit' TERM
         while true; do
-            afplay -v 0.3 "$AUDIO_PATH" &
+            afplay -v 0.2 "$AUDIO_PATH" &
             PID=$!
             wait $PID
         done
