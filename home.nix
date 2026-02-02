@@ -149,6 +149,7 @@
     ]
     ++ lib.optionals (tag == "mac") [
       ./modules/system/macos.nix
+      ./modules/services/polymarket-monitor.nix
     ]
     ++ lib.optionals (tag == "ft") [
       ./modules/system/linux-ft.nix
