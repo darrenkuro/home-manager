@@ -34,10 +34,7 @@ in
       ProgramArguments = [ "${runScript}" ];
       WorkingDirectory = workDir;
       RunAtLoad = true;
-      KeepAlive = {
-        SuccessfulExit = false;  # Restart if exits with non-zero
-        Crashed = true;          # Restart if crashes
-      };
+      KeepAlive = true;  # Always restart (pm2-like behavior)
       StandardOutPath = "${logDir}/monitor.log";
       StandardErrorPath = "${logDir}/monitor.err";
       ThrottleInterval = 10;  # Wait 10s between restarts
