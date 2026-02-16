@@ -33,5 +33,12 @@
     ZSH_SESSION_DIR = "$HOME/.local/state/zsh/sessions";
     WAKATIME_HOME = "$HOME/.local/state/wakatime";
     CLAUDE_CONFIG_DIR = "$HOME/.config/claude";
+
+    # pnpm global
+    PNPM_HOME = "$HOME/Library/pnpm";
   };
+
+  home.sessionPath = [
+    "$HOME/Library/pnpm"
+  ];
 }
