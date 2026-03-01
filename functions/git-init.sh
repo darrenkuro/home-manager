@@ -66,7 +66,7 @@ function git-init() {
   fi
 
   local tmpl_dir="$HM/templates"
-  for f in README.md LICENSE .gitignore; do
+  for f in README.md LICENSE; do
     if [[ -f "$tmpl_dir/$f" ]]; then
       cp "$tmpl_dir/$f" "./$f"
     else
