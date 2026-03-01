@@ -8,6 +8,7 @@
     matchBlocks = {
       "hetzner" = {
         hostname = "77.42.93.119";
+        user = "root";
       };
     };
   };
