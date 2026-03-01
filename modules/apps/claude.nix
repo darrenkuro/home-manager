@@ -15,9 +15,9 @@
       ];
       RunAtLoad = true;
     };
+  };
 
   programs.zsh.shellAliases = {
     clauded = "claude --dangerously-skip-permissions";
-  };
   };
 }
