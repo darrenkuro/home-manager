@@ -4,7 +4,11 @@
     enableDefaultConfig = false;
     includes = [
       "~/.config/colima/ssh_config"
-      "~/.ssh/config.local" # Untracked — server IPs, etc.
     ];
+    matchBlocks = {
+      "hetzner" = {
+        hostname = "77.42.93.119";
+      };
+    };
   };
 }
