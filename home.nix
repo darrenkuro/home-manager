@@ -77,6 +77,15 @@
 
       pnpm
       bun
+
+      # Docker (via Colima)
+      colima # Docker replacement
+      docker-client
+      docker-compose
+      docker-buildx
+
+      pandoc
+      # typst
     ]
     ++ lib.optionals (tag == "ft") [
     ];
@@ -146,6 +155,7 @@
       ./modules/apps/git.nix
       ./modules/apps/helix.nix
       ./modules/apps/claude.nix
+      ./modules/apps/ssh.nix
     ]
     ++ lib.optionals (tag == "mac") [
       ./modules/system/macos.nix
