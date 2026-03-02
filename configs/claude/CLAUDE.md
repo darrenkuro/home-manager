@@ -9,13 +9,17 @@
 
 ## Claude Code Config Paths
 - Claude config directory: `~/.config/claude/` (or `$CLAUDE_CONFIG_DIR` if set)
-- Claude skills location: `~/.config/claude/skills/`
-- This CLAUDE.md source: `~/.config/home-manager/configs/CLAUDE.md` (managed by home-manager)
+- Claude skills location: `~/.config/claude/skills/` (symlinked from hm)
+- `settings.json`: owned by Claude Code (not hm-managed). Hooks key injected by hm on `re`
+- `hooks/`: symlinked from hm (`~/.config/home-manager/configs/claude/hooks/`)
+- Plugins: use `/plugin install` directly — settings.json is writable
+- This CLAUDE.md source: `~/.config/home-manager/configs/claude/CLAUDE.md` (managed by home-manager)
 - To edit global Claude settings, edit the source file above then run `re`
 
-## Code Standards
-- This is a TypeScript-first codebase. All new code should be written in TypeScript with proper types. Do not use `any` unless absolutely necessary. Co-locate types with their modules unless shared across multiple files.
-- **Error handling**: Always use `neverthrow` and return `Result`/`Option` types instead of throwing. Only deviate if explicitly told otherwise.
+## Code Standards (TypeScript projects)
+When working in a TypeScript codebase:
+- TypeScript-first with proper types. Do not use `any` unless absolutely necessary. Co-locate types with their modules unless shared across multiple files.
+- **Error handling**: Use `neverthrow` and return `Result`/`Option` types instead of throwing. Only deviate if explicitly told otherwise.
 - **Functional style**: Prefer arrow functions (`const foo = () => {}`) over `function` declarations. Only use `function` if explicitly told otherwise.
 - **No classes**: Prefer closures and factory functions. Only use classes if explicitly told otherwise.
 
@@ -40,17 +44,14 @@
 ## Parallel Agents / Batch Work
 - When spawning parallel sub-agents for large batch tasks, limit each agent's scope to avoid hitting the 32k output token limit. For PDF-heavy tasks, use smaller batches and fallback reading strategies for large files.
 
-## Fetching Tweets (X.com)
-- Use the **FxTwitter API** to load any tweet/X post: `https://api.fxtwitter.com/{username}/status/{tweet_id}`
-- No authentication required, returns clean JSON with full text, author info, engagement stats, and media
-- Extract the tweet ID from any x.com or twitter.com URL and plug it into the endpoint
-- Use WebFetch on the fxtwitter URL to read tweet contents
+## Skills
+- When creating or updating skills, invoke the `skill-creator` plugin (enabled in settings.json) which provides the full skill creation lifecycle including evals, benchmarking, and description optimization
 
 ## New Project Init
 When creating a new project with git init, always include these files from the hm templates:
 - `.gitignore` — use sections: Env (with .env, .envrc, !examples), macOS, VSCode, JetBrains, Node.js, Backup files
 - `LICENSE` — MIT License with "Darren Kuro" as copyright holder
-- `README.md` — centered h1, badge row (license, status, size/date), blockquote tagline, horizontal rules between sections
+- `README.md` — use the `/readme-style` skill for formatting
 
 ## Workflow Orchestration
 
