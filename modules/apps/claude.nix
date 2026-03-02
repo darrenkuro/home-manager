@@ -6,10 +6,7 @@ in
   xdg.configFile = {
     "claude/CLAUDE.md".source = claudeConfigDir + "/CLAUDE.md";
     "claude/skills".source = claudeConfigDir + "/skills";
-    "claude/hooks/protect-env.sh" = {
-      source = claudeConfigDir + "/hooks/protect-env.sh";
-      executable = true;
-    };
+    "claude/hooks".source = claudeConfigDir + "/hooks";
   };
 
   # Set env CLAUDE_CONFIG_DIR at login so it will be found everywhere

@@ -1,6 +1,18 @@
+---
+name: makefile-c
+description: Generate a C/C++ Makefile for a project. Use when user asks to create a Makefile, scaffold a C project, or initialize a C/C++ build system.
+---
+
+# C/C++ Makefile Generator
+
+Generate a Makefile using this structure and style. Replace values in `{{...}}` with project-specific values.
+
+## Template
+
+```makefile
 # ------------------------ Project Metadata
-NAME	:=	{{REPO_NAME}}
-TARGET	:=
+NAME	:=	{{project_name}}
+TARGET	:=	{{target_binary_or_library}}
 
 # ------------------------ Directories
 SRCDIR	:=	src
@@ -8,7 +20,7 @@ OBJDIR	:=	obj
 INCDIR	:=	include
 
 # ------------------------ Files
-SRC	:=	main.c
+SRC	:=	{{source_files}}
 OBJ	:=	$(addprefix $(OBJDIR)/, $(SRC:.c=.o))
 
 # ------------------------ Toolchain & Flags
@@ -22,7 +34,7 @@ CPPFLAGS:=	-I $(INCDIR)
 # ------------------------ Build Settings
 .DEFAULT_GOAL	:= all
 
-PAD		?=	0 # Inherited label length for alignment
+PAD		?=	0
 PAD2	:=	10
 DEBUG	?=	0
 
@@ -80,5 +92,17 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.c | $(OBJDIR)
 	@$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
 	@$(call logok)
 
-.DELETE_ON_ERROR:     # Delete target build that's incomplete
--include $(OBJ:.o=.d) # Dependency injection
+.DELETE_ON_ERROR:
+-include $(OBJ:.o=.d)
+```
+
+## Style Rules
+
+- Use tab-aligned `:=` assignments with comment section headers
+- `PAD`/`PAD2` support aligned output when building as part of a larger project (parent Makefile passes `PAD`)
+- `DEBUG=1` flag adds `-g` for debug builds
+- `-MMD -MP` for automatic header dependency tracking
+- Colorized log output with `[OK]` markers
+- For executables: replace `$(AR) $(ARFLAGS) $@ $^` with `$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)`
+- For libraries: use `ar rcs` (the default)
+- `.DELETE_ON_ERROR` ensures partial builds don't leave broken objects
