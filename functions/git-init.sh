@@ -46,40 +46,31 @@ function git-init() {
   mkdir -p "$dir"
   cd "$dir" || return 1
   local repo_name="$(basename "$(pwd)")"
-  local year="$(date +%Y)"
 
   if gh repo view "darrenkuro/$repo_name" > /dev/null 2>&1; then
     echo "🚫 Repository darrenkuro/$repo_name already exists on GitHub."
     return 1
   fi
 
-  # Make sure we're not inside a repo (already handled above)
   if git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
     echo "❌ Already inside a git repository!" >&2
     return 1
   fi
 
-  # Make sure there are no git repos below (subdirectories)
   if find . -type d -name ".git" -mindepth 2 -print -quit | grep -q .; then
     echo "🚫 Found existing Git repos inside subdirectories. Aborting." >&2
     return 1
   fi
 
-  local tmpl_dir="$HM/templates"
-  for f in README.md LICENSE; do
-    if [[ -f "$tmpl_dir/$f" ]]; then
-      cp "$tmpl_dir/$f" "./$f"
-    else
-      echo "⚠️ Warning: missing $f in $tmpl_dir"
-    fi
-  done
+  # Generate LICENSE from GitHub API
+  gh api /licenses/mit --jq '.body' \
+    | sed "s/\[year\]/$(date +%Y)/g; s/\[fullname\]/Darren Kuro/g" > LICENSE
 
-  # Replace placeholders, with portable version for both gnu and bsd sed
-  sed -i'' -e "s/{{REPO_NAME}}/$repo_name/g" README.md 2> /dev/null || true
-  sed -i'' -e "s/{{YEAR}}/$year/g" LICENSE 2> /dev/null || true
+  # Empty README
+  touch README.md
 
   git init
-  git add .
+  git add LICENSE README.md
   git commit -m "Initial commit"
 
   gh repo create "$repo_name" $visibility

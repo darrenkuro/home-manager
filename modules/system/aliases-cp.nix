@@ -9,9 +9,6 @@ let
 in
 {
   programs.zsh.shellAliases = {
-    readme = "cat $HM/templates/README.md | ${copyCmd}";
-    gig = "cat $HM/templates/.gitignore | ${copyCmd}";
-
     ijs = badge "![JavaScript](https://img.shields.io/badge/-JavaScript-f7df1e?style=flat-square&logo=JavaScript&logoColor=black)";
     its = badge "![TypeScript](https://img.shields.io/badge/-TypeScript-3178c6?style=flat-square&logo=TypeScript&logoColor=white)";
     ic  = badge "![C](https://img.shields.io/badge/-C-A8B9CC?style=flat-square&logo=C&logoColor=black)";

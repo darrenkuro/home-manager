@@ -48,9 +48,9 @@ When working in a TypeScript codebase:
 - When creating or updating skills, invoke the `skill-creator` plugin (enabled in settings.json) which provides the full skill creation lifecycle including evals, benchmarking, and description optimization
 
 ## New Project Init
-When creating a new project with git init, always include these files from the hm templates:
+When creating a new project with git init, use `gi` (alias for `git-init`) which initializes the repo and creates the GitHub remote. Then create:
 - `.gitignore` — use sections: Env (with .env, .envrc, !examples), macOS, VSCode, JetBrains, Node.js, Backup files
-- `LICENSE` — MIT License with "Darren Kuro" as copyright holder
+- `LICENSE` — MIT License, year from `date +%Y`, copyright holder "Darren Kuro"
 - `README.md` — use the `/readme-style` skill for formatting
 
 ## Workflow Orchestration
