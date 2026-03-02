@@ -48,7 +48,7 @@ if [[ ! -f "$CLAUDE_SETTINGS" ]]; then
   echo '{}' > "$CLAUDE_SETTINGS"
 fi
 # Idempotently merge hooks config (preserves all other keys)
-jq '. * {"hooks":{"PreToolUse":[{"matcher":"Read|Edit|Write|MultiEdit|Bash","hooks":["~/.config/claude/hooks/protect-env.sh"]}]}}' \
+jq '. * {"hooks":{"PreToolUse":[{"matcher":{"tools":["Read","Edit","Write","MultiEdit","Bash"]},"hooks":[{"type":"command","command":"~/.config/claude/hooks/protect-env.sh"}]}]}}' \
   "$CLAUDE_SETTINGS" > "$CLAUDE_SETTINGS.tmp" \
   && mv "$CLAUDE_SETTINGS.tmp" "$CLAUDE_SETTINGS"
 chmod u+w "$CLAUDE_SETTINGS"
