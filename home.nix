@@ -60,13 +60,13 @@
       typescript
       nodePackages.typescript-language-server
 
-      python311Packages.black
-      python311Packages.flake8
+      python313Packages.black
+      python313Packages.flake8
       prettierd
 
-      python311
-      python311Packages.pip
-      python311Packages.virtualenv
+      python313
+      python313Packages.pip
+      python313Packages.virtualenv
 
       darwin.trash # Replace rm (safer)
       ghostty-bin

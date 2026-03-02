@@ -19,7 +19,19 @@
 
 
       ncg = "nix-collect-garbage -d";
-      clean = "rm -rf $HOME/.npm $HOME/.zcompdump $HOME/.cache $HOME/.lesshst";
+      clean = builtins.concatStringsSep " && " [
+        # Caches (safe, all regenerate)
+        "rm -rf $HOME/.cache $HOME/.npm $HOME/.matplotlib"
+        # Shell artifacts
+        "rm -rf $HOME/.zcompdump $HOME/.lesshst"
+        # .NET (not in use, regenerates on dotnet run)
+        "rm -rf $HOME/.aspnet $HOME/.dotnet $HOME/.nuget $HOME/.templateengine"
+        # Docker (redundant, DOCKER_CONFIG already points to $XDG_CONFIG_HOME/docker)
+        "rm -rf $HOME/.docker"
+        # macOS junk
+        "rm -f $HOME/.DS_Store"
+        ''echo "clean: done"''
+      ];
 
       tpll = "git -C $XDG_DATA_HOME/task pull";
       tpsh = "git -C $XDG_DATA_HOME/task add . && git -C $XDG_DATA_HOME/task commit -m 'Auto-sync' && git -C $XDG_DATA_HOME/task push";

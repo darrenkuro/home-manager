@@ -44,6 +44,16 @@
     GEM_HOME = "$HOME/.local/share/gem";
     RBENV_ROOT = "$HOME/.local/share/rbenv";
 
+    # .NET (moves .dotnet, .aspnet, .templateengine under XDG_DATA_HOME)
+    DOTNET_CLI_HOME = "$HOME/.local/share";
+    NUGET_PACKAGES = "$HOME/.local/share/NuGet/packages";
+    DOTNET_CLI_TELEMETRY_OPTOUT = "1";
+
+    # Python / Node
+    MPLCONFIGDIR = "$HOME/.config/matplotlib";
+    PYTHON_HISTORY = "$HOME/.local/state/python/history"; # requires Python 3.13+
+    NODE_REPL_HISTORY = "$HOME/.local/state/node/history";
+
     # ── Tools ──
     PNPM_HOME = "$HOME/Library/pnpm";
     HOMEBREW_NO_ENV_HINTS = "1";
