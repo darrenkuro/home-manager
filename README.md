@@ -1,56 +1,95 @@
-<h1 align="center">Home manager</h1>
+<h1 align="center">Home Manager</h1>
 
 <p align="center">
-    <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License"/>
-    <img src="https://img.shields.io/badge/status-maintained-brightgreen" alt="Status">
-    <img src="https://img.shields.io/badge/date-Dec%208%2C%202025-ff6984?style=flat-square&logo=Cachet&logoColor=white" alt="Date"/>
+    <img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square&logo=opensourceinitiative&logoColor=white" alt="License"/>
+    <img src="https://img.shields.io/badge/status-maintained-brightgreen?style=flat-square&logo=git&logoColor=white" alt="Status">
 </p>
 
-> My personal flake.nix for home manager.
+> Declarative user environment for macOS and rootless Linux, powered by Nix flakes.
 
 ---
 
-## 🚀 Overview
+## Overview
 
-This repository contains my personal Home Manager configuration, used to declaratively define my user-level environment across multiple machines (macOS and Linux). Linux has no root privilege and therefore is used as rootless.
+Personal [Home Manager](https://github.com/nix-community/home-manager) configuration that defines shell, editor, toolchain, and dotfile setup across two machines. The Linux target (42 school) runs without root privileges, so the config is designed to work in a rootless Nix installation.
 
-## 🧰 Tech Stack: ![Nix](https://img.shields.io/badge/-Nix-3f3f3f?style=flat-square&logo=nixos&logoColor=white)
+## Targets
 
----
+| Tag   | System             | Description                  |
+|-------|--------------------|------------------------------|
+| `mac` | `aarch64-darwin`   | Personal macOS (Apple Silicon) |
+| `ft`  | `x86_64-linux`     | 42 school Linux (rootless)   |
 
-## 🛠️ Configuration
+The `tag` parameter flows through the entire config, conditionally including modules, packages, and aliases per target.
 
-### Installation & Usage
+## Config Strategies
+
+Configs are managed two ways depending on whether the target app needs write access:
+
+- **Nix symlinks** (`xdg.configFile`) — for read-only configs (starship, helix, clang-format, Claude hooks/skills)
+- **Copy-in-place** (`scripts/copy-files.sh`) — for configs that apps modify at runtime (VSCode settings, taskrc, tmux, Claude `settings.json`)
+
+## Project Structure
+
+```
+.
+├── flake.nix              # Entry point — defines mac/ft homeConfigurations
+├── home.nix               # Main module — packages, shell, imports
+├── modules/
+│   ├── apps/              # Per-app config (git, helix, starship, claude, ssh)
+│   ├── system/            # Aliases, env vars, platform-specific settings
+│   └── services/          # launchd/systemd services
+├── functions/             # Shell functions sourced at init (each has tag/dep guard)
+├── scripts/               # Shell init chain + activation scripts
+└── configs/               # Raw config files (starship, ghostty, claude, etc.)
+```
+
+## Usage
 
 ```bash
-# Install nix
+# Install Nix
 sh <(curl -L https://nixos.org/nix/install)
 
-# Allow nix flakes
+# Enable flakes
 mkdir -p ~/.config/nix
 echo 'experimental-features = nix-command flakes' >> ~/.config/nix/nix.conf
 
-# Run home-manager, current [tag] include mac and ft
-nix run home-manager/master -- switch --flake ~/.config/home-manager#[tag]
+# First run (mac or ft)
+nix run home-manager -- switch --flake ~/.config/home-manager#mac
 
-# To update run:
+# After initial setup, use the alias
+re
+
+# Update flake inputs
 nix flake update
 ```
 
 ---
 
-## Notes
+<details>
+<summary>Notes</summary>
 
-- You cannot define the same attribute twice in a single Nix file, that is a Nix language thing. But same attribute in different files tend to merge (barring some exceptions?) and that is a home-manager thing.
-- On MacOS: /etc/zshenv -> user zshenv -> /etc/zprofile (This is where Apple handle PATH) -> user zprofile -> (/etc/zshrc_Apple_Terminal) -> /etc/zshrc -> user zshrc -> /etc/zlogin -> user zlogin.
-- GUI apps highly dependent on the env and the kind of rendering it uses; on 42 machines, GLX lib is dead on rootless it seems, only X11 and GTK4 working; DO NOT TRY OPENGL! Too much work.
-- In the rootless nix environment, `code` does not work and fail silently, fix is run `code -no-sandbox` instead; be aware of that this runs vs code with user privilege and could potentially be dangerous.
-- Note that nix adds sourcing the env during installation place but may not always be visible. On MacOS for instance that system update could overwrite `/etc/zshrc` and erase the sourcing; manually add `source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh` somewhere if that were to happen; for rootless (single user) `source ~/.nix-profile/etc/profile.d/nix.sh`.
-- In many use cases, copying files in place could be better; for example, in rootless env sometimes config needs to be loaded outside of the nix env and copying in place can ensure correctness. And for vs code settings, where experiments should be allowed, and the app will often try to change it as well.
-- Do not over do it with apps that clearly shouldn't be managed by nix! (Basically any GUI, especially ones that updates often, i.e. broswers, Discord, etc.)
+### macOS
+
+- Zsh load order: `/etc/zshenv` → user zshenv → `/etc/zprofile` (Apple PATH) → user zprofile → `/etc/zshrc` → user zshrc → `/etc/zlogin` → user zlogin.
+- macOS system updates can overwrite `/etc/zshrc` and erase the Nix sourcing line. If Nix stops working after an update, re-add: `source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh`.
+- Avoid managing GUI apps through Nix — browsers, Discord, etc. update too frequently and fight with Nix's immutable store.
+
+### Rootless Linux (42)
+
+- VSCode requires `code --no-sandbox` in rootless Nix (silently fails otherwise). This runs without sandboxing — be aware of the security implications.
+- GLX is broken on 42 machines under rootless Nix. Only X11 and GTK4 rendering work. Avoid OpenGL-dependent GUI apps.
+- For rootless (single-user) Nix, source: `source ~/.nix-profile/etc/profile.d/nix.sh`.
+
+### General Nix
+
+- Same attribute in one file = error (Nix language). Same attribute across files = merged (Home Manager behavior).
+- Copying configs in place is sometimes better than symlinking — especially when the app needs to modify the file, or when the config must be available outside the Nix env.
+
+</details>
 
 ---
 
-## 📄 License
+## License
 
-This project is licensed under the [MIT License](LICENSE).
+[MIT](LICENSE) - Darren Kuro

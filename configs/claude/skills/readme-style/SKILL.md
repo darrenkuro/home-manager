@@ -1,6 +1,6 @@
 ---
 name: readme-style
-description: Use when creating or updating a README.md for any project. Provides standard structure with centered title, badges, blockquote tagline, and consistent section ordering.
+description: Use when creating, updating, auditing, or reviewing a README.md for any project. Provides standard structure with centered title, badges, blockquote tagline, and consistent section ordering.
 ---
 
 # README Style Standard
