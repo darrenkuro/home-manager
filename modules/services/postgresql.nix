@@ -48,15 +48,6 @@ let
 
   pgHba = ../../configs/postgresql/pg_hba.conf;
 
-  # ── Server Wrapper Script ──
-  pgStartScript = pkgs.writeShellScript "postgresql-start" ''
-    exec ${pg}/bin/postgres \
-      -D ${dataDir} \
-      -c config_file=${pgConf} \
-      -c hba_file=${pgHba} \
-      -k ${socketDir}
-  '';
-
   # ── Backup Script ──
   pgBackupScript = pkgs.writeShellScript "postgresql-backup" ''
     set -euo pipefail
@@ -134,6 +125,23 @@ let
 
     log "Backup run complete"
   '';
+
+  # Compiled shim so macOS Login Items shows "postgresql-backup" instead of "sh"
+  pgBackupBin = pkgs.stdenv.mkDerivation {
+    name = "postgresql-backup";
+    dontUnpack = true;
+    buildPhase = ''
+      cat > main.c << 'EOF'
+      #include <unistd.h>
+      int main(void) { execl("${pgBackupScript}", "postgresql-backup", (char *)0); return 1; }
+      EOF
+      $CC -o postgresql-backup main.c
+    '';
+    installPhase = ''
+      mkdir -p $out/bin
+      cp postgresql-backup $out/bin/
+    '';
+  };
 in
 {
   # ── Directory Setup ──
@@ -165,7 +173,13 @@ in
     enable = true;
     config = {
       Label = "org.postgresql.server";
-      ProgramArguments = [ "${pgStartScript}" ];
+      ProgramArguments = [
+        "${pg}/bin/postgres"
+        "-D" dataDir
+        "-c" "config_file=${pgConf}"
+        "-c" "hba_file=${pgHba}"
+        "-k" socketDir
+      ];
       RunAtLoad = true;
       KeepAlive = true;
       ThrottleInterval = 10;
@@ -184,7 +198,7 @@ in
     enable = true;
     config = {
       Label = "org.postgresql.backup";
-      ProgramArguments = [ "${pgBackupScript}" ];
+      ProgramArguments = [ "${pgBackupBin}/bin/postgresql-backup" ];
       StartCalendarInterval = [ backupInterval ];
       StandardOutPath = "${logDir}/backup-stdout.log";
       StandardErrorPath = "${logDir}/backup-stderr.log";
