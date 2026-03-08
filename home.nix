@@ -56,7 +56,7 @@
     ]
     ++ lib.optionals (tag == "mac") [
       rustc
-      nodejs_latest
+      nodejs_22 # LTS; nodejs_latest (v25) fails to build, nodejs_24 not cached for aarch64-darwin
       typescript
       nodePackages.typescript-language-server
 
@@ -125,6 +125,9 @@
         (builtins.readFile ./scripts/source.sh)
         (builtins.readFile ./scripts/hygiene.sh)
       ]
+      ++ lib.optionals (tag == "mac") [
+        (builtins.readFile ./scripts/ssh-keychain.sh)
+      ]
       ++ lib.optionals (tag == "ft") [
         (builtins.readFile ./scripts/repeat-rate.sh)
       ]);
@@ -138,7 +141,6 @@
 
   xdg.configFile."clang-format".source = ./configs/clang-format.yml;
   xdg.configFile."prettier.json".source = ./configs/prettier-config.json;
-  xdg.configFile."ghostty/config".source = ./configs/ghostty.conf;
   # xdg.configFile."task/taskrc".source = ./configs/taskrc;
 
   home.activation.configCopy =

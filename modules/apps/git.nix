@@ -11,7 +11,7 @@
 
       # macOS
       ".DS_Store"
-      "Icon?"
+      "Icon\r"
       "._*"
       ".AppleDouble"
       ".LSOverride"
@@ -69,6 +69,11 @@
       "*.a"
       "*.so"
       "*.out"
+
+      # Xcode / Swift
+      "xcuserdata/"
+      "DerivedData/"
+      ".build/"
     ];
 
     settings = {
