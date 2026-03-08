@@ -75,6 +75,8 @@
       poppler-utils # PDF tools
       yt-dlp # Youtube download
 
+      (postgresql_17.withPackages (ps: [ ps.pgvector ]))
+
       pnpm
       bun
 
@@ -98,7 +100,8 @@
       "$HOME/.local/state/less" \
       "$HOME/.local/state/sessions" \
       "$HOME/.local/state/wakatime" \
-      "$HOME/.cache/zsh"
+      "$HOME/.cache/zsh" \
+      "$HOME/.local/state/postgresql"
   '';
 
   programs.home-manager.enable = true;
@@ -162,6 +165,7 @@
     ++ lib.optionals (tag == "mac") [
       ./modules/system/macos.nix
       ./modules/services/polymarket-monitor.nix
+      ./modules/services/postgresql.nix
     ]
     ++ lib.optionals (tag == "ft") [
       ./modules/system/linux-ft.nix
