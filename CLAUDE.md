@@ -54,7 +54,7 @@ nix-collect-garbage -d
 Sourced at shell init via `scripts/source.sh` which iterates `$HM/functions/*.sh`.
 
 ### Config Files — Two Strategies
-1. **Nix-managed symlinks** (`xdg.configFile`) — for read-only configs (clang-format, starship, ghostty, claude hooks/skills/CLAUDE.md)
+1. **Nix-managed symlinks** (`xdg.configFile`) — for read-only configs (clang-format, starship, claude hooks/skills/CLAUDE.md)
 2. **Copy-in-place** (`scripts/copy-files.sh`) — for configs that need to be writable at runtime (VSCode settings, taskrc, tmux, Claude `settings.json`)
 
 `copy-files.sh` runs during `home.activation` after `writeBoundary`. It uses `envsubst` for templating and `jq` for merging JSON keys.
