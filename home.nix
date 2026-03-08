@@ -125,6 +125,9 @@
         (builtins.readFile ./scripts/source.sh)
         (builtins.readFile ./scripts/hygiene.sh)
       ]
+      ++ lib.optionals (tag == "mac") [
+        (builtins.readFile ./scripts/ssh-keychain.sh)
+      ]
       ++ lib.optionals (tag == "ft") [
         (builtins.readFile ./scripts/repeat-rate.sh)
       ]);

@@ -30,6 +30,14 @@ When working in a TypeScript codebase:
 - When implementing changes to the trading bot codebase, always run the full test suite (`npm test` or equivalent) after every refactoring step and confirm all tests pass before proceeding to the next change.
 - When modifying strategy logic or trading parameters, always preserve previously implemented features (profit-taking, hedge logic, partial sells, etc.) in new test runs. Never test a change in isolation that drops prior work.
 
+## Tool Installation
+- **NEVER install tools** (via brew, apt, pip, etc.) without explicit user permission
+- For one-off tool needs, use `nix-shell -p <package>` or `nix run nixpkgs#<package>` instead of installing
+
+## Python
+- System Python is Nix-managed — never install packages at system or user level
+- Always use `python3 -m venv /tmp/<name>_env` and run via `/tmp/<name>_env/bin/python3`
+
 ## Docker / Infrastructure
 - For Docker-based projects: always create a .dockerignore excluding node_modules and local build artifacts. Use pnpm's hoisted node_modules layout or shamefully-hoist=true when building Docker images. Test `docker build` before reporting completion.
 
@@ -47,9 +55,16 @@ When working in a TypeScript codebase:
 ## Skills
 - When creating or updating skills, invoke the `skill-creator` plugin (enabled in settings.json) which provides the full skill creation lifecycle including evals, benchmarking, and description optimization
 
+## Git
+- A global gitignore is configured via home-manager — do NOT create per-repo `.gitignore` files unless the project has repo-specific ignores (e.g., generated files unique to that project)
+
+## Pull Requests
+- Before opening a PR, always read the repo's README and check `.github/` for PR templates to follow guidelines closely
+- Always show the full PR title, body, and diff to the user and get explicit confirmation before pushing to remote
+- Never open a PR without user approval of the final text
+
 ## New Project Init
 When creating a new project with git init, use `gi` (alias for `git-init`) which initializes the repo and creates the GitHub remote. Then create:
-- `.gitignore` — use sections: Env (with .env, .envrc, !examples), macOS, VSCode, JetBrains, Node.js, Backup files
 - `LICENSE` — MIT License, year from `date +%Y`, copyright holder "Darren Kuro"
 - `README.md` — use the `/readme-style` skill for formatting
 
