@@ -56,7 +56,7 @@
     ]
     ++ lib.optionals (tag == "mac") [
       rustc
-      nodejs_latest
+      nodejs_22 # LTS; nodejs_latest (v25) fails to build, nodejs_24 not cached for aarch64-darwin
       typescript
       nodePackages.typescript-language-server
 
