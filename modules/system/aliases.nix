@@ -31,9 +31,6 @@
         ''echo "clean: done"''
       ];
 
-      tpll = "git -C $XDG_DATA_HOME/task pull";
-      tpsh = "git -C $XDG_DATA_HOME/task add . && git -C $XDG_DATA_HOME/task commit -m 'Auto-sync' && git -C $XDG_DATA_HOME/task push";
-
       hmpsh = "git -C $HM add . && git -C $HM commit -m 'Auto-push' && git -C $HM push";
       hmpll = "git -C $HM pull";
     }
