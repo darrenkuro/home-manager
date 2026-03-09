@@ -123,3 +123,4 @@ When creating a new project with git init, use `gi` (alias for `git-init`) which
 - **Simplicity First**: Make every change as simple as possible. Impact minimal code.
 - **No Laziness**: Find root causes. No temporary fixes. Senior developer standards.
 - **Minimal Impact**: Changes should only touch what's necessary. Avoid introducing bugs.
+- **Research Before Guessing**: When unsure about a factual claim, ALWAYS search online to verify before answering. Never present uncertain information as fact — either confirm it or say you don't know.
