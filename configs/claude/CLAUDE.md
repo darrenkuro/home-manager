@@ -54,6 +54,7 @@ When working in a TypeScript codebase:
 
 ## Parallel Agents / Batch Work
 - When spawning parallel sub-agents for large batch tasks, limit each agent's scope to avoid hitting the 32k output token limit. For PDF-heavy tasks, use smaller batches and fallback reading strategies for large files.
+- **Never leave background agents unresolved.** When a background agent completes, immediately read its results and report to the user. Do not claim an agent is "still running" without checking — use `TaskList` or resume the agent to verify. If an agent's results are no longer needed, say so explicitly rather than silently dropping them.
 
 ## Skills
 - Skills are managed by home-manager — source files live in `~/.config/home-manager/configs/claude/skills/`. After editing any SKILL.md or reference file, git commit in the hm repo before moving on.
