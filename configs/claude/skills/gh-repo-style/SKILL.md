@@ -106,7 +106,7 @@ If `.npmrc` has other settings beyond `shamefully-hoist`, only remove the `shame
 ### 6. GitHub Metadata
 
 Check via `gh repo view` (or the repo's GitHub page):
-- **Description** must be set (not empty)
+- **Description** must be set (not empty), no trailing period
 - **Topics** should have at least one tag
 
 If missing, suggest values based on the repo content and offer to set them:
