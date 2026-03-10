@@ -115,6 +115,22 @@ gh repo edit --description "..."
 gh repo edit --add-topic "topic1" --add-topic "topic2"
 ```
 
+### 7. Language/Project-Type Compliance
+
+Identify the repo's language or project type from its files, then load the corresponding skill to verify tooling and structure match the standard:
+
+| Indicator | Skill |
+|---|---|
+| `package.json` with `publishConfig` or `@darrenkuro/` scope | `/npm-package` |
+| `Package.swift` or `project.yml` (XcodeGen) | `/swift-project` |
+| `Cargo.toml` | `/rust-project` |
+| `manifest.json` with Obsidian `minAppVersion` | `/obsidian-plugin` |
+| `Makefile` with C/C++ targets | `/makefile-c` |
+
+Check the loaded skill's scaffold structure, required config files, and key conventions against what the repo actually has. Flag deviations (missing CI workflow, wrong tsconfig settings, missing clippy lints, etc.) and offer to fix.
+
+If no skill matches, skip this check.
+
 ## Output Format
 
 Report as a checklist:
@@ -125,6 +141,7 @@ Report as a checklist:
 - [x] Makefile complies with /makefile-c (or: no Makefile present)
 - [ ] .npmrc has unnecessary shamefully-hoist=true (no Docker/esbuild found)
 - [ ] GitHub description missing
+- [x] npm-package compliance (or: no matching project skill)
 ```
 
 Then offer to fix all failing checks.
