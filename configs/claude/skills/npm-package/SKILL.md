@@ -24,7 +24,8 @@ package-name/
 │   └── config.json
 └── .github/
     └── workflows/
-        └── ci.yml
+        ├── ci.yml
+        └── release.yml
 ```
 
 After scaffolding:
@@ -50,14 +51,16 @@ After scaffolding:
 
 ## Publishing Flow
 
+Automated via GitHub Actions (`release.yml`):
+
 1. Make changes and commit
 2. `pnpm changeset` — describe the change, select semver bump type (creates a markdown file in `.changeset/`)
-3. When ready to release: `pnpm changeset version` — consumes changeset files, bumps `package.json`, writes `CHANGELOG.md`
-4. Commit the version bump: `git add -A && git commit -m "chore: release"`
-5. `pnpm changeset publish` — publishes to npm with provenance
-6. Push with tags: `git push && git push --tags`
+3. Push to main — the release workflow detects pending changesets and opens a "Version Packages" PR that bumps `package.json`, generates `CHANGELOG.md`
+4. Merge that PR — the workflow publishes to npm with provenance and creates git tags
 
 Tag format: `v1.0.0` (Changesets handles tag creation automatically).
+
+**Requires**: `NPM_TOKEN` secret set in the GitHub repo settings (Settings > Secrets > Actions).
 
 ## Scripts
 
