@@ -1,6 +1,6 @@
 ---
 name: gh-repo-style
-description: Audits, reviews, or checks a GitHub repo for hygiene. Ensures required files exist (README.md, LICENSE), LICENSE has no placeholders, repo .gitignore has no redundancy with global gitignore, and GitHub metadata (description, topics) is set.
+description: Audits, reviews, or checks a GitHub repo for hygiene. Ensures required files exist (README.md, LICENSE), LICENSE has no placeholders, repo .gitignore has no redundancy with global gitignore, .npmrc has no unnecessary settings (e.g. shamefully-hoist in non-Docker projects), and GitHub metadata (description, topics) is set.
 ---
 
 # GitHub Repo Style Audit
@@ -85,7 +85,25 @@ If a `Makefile` exists in the repo root, audit it against the `/makefile-c` skil
 
 If non-compliant, offer to regenerate using `/makefile-c`.
 
-### 5. GitHub Metadata
+### 5. .npmrc Audit (if present)
+
+If `.npmrc` exists, check whether its contents are actually needed for this project. The most common unnecessary setting is `shamefully-hoist=true`, which flattens pnpm's strict `node_modules` layout.
+
+**When `shamefully-hoist=true` IS needed:**
+- Docker-based projects (symlinks break in container builds)
+- Obsidian plugins (esbuild needs flat resolution to bundle `obsidian` peer dep)
+- Projects with dependencies that don't declare their own deps properly (check for known offenders)
+
+**When it is NOT needed:**
+- Standalone libraries/packages
+- CLI tools
+- Anything without Docker or bundler-specific constraints
+
+To determine: check for `Dockerfile`, `docker-compose.yml`, `esbuild.config.*` with obsidian imports, or similar indicators. If none are found and `.npmrc` only contains `shamefully-hoist=true`, **delete it** — pnpm's strict default is preferred because it catches undeclared dependency usage at dev time.
+
+If `.npmrc` has other settings beyond `shamefully-hoist`, only remove the `shamefully-hoist` line and keep the rest.
+
+### 6. GitHub Metadata
 
 Check via `gh repo view` (or the repo's GitHub page):
 - **Description** must be set (not empty)
@@ -105,6 +123,7 @@ Report as a checklist:
 - [ ] LICENSE has placeholder: [year]
 - [x] .gitignore — 12/15 lines redundant with global, 3 project-specific
 - [x] Makefile complies with /makefile-c (or: no Makefile present)
+- [ ] .npmrc has unnecessary shamefully-hoist=true (no Docker/esbuild found)
 - [ ] GitHub description missing
 ```
 
