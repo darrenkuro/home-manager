@@ -67,10 +67,16 @@ Never push without bumping. Never manually edit version numbers — always use `
 - **Dev**: `pnpm run dev` — esbuild watch mode, output to project root
 - **Build**: `pnpm run build` — typecheck + production bundle
 - **Lint**: `pnpm run lint`
-- **Test in vault**: Installed via BRAT (Beta Reviewers Auto-update Tester). After the first push + release, automatically register the plugin in BRAT by adding the repo to the vault's `.obsidian/plugins/obsidian42-brat/data.json`:
-  - Add `"<github-username>/<repo-name>"` to the `pluginList` array
-  - Add `{ "repo": "<github-username>/<repo-name>", "version": "latest" }` to the `pluginSubListFrozenVersion` array
-  - BRAT auto-updates on new releases. Reload Obsidian (Cmd+R) to pick up changes.
+- **Test in vault**: Installed via BRAT. Reload Obsidian (Cmd+R) to pick up changes.
+
+## BRAT Registration (REQUIRED after first release)
+
+After the first push + release, register the plugin in BRAT by editing the vault's `.obsidian/plugins/obsidian42-brat/data.json`. **Both steps are required** — missing the second step means BRAT won't track version state correctly:
+
+1. Add `"<github-username>/<repo-name>"` to the **`pluginList`** array
+2. Add `{ "repo": "<github-username>/<repo-name>", "version": "latest" }` to the **`pluginSubListFrozenVersion`** array
+
+The `"version": "latest"` entry is critical — it tells BRAT to track the latest release. Without it, BRAT has no version state for the plugin. Never omit this entry.
 
 ## Plugin Code Guidelines
 
