@@ -56,10 +56,11 @@ in
     };
   };
 
-  # Post-activation check: warn if skill-only plugins are still enabled
+  # Post-activation check for Claude plugins
   home.activation.checkClaudePlugins = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     settings="$HOME/.config/claude/settings.json"
     if [ -f "$settings" ]; then
+      # Plugins now managed as hm skills — warn if still enabled
       dupes=""
       for plugin in frontend-design claude-code-setup claude-md-management commit-commands skill-creator; do
         if ${pkgs.gnugrep}/bin/grep -q "\"$plugin@claude-plugins-official\": true" "$settings" 2>/dev/null; then
@@ -70,7 +71,22 @@ in
         echo ""
         echo "⚠ Claude: these plugins are now managed as hm skills and should be disabled:"
         printf "$dupes"
-        echo "Run: claude /plugin disable <name> — or set to false in settings.json"
+        echo "  Run: claude /plugin disable <name>"
+        echo ""
+      fi
+
+      # Required plugins — warn if missing or disabled
+      missing=""
+      for plugin in typescript-lsp swift-lsp rust-analyzer-lsp clangd-lsp pyright-lsp context7 explanatory-output-style learning-output-style; do
+        if ! ${pkgs.gnugrep}/bin/grep -q "\"$plugin@claude-plugins-official\": true" "$settings" 2>/dev/null; then
+          missing="$missing  - $plugin@claude-plugins-official\n"
+        fi
+      done
+      if [ -n "$missing" ]; then
+        echo ""
+        echo "⚠ Claude: these required plugins are missing or disabled:"
+        printf "$missing"
+        echo "  Run: claude /plugin install <name>@claude-plugins-official"
         echo ""
       fi
     fi
