@@ -5,12 +5,22 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    claude-plugins-official = {
+      url = "github:anthropics/claude-plugins-official";
+      flake = false;
+    };
+    obsidian-skills = {
+      url = "github:kepano/obsidian-skills";
+      flake = false;
+    };
   };
 
   outputs =
     {
       nixpkgs,
       home-manager,
+      claude-plugins-official,
+      obsidian-skills,
       ...
     }:
     let
@@ -24,7 +34,10 @@
             inherit system;
             config.allowUnfree = true;
           };
-          extraSpecialArgs = { inherit tag system; };
+          extraSpecialArgs = {
+        inherit tag system;
+        inherit claude-plugins-official obsidian-skills;
+      };
           modules = [ ./home.nix ];
         };
     in
