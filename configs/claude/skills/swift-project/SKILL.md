@@ -5,7 +5,7 @@ description: Scaffold and develop Swift projects (macOS/iOS apps, libraries, CLI
 
 # Swift Project Development
 
-Read `../project-init/common.md` for shared initialization steps (git, LICENSE, README, repo audit) before proceeding with language-specific setup.
+Load the `/project-init` skill for shared initialization steps (git, LICENSE, README, CI, repo audit) before proceeding with language-specific setup.
 
 ## Scaffold
 
