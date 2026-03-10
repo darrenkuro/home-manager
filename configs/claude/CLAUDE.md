@@ -56,6 +56,7 @@ When working in a TypeScript codebase:
 - When spawning parallel sub-agents for large batch tasks, limit each agent's scope to avoid hitting the 32k output token limit. For PDF-heavy tasks, use smaller batches and fallback reading strategies for large files.
 
 ## Skills
+- Skills are managed by home-manager — source files live in `~/.config/home-manager/configs/claude/skills/`. After editing any SKILL.md or reference file, git commit in the hm repo before moving on.
 - When creating or updating skills, invoke the `skill-creator` plugin (enabled in settings.json) which provides the full skill creation lifecycle including evals, benchmarking, and description optimization
 
 ## Git

@@ -331,15 +331,14 @@ jobs:
 
 Create an empty `styles.css` file in the project root. This file is required by BRAT as a release asset even if no custom styles are needed.
 
-## Development Symlink
+## Testing via BRAT
 
-To test the plugin in a vault during development:
+Install the plugin in a vault using BRAT (Beta Reviewers Auto-update Tester):
 
-```bash
-ln -s /absolute/path/to/plugin-name /absolute/path/to/vault/.obsidian/plugins/plugin-name
-```
-
-Then in Obsidian: Settings → Community plugins → enable the plugin. Use Cmd+R (or the "Reload app without saving" command) to pick up changes.
+1. Push and tag a release (see flow below)
+2. In Obsidian: BRAT settings → "Add Beta Plugin" → enter `<github-username>/<repo-name>`
+3. BRAT auto-updates when new releases are published
+4. Reload Obsidian (Cmd+R) to pick up changes
 
 ## Version Bump & Release Flow
 

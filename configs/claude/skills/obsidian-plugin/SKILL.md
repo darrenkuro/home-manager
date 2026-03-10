@@ -31,6 +31,14 @@ plugin-name/
 
 After scaffolding, run `pnpm install` and verify `pnpm run build` succeeds.
 
+After the initial commit and push, run the `/gh-repo-style` skill to audit the GitHub repo for hygiene (README, LICENSE, description, topics, etc.).
+
+The README must include a notice that the plugin is for **personal use only** and will likely not accept PRs or feature requests. Add this near the top of the README (after the description/tagline):
+
+```markdown
+> **Note:** This plugin is built for personal use. I'm unlikely to accept pull requests or feature requests.
+```
+
 For exact file contents and configurations, read `references/build-setup.md`.
 
 ## manifest.json Defaults
@@ -57,11 +65,10 @@ Never push without bumping. Never manually edit version numbers — always use `
 - **Dev**: `pnpm run dev` — esbuild watch mode, output to project root
 - **Build**: `pnpm run build` — typecheck + production bundle
 - **Lint**: `pnpm run lint`
-- **Test in vault**: Symlink the plugin directory into the vault's `.obsidian/plugins/`:
-  ```bash
-  ln -s /path/to/plugin-name /path/to/vault/.obsidian/plugins/plugin-name
-  ```
-  Then reload Obsidian (Cmd+R) or use the "Reload app without saving" command.
+- **Test in vault**: Installed via BRAT (Beta Reviewers Auto-update Tester). After the first push + release, automatically register the plugin in BRAT by adding the repo to the vault's `.obsidian/plugins/obsidian42-brat/data.json`:
+  - Add `"<github-username>/<repo-name>"` to the `pluginList` array
+  - Add `{ "repo": "<github-username>/<repo-name>", "version": "latest" }` to the `pluginSubListFrozenVersion` array
+  - BRAT auto-updates on new releases. Reload Obsidian (Cmd+R) to pick up changes.
 
 ## Plugin Code Guidelines
 
