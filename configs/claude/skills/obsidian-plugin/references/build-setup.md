@@ -46,7 +46,7 @@ Maps plugin versions to minimum Obsidian versions. Updated automatically by `ver
   "author": "Darren Kuro",
   "license": "MIT",
   "devDependencies": {
-    "@anthropic-ai/eslint-plugin-obsidianmd": "^1.0.0",
+    "eslint-plugin-obsidianmd": "^0.1.9",
     "@types/node": "^22.0.0",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@typescript-eslint/parser": "^8.0.0",
@@ -168,11 +168,11 @@ writeFileSync("versions.json", JSON.stringify(versions, null, "\t"));
 
 ```ts
 import tseslint from "typescript-eslint";
-import obsidianPlugin from "@anthropic-ai/eslint-plugin-obsidianmd";
+import obsidianmd from "eslint-plugin-obsidianmd";
 
 export default tseslint.config(
   ...tseslint.configs.recommended,
-  obsidianPlugin.configs.recommended,
+  ...obsidianmd.configs.recommended,
   {
     rules: {
       // Customize as needed
