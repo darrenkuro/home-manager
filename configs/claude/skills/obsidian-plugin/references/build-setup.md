@@ -264,6 +264,9 @@ on:
     tags:
       - "*"
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -286,16 +289,16 @@ jobs:
 
       - uses: softprops/action-gh-release@v2
         with:
-          draft: true
           files: |
             main.js
             manifest.json
             styles.css
 ```
 
-The release is created as a **draft** — review and publish manually or set `draft: false` for auto-publish.
-
-BRAT requires `main.js`, `manifest.json`, and `styles.css` as release assets.
+**Important notes:**
+- `permissions: contents: write` is required for the action to create releases.
+- Releases are published (not draft) so BRAT can discover them immediately.
+- BRAT requires `main.js`, `manifest.json`, and `styles.css` as release assets.
 
 ## .github/workflows/lint.yml
 
@@ -331,7 +334,7 @@ jobs:
 
 ## styles.css
 
-Create an empty `styles.css` file in the project root. This file is required by BRAT as a release asset even if no custom styles are needed.
+Create a `styles.css` file in the project root with a placeholder comment (e.g., `/* plugin-name */`). This file is required by BRAT as a release asset. **It must not be empty (0 bytes)** — GitHub rejects zero-size release assets.
 
 ## Testing via BRAT
 
@@ -354,6 +357,6 @@ pnpm version patch   # or minor, major
 # 3. Push code and tags
 git push && git push --tags
 
-# 4. Tag push triggers release.yml → draft GitHub release
+# 4. Tag push triggers release.yml → published GitHub release
 # 5. BRAT auto-detects the new release
 ```

@@ -31,7 +31,9 @@ plugin-name/
 
 After scaffolding, run `pnpm install` and verify `pnpm run build` succeeds.
 
-After the initial commit and push, run the `/gh-repo-style` skill to audit the GitHub repo for hygiene (README, LICENSE, description, topics, etc.).
+After the initial commit and push:
+1. **Ensure the repo is PUBLIC** — BRAT cannot download release assets from private repos. When using `gh repo create`, pass `--public`. If already created as private: `gh repo edit <owner>/<repo> --visibility public --accept-visibility-change-consequences`.
+2. Run the `/gh-repo-style` skill to audit the GitHub repo for hygiene (README, LICENSE, description, topics, etc.).
 
 The README must include a notice that the plugin is for **personal use only** and will likely not accept PRs or feature requests. Add this near the top of the README (after the description/tagline):
 
@@ -55,7 +57,7 @@ For exact file contents and configurations, read `references/build-setup.md`.
 1. Run `pnpm version patch` (or `minor`/`major` as appropriate)
 2. This triggers `version-bump.mjs` (via npm `version` lifecycle) which syncs `manifest.json` and `versions.json`
 3. Push with tags: `git push && git push --tags`
-4. The tag push triggers `.github/workflows/release.yml` → creates draft GitHub release
+4. The tag push triggers `.github/workflows/release.yml` → creates a GitHub release
 5. BRAT picks up the new release automatically
 
 Never push without bumping. Never manually edit version numbers — always use `pnpm version`.
