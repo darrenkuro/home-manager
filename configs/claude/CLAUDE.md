@@ -67,7 +67,8 @@ When working in a TypeScript codebase:
 - Never open a PR without user approval of the final text
 
 ## New Project Init
-When creating a new project with git init, use `gi` (alias for `git-init`) which initializes the repo and creates the GitHub remote. Then create:
+- Always create new coding projects in `~/Documents/dev/`
+- When creating a new project, run `git init` and `gh repo create` to set up the repo and GitHub remote. Then create:
 - `LICENSE` — MIT License, year from `date +%Y`, copyright holder "Darren Kuro"
 - `README.md` — use the `/readme-style` skill for formatting
 
