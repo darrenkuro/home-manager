@@ -1,4 +1,4 @@
-{ config, pkgs, claude-plugins-official, obsidian-skills, ... }:
+{ config, lib, pkgs, claude-plugins-official, obsidian-skills, ... }:
 let
   claudeConfigDir = ../../configs/claude;
 
@@ -55,6 +55,26 @@ in
       RunAtLoad = true;
     };
   };
+
+  # Post-activation check: warn if skill-only plugins are still enabled
+  home.activation.checkClaudePlugins = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    settings="$HOME/.config/claude/settings.json"
+    if [ -f "$settings" ]; then
+      dupes=""
+      for plugin in frontend-design claude-code-setup claude-md-management commit-commands skill-creator; do
+        if ${pkgs.gnugrep}/bin/grep -q "\"$plugin@claude-plugins-official\": true" "$settings" 2>/dev/null; then
+          dupes="$dupes  - $plugin@claude-plugins-official\n"
+        fi
+      done
+      if [ -n "$dupes" ]; then
+        echo ""
+        echo "⚠ Claude: these plugins are now managed as hm skills and should be disabled:"
+        printf "$dupes"
+        echo "Run: claude /plugin disable <name> — or set to false in settings.json"
+        echo ""
+      fi
+    fi
+  '';
 
   programs.zsh.shellAliases = {
     clauded = "claude --dangerously-skip-permissions";
