@@ -67,9 +67,11 @@ The `"version"` script is a lifecycle hook — npm/pnpm runs it automatically wh
 
 ```
 tag-version-prefix=""
+onlyBuiltDependencies=["esbuild"]
 ```
 
-This makes `pnpm version` create tags like `1.0.1` instead of `v1.0.1`. Obsidian/BRAT expects bare semver tags.
+- `tag-version-prefix=""` makes `pnpm version` create tags like `1.0.1` instead of `v1.0.1`. Obsidian/BRAT expects bare semver tags.
+- `onlyBuiltDependencies` allows esbuild's postinstall scripts. **Never run `pnpm approve-builds`** — it's interactive and will hang in non-TTY environments.
 
 ## tsconfig.json
 
