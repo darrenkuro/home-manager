@@ -61,7 +61,8 @@ When working in a TypeScript codebase:
 - When creating or updating skills, invoke the `skill-creator` plugin (enabled in settings.json) which provides the full skill creation lifecycle including evals, benchmarking, and description optimization
 
 ## Git
-- A global gitignore is configured via home-manager — do NOT create per-repo `.gitignore` files unless the project has repo-specific ignores (e.g., generated files unique to that project)
+- A global gitignore exists at `~/.config/git/ignore` (managed by home-manager). It covers node_modules, dist, build, .env, .DS_Store, __pycache__, target, .venv, *.o, etc.
+- Do NOT create per-repo `.gitignore` files unless the project has repo-specific ignores (e.g., generated files unique to that project)
 
 ## Pull Requests
 - Before opening a PR, always read the repo's README and check `.github/` for PR templates to follow guidelines closely
