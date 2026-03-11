@@ -1,3 +1,7 @@
+# Claude Code configuration — skills, hooks, CLAUDE.md
+#
+# Cross-platform: imported on both macOS and Linux.
+# The BTM launchd agent is in services/claude-agent.nix (macOS only).
 { config, lib, pkgs, claude-plugins-official, obsidian-skills, ... }:
 let
   claudeConfigDir = ../../configs/claude;
@@ -62,21 +66,6 @@ in
     "claude/CLAUDE.md".source = claudeConfigDir + "/CLAUDE.md";
     "claude/skills".source = mergedSkills;
     "claude/hooks".source = claudeConfigDir + "/hooks";
-  };
-
-  # Set env CLAUDE_CONFIG_DIR at login so it will be found everywhere
-  launchd.agents.set-claude-config-dir = {
-    enable = true;
-    config = {
-      Label = "com.user.set-claude-config-dir";
-      ProgramArguments = [
-        "/bin/launchctl"
-        "setenv"
-        "CLAUDE_CONFIG_DIR"
-        "${config.home.homeDirectory}/.config/claude"
-      ];
-      RunAtLoad = true;
-    };
   };
 
   # Post-activation check for Claude plugins

@@ -61,7 +61,7 @@
       "target/"
 
       # Nix
-      "result/"
+      "result"
 
       # C / C++
       "*.o"
