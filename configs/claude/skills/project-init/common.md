@@ -34,6 +34,18 @@ A global gitignore is configured via home-manager covering common patterns (node
 
 Only create a per-repo `.gitignore` if the project has **repo-specific** ignores not covered by the global config (e.g., generated files, platform-specific build artifacts).
 
+## CLAUDE.md
+
+Every project must have a `CLAUDE.md` at the root. Include:
+- Project name and one-line description
+- Usage (how to run/build)
+- Architecture overview (directory structure, module responsibilities)
+- Key design decisions and trade-offs
+- Dependencies and why they were chosen
+- Known limitations or TODOs
+
+Keep it concise and useful for future Claude sessions — it's the first file read when resuming work on a project.
+
 ## CI
 
 All projects use GitHub Actions. Workflow file: `.github/workflows/ci.yml`.
