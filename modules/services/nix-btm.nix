@@ -54,48 +54,33 @@ in
     "btmLaunchAgents"
   ] ''
     set +e
-    _need_sudo=0
     _stub_macos="${stubDir}/Nix.app/Contents/MacOS"
+    _patched=0
 
     ${lib.concatMapStringsSep "\n" (d: ''
-      # Check ${d.wrapper}
       if [ -f "${d.plist}" ]; then
         _cur_prog=$(/usr/libexec/PlistBuddy -c "Print :ProgramArguments:0" "${d.plist}" 2>/dev/null)
         _cur_bid=$(/usr/libexec/PlistBuddy -c "Print :AssociatedBundleIdentifiers:0" "${d.plist}" 2>/dev/null)
         if [ "$_cur_prog" != "$_stub_macos/${d.wrapper}" ] || [ "$_cur_bid" != "${nixBundleId}" ]; then
-          _need_sudo=1
+          if /usr/bin/sudo -n true 2>/dev/null; then
+            /usr/bin/sudo /usr/libexec/PlistBuddy \
+              -c "Delete :ProgramArguments" \
+              -c "Add :ProgramArguments array" \
+              -c "Add :ProgramArguments:0 string $_stub_macos/${d.wrapper}" \
+              -c "Delete :AssociatedBundleIdentifiers" \
+              -c "Add :AssociatedBundleIdentifiers array" \
+              -c "Add :AssociatedBundleIdentifiers:0 string ${nixBundleId}" \
+              "${d.plist}" 2>/dev/null && \
+              echo "  patched: $(basename "${d.plist}")" || \
+              echo "  btm error: failed to patch $(basename "${d.plist}")" >&2
+            _patched=1
+          else
+            echo "BTM: Nix daemon plists need patching (requires sudo)."
+            echo "  Run: sudo -v && re"
+          fi
         fi
       fi
     '') nixDaemons}
-
-    if [ "$_need_sudo" -eq 1 ]; then
-      if /usr/bin/sudo -n true 2>/dev/null; then
-        echo "BTM: patching Nix daemon plists..."
-        ${lib.concatMapStringsSep "\n" (d: ''
-          if [ -f "${d.plist}" ]; then
-            _cur_prog=$(/usr/libexec/PlistBuddy -c "Print :ProgramArguments:0" "${d.plist}" 2>/dev/null)
-            _cur_bid=$(/usr/libexec/PlistBuddy -c "Print :AssociatedBundleIdentifiers:0" "${d.plist}" 2>/dev/null)
-            if [ "$_cur_prog" != "$_stub_macos/${d.wrapper}" ] || [ "$_cur_bid" != "${nixBundleId}" ]; then
-              /usr/bin/sudo /usr/libexec/PlistBuddy \
-                -c "Delete :ProgramArguments" \
-                -c "Add :ProgramArguments array" \
-                -c "Add :ProgramArguments:0 string $_stub_macos/${d.wrapper}" \
-                -c "Delete :AssociatedBundleIdentifiers" \
-                -c "Add :AssociatedBundleIdentifiers array" \
-                -c "Add :AssociatedBundleIdentifiers:0 string ${nixBundleId}" \
-                "${d.plist}" 2>/dev/null && \
-                echo "  patched: $(basename "${d.plist}")" || \
-                echo "  btm error: failed to patch $(basename "${d.plist}")" >&2
-            else
-              echo "  already patched: $(basename "${d.plist}")"
-            fi
-          fi
-        '') nixDaemons}
-      else
-        echo "BTM: Nix daemon plists need patching (requires sudo)."
-        echo "  Run: sudo -v && re"
-      fi
-    fi
 
     set -e
   '';

@@ -88,16 +88,6 @@ in
       echo "BTM: syncing stubs and agents..."
       mkdir -p "${cfg.stubDir}"
 
-      # ── One-time migration from old btm.nix (separate btm.agents option) ──
-      _migrated_marker="${cfg.stubDir}/.migrated"
-      if [ ! -f "$_migrated_marker" ]; then
-        # Remove old tracking file
-        rm -f "${cfg.stubDir}/.btm-labels"
-        rm -f "${cfg.stubDir}"/.StubLauncher-*
-        rm -f "${cfg.stubDir}"/.migrated-to-sm
-        touch "$_migrated_marker"
-      fi
-
       # ── Install stubs ──
       ${lib.concatStringsSep "\n\n" (lib.mapAttrsToList (name: stubCfg: ''
         # ── ${name} ──

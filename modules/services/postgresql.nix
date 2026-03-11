@@ -150,8 +150,8 @@ let
   };
 
   # ── Launchd Plists ──
-  # BundleProgram is relative to the .app bundle root — resolved by SMAppService.
-  # No AssociatedBundleIdentifiers needed; SM handles parent association.
+  # BundleProgram is relative to the .app bundle root — btm.nix converts it to
+  # absolute ProgramArguments and adds AssociatedBundleIdentifiers at install time.
   serverPlist = btm.mkPlist {
     Label = "org.postgresql.server";
     BundleProgram = "Contents/MacOS/PostgresServer";
