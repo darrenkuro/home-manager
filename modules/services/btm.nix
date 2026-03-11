@@ -99,6 +99,7 @@ in
         rm -rf "$_stub_dst"
         cp -R "$_stub_src" "$_stub_dst"
         chmod -R u+w "$_stub_dst"
+        mkdir -p "$_stub_dst/Contents/MacOS"
 
         # Embed wrapper binaries into Contents/MacOS/
         ${lib.concatMapStringsSep "\n" (w: ''
