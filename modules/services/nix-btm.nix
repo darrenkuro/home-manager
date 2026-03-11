@@ -1,31 +1,30 @@
 # Nix BTM stub — registers a parent app in BTM for Nix system daemons.
 #
 # Nix daemons (nix-daemon, darwin-store) are system-level LaunchDaemons
-# managed by the Nix installer. They show as "Unidentified Developer" in BTM
-# because the launcher scripts at /usr/local/bin/ are shell scripts with no
-# Team Identifier — macOS BTM ignores AssociatedBundleIdentifiers for them.
+# managed by the Nix installer. BTM groups items by tracing the executable
+# path back to an app bundle.
 #
 # This module:
-#   1. Registers a Nix.app stub (icon + bundle ID) via btm.stubs
-#   2. Compiles Mach-O wrapper binaries (NixDaemonStart, NixStoreMount)
-#   3. Codesigns them with Apple Development cert (Team ID matches Nix.app stub)
-#   4. Installs them to /usr/local/bin/ replacing the original shell scripts
-#   5. Patches the Nix LaunchDaemon plists to add AssociatedBundleIdentifiers
+#   1. Registers Nix.app stub with embedded Mach-O wrappers via btm.stubs
+#   2. Patches the Nix LaunchDaemon plists to point ProgramArguments at the
+#      wrappers inside Nix.app and add AssociatedBundleIdentifiers
 #
-# With Mach-O binaries + matching Team IDs, BTM can resolve the association
-# and group both daemons under the Nix.app stub in Login Items.
+# With executables inside the codesigned Nix.app bundle, BTM resolves the
+# association and groups both daemons under "Nix" in Login Items.
 { config, lib, pkgs, ... }:
 
 let
   nixBundleId = "com.local.nix.stub";
+  stubDir = config.btm.stubDir;
 
   # Machine-specific APFS volume UUID for the Nix store.
   # Read from the existing NixStoreMount script installed by the Nix installer.
   nixVolumeUUID = "7F2237ED-FBD0-463A-B08C-EC01257136DA";
 
-  nixDaemonPlists = [
-    "/Library/LaunchDaemons/org.nixos.nix-daemon.plist"
-    "/Library/LaunchDaemons/org.nixos.darwin-store.plist"
+  # Daemon label → wrapper binary name mapping
+  nixDaemons = [
+    { plist = "/Library/LaunchDaemons/org.nixos.nix-daemon.plist"; wrapper = "NixDaemonStart"; }
+    { plist = "/Library/LaunchDaemons/org.nixos.darwin-store.plist"; wrapper = "NixStoreMount"; }
   ];
 
   nixWrappers = pkgs.stdenv.mkDerivation {
@@ -40,128 +39,61 @@ let
       cp NixDaemonStart NixStoreMount $out/bin/
     '';
   };
-
-  codesignId = "Apple Development: odon5ht@gmail.com (497TM5HK44)";
 in
 {
   btm.stubs."Nix" = {
     src = ../../app-stubs/Nix.app;
-    wrappers = [];
+    wrappers = [
+      { drv = nixWrappers; bin = "NixDaemonStart"; }
+      { drv = nixWrappers; bin = "NixStoreMount"; }
+    ];
   };
 
-  home.activation.installNixWrappers = lib.hm.dag.entryAfter [
+  # Patch system LaunchDaemon plists to point at wrappers inside Nix.app
+  home.activation.patchNixDaemonPlists = lib.hm.dag.entryAfter [
     "btmLaunchAgents"
   ] ''
     set +e
-
-    echo "BTM: checking Nix Mach-O wrappers..."
-
     _need_sudo=0
+    _stub_macos="${stubDir}/Nix.app/Contents/MacOS"
 
-    for bin in NixDaemonStart NixStoreMount; do
-      _src="${nixWrappers}/bin/$bin"
-      _dst="/usr/local/bin/$bin"
-
-      # Skip if installed binary matches source (pre-codesign)
-      # We track the source hash in a sidecar file since codesigning changes the binary
-      _hash_file="${config.home.homeDirectory}/.local/share/app-stubs/.nix-wrapper-hash-$bin"
-      _src_hash=$(/usr/bin/shasum -a 256 "$_src" | /usr/bin/cut -d' ' -f1)
-
-      if [ -f "$_hash_file" ] && [ "$(/bin/cat "$_hash_file")" = "$_src_hash" ]; then
-        continue
-      fi
-
-      _need_sudo=1
-      break
-    done
-
-    if [ "$_need_sudo" -eq 0 ]; then
-      set -e
-      return 0 2>/dev/null || true
-    fi
-
-    if /usr/bin/sudo -n true 2>/dev/null; then
-      for bin in NixDaemonStart NixStoreMount; do
-        _src="${nixWrappers}/bin/$bin"
-        _dst="/usr/local/bin/$bin"
-        _tmp="/tmp/btm-$bin"
-        _hash_file="${config.home.homeDirectory}/.local/share/app-stubs/.nix-wrapper-hash-$bin"
-        _src_hash=$(/usr/bin/shasum -a 256 "$_src" | /usr/bin/cut -d' ' -f1)
-
-        if [ -f "$_hash_file" ] && [ "$(/bin/cat "$_hash_file")" = "$_src_hash" ]; then
-          continue
+    ${lib.concatMapStringsSep "\n" (d: ''
+      # Check ${d.wrapper}
+      if [ -f "${d.plist}" ]; then
+        _cur_prog=$(/usr/libexec/PlistBuddy -c "Print :ProgramArguments:0" "${d.plist}" 2>/dev/null)
+        _cur_bid=$(/usr/libexec/PlistBuddy -c "Print :AssociatedBundleIdentifiers:0" "${d.plist}" 2>/dev/null)
+        if [ "$_cur_prog" != "$_stub_macos/${d.wrapper}" ] || [ "$_cur_bid" != "${nixBundleId}" ]; then
+          _need_sudo=1
         fi
-
-        /bin/cp "$_src" "$_tmp"
-        /bin/chmod 755 "$_tmp"
-        /usr/bin/codesign -fs "${codesignId}" "$_tmp"
-
-        /usr/bin/sudo /bin/cp "$_tmp" "$_dst"
-        /usr/bin/sudo /usr/sbin/chown root:wheel "$_dst"
-        /usr/bin/sudo /bin/chmod 755 "$_dst"
-        /bin/rm -f "$_tmp"
-
-        echo "$_src_hash" > "$_hash_file"
-        echo "  installed Mach-O wrapper: $bin"
-      done
-    else
-      echo "BTM: Nix wrappers need sudo to install. Run manually:"
-      for bin in NixDaemonStart NixStoreMount; do
-        _src="${nixWrappers}/bin/$bin"
-        echo "  cp $_src /tmp/btm-$bin && codesign -fs '${codesignId}' /tmp/btm-$bin && sudo cp /tmp/btm-$bin /usr/local/bin/$bin && sudo chown root:wheel /usr/local/bin/$bin"
-      done
-    fi
-
-    set -e
-  '';
-
-  # Patch system LaunchDaemon plists with AssociatedBundleIdentifiers
-  home.activation.patchNixDaemonPlists = lib.hm.dag.entryAfter [
-    "installNixWrappers"
-  ] ''
-    set +e
-    _need_sudo=0
-
-    for plist in ${lib.concatStringsSep " " nixDaemonPlists}; do
-      [ -f "$plist" ] || continue
-
-      _existing=$(/usr/libexec/PlistBuddy -c "Print :AssociatedBundleIdentifiers:0" "$plist" 2>/dev/null)
-      if [ "$_existing" = "${nixBundleId}" ]; then
-        continue
       fi
-
-      _need_sudo=1
-      break
-    done
+    '') nixDaemons}
 
     if [ "$_need_sudo" -eq 1 ]; then
       if /usr/bin/sudo -n true 2>/dev/null; then
         echo "BTM: patching Nix daemon plists..."
-        for plist in ${lib.concatStringsSep " " nixDaemonPlists}; do
-          [ -f "$plist" ] || continue
-
-          _existing=$(/usr/libexec/PlistBuddy -c "Print :AssociatedBundleIdentifiers:0" "$plist" 2>/dev/null)
-          if [ "$_existing" = "${nixBundleId}" ]; then
-            echo "  already patched: $(basename "$plist")"
-            continue
+        ${lib.concatMapStringsSep "\n" (d: ''
+          if [ -f "${d.plist}" ]; then
+            _cur_prog=$(/usr/libexec/PlistBuddy -c "Print :ProgramArguments:0" "${d.plist}" 2>/dev/null)
+            _cur_bid=$(/usr/libexec/PlistBuddy -c "Print :AssociatedBundleIdentifiers:0" "${d.plist}" 2>/dev/null)
+            if [ "$_cur_prog" != "$_stub_macos/${d.wrapper}" ] || [ "$_cur_bid" != "${nixBundleId}" ]; then
+              /usr/bin/sudo /usr/libexec/PlistBuddy \
+                -c "Delete :ProgramArguments" \
+                -c "Add :ProgramArguments array" \
+                -c "Add :ProgramArguments:0 string $_stub_macos/${d.wrapper}" \
+                -c "Delete :AssociatedBundleIdentifiers" \
+                -c "Add :AssociatedBundleIdentifiers array" \
+                -c "Add :AssociatedBundleIdentifiers:0 string ${nixBundleId}" \
+                "${d.plist}" 2>/dev/null && \
+                echo "  patched: $(basename "${d.plist}")" || \
+                echo "  btm error: failed to patch $(basename "${d.plist}")" >&2
+            else
+              echo "  already patched: $(basename "${d.plist}")"
+            fi
           fi
-
-          /usr/bin/sudo /usr/libexec/PlistBuddy -c "Delete :AssociatedBundleIdentifiers" "$plist" 2>/dev/null
-          /usr/bin/sudo /usr/libexec/PlistBuddy \
-            -c "Add :AssociatedBundleIdentifiers array" \
-            -c "Add :AssociatedBundleIdentifiers:0 string ${nixBundleId}" \
-            "$plist" && \
-            echo "  patched: $(basename "$plist")" || \
-            echo "  btm error: failed to patch $(basename "$plist")" >&2
-        done
+        '') nixDaemons}
       else
-        echo "BTM: Nix daemon plists need patching (one-time, requires sudo)."
-        echo "  Run manually:"
-        for plist in ${lib.concatStringsSep " " nixDaemonPlists}; do
-          [ -f "$plist" ] || continue
-          echo "  sudo /usr/libexec/PlistBuddy -c 'Add :AssociatedBundleIdentifiers array' -c 'Add :AssociatedBundleIdentifiers:0 string ${nixBundleId}' $plist"
-        done
-        echo "  Then reboot for BTM to pick up the change."
+        echo "BTM: Nix daemon plists need patching (requires sudo)."
+        echo "  Run: sudo -v && re"
       fi
     fi
 
