@@ -185,6 +185,28 @@ in
         '') stubCfg.agents)
       ) cfg.stubs)}
 
+      # ── Cleanup stale agents (removed from config but still loaded) ──
+      for _cached in "${cfg.stubDir}"/.plist-src-*; do
+        [ -f "$_cached" ] || continue
+        _label=$(basename "$_cached" | /usr/bin/sed 's/^\.plist-src-//')
+
+        # Skip if label matches a current agent
+        _found=0
+        for _current in ${lib.concatStringsSep " " allAgentLabels}; do
+          if [ "$_label" = "$_current" ]; then
+            _found=1
+            break
+          fi
+        done
+
+        if [ "$_found" -eq 0 ]; then
+          echo "  removing stale agent: $_label"
+          /bin/launchctl bootout "gui/$UID/$_label" 2>/dev/null
+          rm -f "${agentDir}/$_label.plist"
+          rm -f "$_cached"
+        fi
+      done
+
       echo "BTM: done"
       set -e
     '';
