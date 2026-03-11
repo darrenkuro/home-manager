@@ -70,7 +70,8 @@ When working in a TypeScript codebase:
 
 ## New Project Init
 - Always create new coding projects in `~/Documents/dev/`
-- When creating a new project, run `git init` and `gh repo create` to set up the repo and GitHub remote. Then create:
+- When creating a new project, run `git init` and `gh repo create` to set up the repo and GitHub remote. **Always default to `--private`** unless the user explicitly requests a public repo.
+- Then create:
 - `LICENSE` — MIT License, year from `date +%Y`, copyright holder "Darren Kuro"
 - `README.md` — use the `/readme-style` skill for formatting
 

@@ -32,7 +32,7 @@ plugin-name/
 After scaffolding, run `pnpm install` and verify `pnpm run build` succeeds.
 
 After the initial commit and push:
-1. **Ensure the repo is PUBLIC** — BRAT cannot download release assets from private repos. When using `gh repo create`, pass `--public`. If already created as private: `gh repo edit <owner>/<repo> --visibility public --accept-visibility-change-consequences`.
+1. **Ensure the repo is PUBLIC** (exception to the default-private rule) — BRAT cannot download release assets from private repos. When using `gh repo create`, pass `--public` explicitly. If already created as private: `gh repo edit <owner>/<repo> --visibility public --accept-visibility-change-consequences`.
 2. Run the `/gh-repo-style` skill to audit the GitHub repo for hygiene (README, LICENSE, description, topics, etc.).
 
 The README must include a notice that the plugin is for **personal use only** and will likely not accept PRs or feature requests. Add this near the top of the README (after the description/tagline):
