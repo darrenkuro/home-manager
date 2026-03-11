@@ -56,7 +56,7 @@ Bypasses home-manager's default `launchd.agents` which wraps `ProgramArguments` 
 
 **How icons work:** ProgramArguments points to a wrapper binary inside the .app stub. BTM resolves icons by path containment (executable is inside a .app → use that app's icon). Stubs are ad-hoc codesigned at activation time so the wrapper + bundle share one identity. After icon changes, reboot to refresh BTM. Do NOT use `sfltool resetbtm` — it wipes ALL login items system-wide.
 
-**Current agents:** `postgresql.nix` (server + backup), `polymarket-monitor.nix`, `claude-agent.nix` (sets CLAUDE_CONFIG_DIR at login)
+**Current agents:** `postgresql.nix` (server + backup), `polymarket-monitor.nix`, `env-setter.nix` (propagates env vars to GUI domain via launchctl setenv)
 
 ### Shell Functions
 `functions/*.sh` — each file has a preamble pattern:
