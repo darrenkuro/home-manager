@@ -7,16 +7,15 @@
 #
 # This module's activation script then:
 #   1. Copies app stubs from the repo, embeds wrapper binaries into Contents/MacOS/
-#   2. Ad-hoc codesigns each stub (so the whole bundle shares one identity)
+#   2. Codesigns each stub with Apple Development identity (real Team ID for BTM)
 #   3. Registers stubs with LaunchServices for bundle ID → icon resolution
 #   4. Installs/updates plists whose ProgramArguments point inside the stub
 #   5. Removes agents from previous generations that are no longer registered
 #
 # ── Why wrapper binaries go inside the .app ──
 # BTM resolves icons via path containment: if ProgramArguments points to a binary
-# inside a .app bundle, BTM uses that bundle's icon. The older approach using
-# AssociatedBundleIdentifiers requires matching team identifiers (impossible with
-# adhoc signing). Path containment works regardless of signing identity.
+# inside a .app bundle, BTM uses that bundle's icon. Stubs are signed with the
+# user's Apple Development identity (not ad-hoc) so BTM gets a real Team ID.
 #
 # ── Icon refresh ──
 # After first setup or icon changes, a reboot (or logout/login) is needed for
@@ -140,13 +139,13 @@ in
           # Embed wrapper binaries into Contents/MacOS/
           ${lib.concatMapStringsSep "\n" (w: ''
             cp "${w.drv}/bin/${w.bin}" "$_stub_dst/Contents/MacOS/${w.bin}"
-            chmod +x "$_stub_dst/Contents/MacOS/${w.bin}"
+            chmod u+wx "$_stub_dst/Contents/MacOS/${w.bin}"
           '') stubCfg.wrappers}
 
-          # Codesign the whole bundle (wrappers + stub share one identity)
-          /usr/bin/codesign --force --deep -s - "$_stub_dst" 2>/dev/null && \
+          # Codesign with real Apple Development identity (not ad-hoc)
+          /usr/bin/codesign --force --deep -s "Apple Development: odon5ht@gmail.com (497TM5HK44)" "$_stub_dst" && \
             echo "  codesigned: ${name}.app" || \
-            echo "  btm warn: codesign failed for ${name}.app" >&2
+            echo "  btm error: codesign failed for ${name}.app" >&2
         '') cfg.stubs)}
 
         _lsregister="/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister"

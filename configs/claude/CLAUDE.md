@@ -33,6 +33,12 @@ When working in a TypeScript codebase:
 - When implementing changes to the trading bot codebase, always run the full test suite (`npm test` or equivalent) after every refactoring step and confirm all tests pass before proceeding to the next change.
 - When modifying strategy logic or trading parameters, always preserve previously implemented features (profit-taking, hedge logic, partial sells, etc.) in new test runs. Never test a change in isolation that drops prior work.
 
+## Apple Code Signing
+- **Always sign with the real Apple Development identity**, never ad-hoc
+- Identity: `Apple Development: odon5ht@gmail.com (497TM5HK44)`
+- SHA-1: `8ACAA4DD2DE6B8737BFBDE14997489A7AFE66BAA`
+- Use: `codesign -fs "Apple Development: odon5ht@gmail.com (497TM5HK44)"` (or the SHA-1)
+
 ## Tool Installation
 - **NEVER install tools** (via brew, apt, pip, etc.) without explicit user permission
 - For one-off tool needs, use `nix-shell -p <package>` or `nix run nixpkgs#<package>` instead of installing

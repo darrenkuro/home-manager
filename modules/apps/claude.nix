@@ -104,7 +104,9 @@ in
     fi
   '';
 
+  # cc = claude code
   programs.zsh.shellAliases = {
-    clauded = "claude --dangerously-skip-permissions";
+    ccd = "claude --dangerously-skip-permissions";
+    ccu = "claude-usage";
   };
 }
