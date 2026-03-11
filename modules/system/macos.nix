@@ -4,6 +4,6 @@
   # Add new defaults here to ensure they're set on fresh installs.
   home.activation.macosDefaults = lib.hm.dag.entryAfter ["writeBoundary"] ''
     # Disable recent documents for all apps
-    defaults write -g NSRecentDocumentsLimit 0
+    /usr/bin/defaults write -g NSRecentDocumentsLimit 0
   '';
 }
