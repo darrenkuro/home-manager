@@ -16,16 +16,15 @@ let
 
   plist = btm.mkPlist {
     Label = "com.user.set-claude-config-dir";
-    ProgramArguments = [ "${config.btm.stubDir}/Claude.app/Contents/MacOS/ClaudeConfig" ];
+    BundleProgram = "Contents/MacOS/ClaudeConfig";
     RunAtLoad = true;
-    AssociatedBundleIdentifiers = [ "com.local.claude.stub" ];
   };
 
 in
 {
-  btm.agents."com.user.set-claude-config-dir" = plist;
   btm.stubs."Claude" = {
     src = ../../app-stubs/Claude.app;
     wrappers = [{ drv = wrapper; bin = "ClaudeConfig"; }];
+    agents = { "com.user.set-claude-config-dir" = plist; };
   };
 }

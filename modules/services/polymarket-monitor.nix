@@ -30,14 +30,13 @@ let
 
   plist = btm.mkPlist {
     Label = "com.polymarket.data-monitor";
-    ProgramArguments = [ "${config.btm.stubDir}/Polymarket.app/Contents/MacOS/PolymarketMonitor" ];
+    BundleProgram = "Contents/MacOS/PolymarketMonitor";
     WorkingDirectory = workDir;
     RunAtLoad = true;
     KeepAlive = true;
     ThrottleInterval = 10;
     StandardOutPath = "${logDir}/monitor.log";
     StandardErrorPath = "${logDir}/monitor.err";
-    AssociatedBundleIdentifiers = [ "com.local.polymarket-monitor.stub" ];
     EnvironmentVariables = {
       PATH = "${pkgs.nodejs}/bin:${pkgs.pnpm}/bin:/usr/bin:/bin";
       HOME = config.home.homeDirectory;
@@ -50,9 +49,9 @@ in
     mkdir -p ${logDir}
   '';
 
-  btm.agents."com.polymarket.data-monitor" = plist;
   btm.stubs."Polymarket" = {
     src = ../../app-stubs/Polymarket.app;
     wrappers = [{ drv = wrapper; bin = "PolymarketMonitor"; }];
+    agents = { "com.polymarket.data-monitor" = plist; };
   };
 }

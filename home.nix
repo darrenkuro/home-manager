@@ -163,6 +163,7 @@
     ++ lib.optionals (tag == "mac") [
       ./modules/system/macos.nix
       ./modules/services/btm.nix
+      ./modules/services/nix-btm.nix
       ./modules/services/claude-agent.nix
       ./modules/services/polymarket-monitor.nix
       ./modules/services/postgresql.nix

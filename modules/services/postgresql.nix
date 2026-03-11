@@ -150,16 +150,16 @@ let
   };
 
   # ── Launchd Plists ──
-  # ProgramArguments points inside the stub so BTM finds the .app by path containment
+  # BundleProgram is relative to the .app bundle root — resolved by SMAppService.
+  # No AssociatedBundleIdentifiers needed; SM handles parent association.
   serverPlist = btm.mkPlist {
     Label = "org.postgresql.server";
-    ProgramArguments = [ "${config.btm.stubDir}/Postgres.app/Contents/MacOS/PostgresServer" ];
+    BundleProgram = "Contents/MacOS/PostgresServer";
     RunAtLoad = true;
     KeepAlive = true;
     ThrottleInterval = 10;
     StandardOutPath = "${logDir}/launchd-stdout.log";
     StandardErrorPath = "${logDir}/launchd-stderr.log";
-    AssociatedBundleIdentifiers = [ "com.local.postgres.stub" ];
     EnvironmentVariables = {
       PATH = "${pg}/bin:/usr/bin:/bin";
       HOME = config.home.homeDirectory;
@@ -169,11 +169,10 @@ let
 
   backupPlist = btm.mkPlist {
     Label = "org.postgresql.backup";
-    ProgramArguments = [ "${config.btm.stubDir}/Postgres.app/Contents/MacOS/PostgresBackup" ];
+    BundleProgram = "Contents/MacOS/PostgresBackup";
     StartCalendarInterval = [ backupInterval ];
     StandardOutPath = "${logDir}/backup-stdout.log";
     StandardErrorPath = "${logDir}/backup-stderr.log";
-    AssociatedBundleIdentifiers = [ "com.local.postgres.stub" ];
     EnvironmentVariables = {
       PATH = "${pg}/bin:/usr/bin:/bin";
       HOME = config.home.homeDirectory;
@@ -206,17 +205,16 @@ in
   '';
 
   # ── Register with BTM module ──
-  btm.agents = {
-    "org.postgresql.server" = serverPlist;
-    "org.postgresql.backup" = backupPlist;
-  };
-
   btm.stubs."Postgres" = {
     src = ../../app-stubs/Postgres.app;
     wrappers = [
       { drv = serverWrapper; bin = "PostgresServer"; }
       { drv = backupWrapper; bin = "PostgresBackup"; }
     ];
+    agents = {
+      "org.postgresql.server" = serverPlist;
+      "org.postgresql.backup" = backupPlist;
+    };
   };
 
   # ── Environment Variables ──

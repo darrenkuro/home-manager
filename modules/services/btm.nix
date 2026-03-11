@@ -1,44 +1,43 @@
-# BTM (Background Task Management) module — shared activation for launchd agents.
+# BTM (Background Task Management) module — app stubs + grouped agent registration.
 #
 # ── How it works ──
-# Service modules register their agents and app stubs via options:
-#   btm.agents.<label> = plistDerivation;   (from mkPlist)
-#   btm.stubs.<Name>   = { src, wrappers }  (static .app from configs/app-stubs/)
+# Service modules register stubs with optional agents:
+#   btm.stubs.<Name> = { src, wrappers, agents }
 #
-# This module's activation script then:
-#   1. Copies app stubs from the repo, embeds wrapper binaries + Stub launcher into Contents/MacOS/
-#   2. Codesigns each stub with Apple Development identity (real Team ID for BTM)
-#   3. Registers stubs with LaunchServices for bundle ID → icon resolution
-#   4. Opens each stub app to register it as a parent app in BTM (enables AssociatedBundleIdentifiers)
-#   5. Installs/updates plists whose ProgramArguments point inside the stub
-#   6. Removes agents from previous generations that are no longer registered
+# This module's activation script:
+#   1. Copies app stubs from repo, embeds wrappers into Contents/MacOS/
+#   2. Codesigns each stub with Apple Development identity
+#   3. Opens each stub to register it as a BTM parent (enables grouping)
+#   4. Installs agent plists via launchctl with AssociatedBundleIdentifiers
+#      pointing to the stub's bundle ID → agents appear grouped under the stub
 #
-# ── Why wrapper binaries go inside the .app ──
-# BTM resolves icons via path containment: if ProgramArguments points to a binary
-# inside a .app bundle, BTM uses that bundle's icon. Stubs are signed with the
-# user's Apple Development identity (not ad-hoc) so BTM gets a real Team ID.
+# For stubs without agents (e.g. Nix), only BTM parent registration is done.
+#
+# ── Grouping ──
+# `open Foo.app` registers the stub as a type 0x2 parent entry in BTM.
+# Agent plists include AssociatedBundleIdentifiers referencing the stub's
+# CFBundleIdentifier. BTM then shows "Postgres — 2 items" in Login Items.
 #
 # ── Icon refresh ──
 # After first setup or icon changes, a reboot (or logout/login) is needed for
-# BTM to pick up the new icons. Do NOT use `sfltool resetbtm` — that wipes ALL
-# login items and background items system-wide.
-#
-# ── Why not use HM's launchd.agents? ──
-# HM wraps ProgramArguments in `/bin/sh -c "wait4path..."`, so BTM shows "sh"
-# for every agent. Our mkWrapper bakes in wait4path directly, and mkPlist
-# bypasses HM's mutateConfig entirely. See lib/launchd-btm.nix for details.
+# BTM to pick up the new icons. Do NOT use `sfltool resetbtm`.
 { config, lib, pkgs, ... }:
 
 let
   cfg = config.btm;
   homeDir = config.home.homeDirectory;
-  dstDir = "${homeDir}/Library/LaunchAgents";
+  agentDir = "${homeDir}/Library/LaunchAgents";
+
+  # Collect all agent labels across all stubs (for migration)
+  allAgentLabels = lib.concatLists (lib.mapAttrsToList
+    (_: stubCfg: lib.attrNames stubCfg.agents)
+    cfg.stubs);
 
   stubType = lib.types.submodule {
     options = {
       src = lib.mkOption {
         type = lib.types.path;
-        description = "Path to the .app bundle in the repo (e.g. ../../configs/app-stubs/Claude.app).";
+        description = "Path to the .app bundle in the repo.";
       };
       wrappers = lib.mkOption {
         type = lib.types.listOf (lib.types.submodule {
@@ -48,44 +47,36 @@ let
           };
         });
         default = [];
-        description = "Wrapper binaries to embed in Contents/MacOS/ for path-based BTM icon resolution.";
+        description = "Wrapper binaries to embed in Contents/MacOS/.";
+      };
+      agents = lib.mkOption {
+        type = lib.types.attrsOf lib.types.package;
+        default = { };
+        description = "Map of launchd label to plist derivation (from mkPlist with BundleProgram).";
       };
     };
   };
 in
 {
   options.btm = {
-    agents = lib.mkOption {
-      type = lib.types.attrsOf lib.types.package;
-      default = { };
-      description = "Map of launchd label to plist derivation.";
-    };
-
     stubs = lib.mkOption {
       type = lib.types.attrsOf stubType;
       default = { };
-      description = "Map of PascalCase app name to { src, wrappers }.";
+      description = "Map of PascalCase app name to { src, wrappers, agents }.";
     };
 
     stubDir = lib.mkOption {
       type = lib.types.str;
       default = "${config.home.homeDirectory}/.local/share/app-stubs";
       readOnly = true;
-      description = "Directory where app stubs are installed. Used by service modules to build ProgramArguments paths.";
+      description = "Directory where app stubs are installed.";
     };
   };
 
-  config = lib.mkIf (cfg.agents != { }) {
+  config = lib.mkIf (cfg.stubs != { }) {
 
-    # Write current agent labels to disk so the next generation can diff
-    # and clean up any agents that were removed.
-    home.file.".local/share/app-stubs/.btm-labels".text =
-      lib.concatStringsSep "\n" (lib.attrNames cfg.agents);
-
-    # DAG ordering: run after HM's built-in launchd cleanup (setupLaunchAgents)
-    # and after service-specific init (postgresqlInit creates data dir,
-    # createPolymarketLogDir creates log dir) so everything is ready before
-    # we bootstrap agents that depend on those paths.
+    # DAG ordering: run after HM's built-in launchd cleanup and after
+    # service-specific init steps so everything is ready before we register agents.
     home.activation.btmLaunchAgents = lib.hm.dag.entryAfter [
       "writeBoundary"
       "setupLaunchAgents"
@@ -94,109 +85,105 @@ in
     ] ''
       set +e
 
-      # ── Helper: stop an agent (safe if already stopped) ──
-      _btm_bootout() {
-        local label="$1"
-        local out
-        out=$(/bin/launchctl bootout "gui/$UID/$label" 2>&1) || {
-          if [[ "$out" != *"No such process"* && "$out" != *"Could not find"* ]]; then
-            echo "  btm warn: bootout $label: $out" >&2
-          fi
-        }
-        sleep 1
-      }
+      echo "BTM: syncing stubs and agents..."
+      mkdir -p "${cfg.stubDir}"
 
-      # ── Helper: install plist and start an agent ──
-      _btm_bootstrap() {
-        local src="$1" dst="$2" label="$3"
-        install -Dm444 "$src" "$dst"
-        local out
-        out=$(/bin/launchctl bootstrap "gui/$UID" "$dst" 2>&1) || {
-          echo "  btm error: bootstrap $label: $out" >&2
-          return 1
-        }
-      }
-
-      echo "BTM: syncing launch agents..."
-      mkdir -p "${dstDir}"
-
-      # ── App stubs: install BEFORE bootstrapping agents ──
-      # ProgramArguments points to executables inside the .app bundles, so stubs
-      # must exist before launchd tries to start the agents.
-      ${lib.optionalString (cfg.stubs != { }) ''
-        mkdir -p "${cfg.stubDir}"
-
-        ${lib.concatStringsSep "\n" (lib.mapAttrsToList (name: stubCfg: ''
-          _stub_dst="${cfg.stubDir}/${name}.app"
-          _stub_src="${stubCfg.src}"
-
-          # Always reinstall (cheap, ensures wrappers are current)
-          echo "  installing stub: ${name}.app"
-          [ -d "$_stub_dst" ] && chmod -R u+w "$_stub_dst"
-          rm -rf "$_stub_dst"
-          cp -R "$_stub_src" "$_stub_dst"
-          chmod -R u+w "$_stub_dst"
-
-          # Create a no-op Stub binary so `open` can launch the app (registers it in BTM as a parent app)
-          printf '#!/bin/sh\nexit 0\n' > "$_stub_dst/Contents/MacOS/Stub"
-          chmod u+x "$_stub_dst/Contents/MacOS/Stub"
-
-          # Embed wrapper binaries into Contents/MacOS/
-          ${lib.concatMapStringsSep "\n" (w: ''
-            cp "${w.drv}/bin/${w.bin}" "$_stub_dst/Contents/MacOS/${w.bin}"
-            chmod u+wx "$_stub_dst/Contents/MacOS/${w.bin}"
-          '') stubCfg.wrappers}
-
-          # Codesign with real Apple Development identity (not ad-hoc)
-          /usr/bin/codesign --force --deep -s "Apple Development: odon5ht@gmail.com (497TM5HK44)" "$_stub_dst" && \
-            echo "  codesigned: ${name}.app" || \
-            echo "  btm error: codesign failed for ${name}.app" >&2
-        '') cfg.stubs)}
-
-        _lsregister="/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister"
-        if [ -x "$_lsregister" ]; then
-          for app in "${cfg.stubDir}"/*.app; do
-            [ -d "$app" ] && "$_lsregister" -f "$app" 2>/dev/null
-          done
-          echo "  registered stubs with LaunchServices"
-        fi
-
-        # Open each stub app to register it as a parent app (type 0x2) in BTM.
-        # This is required for AssociatedBundleIdentifiers to link agents to their
-        # parent app, so the UI shows the app name + icon instead of developer name.
-        # LSUIElement=true keeps them out of the Dock; Stub binary exits immediately.
-        for app in "${cfg.stubDir}"/*.app; do
-          [ -d "$app" ] && /usr/bin/open "$app" 2>/dev/null
-        done
-        sleep 2
-        echo "  opened stubs to register in BTM"
-      ''}
-
-      # ── Install / update: only touch agents whose plist actually changed ──
-      ${lib.concatStringsSep "\n" (lib.mapAttrsToList (label: plistDrv: ''
-        _dst="${dstDir}/${label}.plist"
-        if ! cmp -s "${plistDrv}" "$_dst" 2>/dev/null; then
-          echo "  updating: ${label}"
-          _btm_bootout "${label}"
-          _btm_bootstrap "${plistDrv}" "$_dst" "${label}"
-        fi
-      '') cfg.agents)}
-
-      # ── Cleanup: remove agents from previous generation that are no longer registered ──
-      _prev_labels="${cfg.stubDir}/.btm-labels"
-      if [ -f "$_prev_labels" ]; then
-        while IFS= read -r label; do
-          [ -z "$label" ] && continue
-          case "$label" in
-            ${lib.concatStringsSep "|" (lib.attrNames cfg.agents)}) ;;  # still active
-            *)
-              echo "  removing: $label"
-              _btm_bootout "$label"
-              rm -f "${dstDir}/$label.plist"
-              ;;
-          esac
-        done < "$_prev_labels"
+      # ── One-time migration from old btm.nix (separate btm.agents option) ──
+      _migrated_marker="${cfg.stubDir}/.migrated"
+      if [ ! -f "$_migrated_marker" ]; then
+        # Remove old tracking file
+        rm -f "${cfg.stubDir}/.btm-labels"
+        rm -f "${cfg.stubDir}"/.StubLauncher-*
+        rm -f "${cfg.stubDir}"/.migrated-to-sm
+        touch "$_migrated_marker"
       fi
+
+      # ── Install stubs ──
+      ${lib.concatStringsSep "\n\n" (lib.mapAttrsToList (name: stubCfg: ''
+        # ── ${name} ──
+        _stub_dst="${cfg.stubDir}/${name}.app"
+        _stub_src="${stubCfg.src}"
+
+        echo "  installing stub: ${name}.app"
+        [ -d "$_stub_dst" ] && chmod -R u+w "$_stub_dst"
+        rm -rf "$_stub_dst"
+        cp -R "$_stub_src" "$_stub_dst"
+        chmod -R u+w "$_stub_dst"
+
+        # Embed wrapper binaries into Contents/MacOS/
+        ${lib.concatMapStringsSep "\n" (w: ''
+          cp "${w.drv}/bin/${w.bin}" "$_stub_dst/Contents/MacOS/${w.bin}"
+          chmod u+wx "$_stub_dst/Contents/MacOS/${w.bin}"
+        '') stubCfg.wrappers}
+
+        # No-op Stub binary — `open` launches it to register the app in BTM
+        printf '#!/bin/sh\nexit 0\n' > "$_stub_dst/Contents/MacOS/Stub"
+        chmod u+x "$_stub_dst/Contents/MacOS/Stub"
+
+        # Codesign with real Apple Development identity
+        /usr/bin/codesign --force --deep \
+          -s "Apple Development: odon5ht@gmail.com (497TM5HK44)" \
+          "$_stub_dst" && \
+          echo "  codesigned: ${name}.app" || \
+          echo "  btm error: codesign failed for ${name}.app" >&2
+      '') cfg.stubs)}
+
+      # ── Open stubs to register as BTM parent apps ──
+      for app in "${cfg.stubDir}"/*.app; do
+        [ -d "$app" ] && /usr/bin/open "$app" 2>/dev/null
+      done
+      sleep 1
+
+      # ── Install / update agents via launchctl ──
+      # Converts BundleProgram → ProgramArguments and adds AssociatedBundleIdentifiers
+      # for grouping under the parent stub.
+      ${lib.concatStringsSep "\n" (lib.mapAttrsToList (name: stubCfg:
+        lib.concatStringsSep "\n" (lib.mapAttrsToList (label: plistDrv: ''
+          _dst="${agentDir}/${label}.plist"
+          _stub_path="${cfg.stubDir}/${name}.app"
+          _need_install=0
+
+          if ! /bin/launchctl print "gui/$UID/${label}" &>/dev/null; then
+            _need_install=1
+          elif ! cmp -s "${plistDrv}" "${cfg.stubDir}/.plist-src-${label}" 2>/dev/null; then
+            # Plist source changed (e.g. Nix store paths updated) — reinstall
+            _need_install=1
+            /bin/launchctl bootout "gui/$UID/${label}" 2>/dev/null
+            sleep 1
+          fi
+
+          if [ "$_need_install" -eq 1 ]; then
+            echo "  installing: ${label}"
+
+            # Convert BundleProgram → ProgramArguments for launchctl
+            _bp=$(/usr/libexec/PlistBuddy -c "Print :BundleProgram" "${plistDrv}" 2>/dev/null)
+            if [ -n "$_bp" ]; then
+              cp "${plistDrv}" "$_dst"
+              chmod u+w "$_dst"
+              /usr/libexec/PlistBuddy \
+                -c "Delete :BundleProgram" \
+                -c "Add :ProgramArguments array" \
+                -c "Add :ProgramArguments:0 string $_stub_path/$_bp" \
+                "$_dst" 2>/dev/null
+              _bid=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$_stub_path/Contents/Info.plist" 2>/dev/null)
+              if [ -n "$_bid" ]; then
+                /usr/libexec/PlistBuddy \
+                  -c "Add :AssociatedBundleIdentifiers array" \
+                  -c "Add :AssociatedBundleIdentifiers:0 string $_bid" \
+                  "$_dst" 2>/dev/null
+              fi
+            else
+              install -Dm444 "${plistDrv}" "$_dst"
+            fi
+
+            /bin/launchctl bootstrap "gui/$UID" "$_dst" 2>&1 || \
+              echo "  btm error: bootstrap ${label} failed" >&2
+
+            # Cache plist source for change detection
+            cp "${plistDrv}" "${cfg.stubDir}/.plist-src-${label}"
+          fi
+        '') stubCfg.agents)
+      ) cfg.stubs)}
 
       echo "BTM: done"
       set -e
