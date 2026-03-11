@@ -2,17 +2,11 @@
 #
 # Sets CLAUDE_CONFIG_DIR at login so all processes (including GUI apps) see it.
 # One-shot: runs at load, no KeepAlive.
-#
-# Creates:
-#   - ClaudeConfig wrapper → named binary for BTM/ps display
-#   - Claude.app stub      → BTM icon (uses Claude.icns)
-#   - Launchd plist via btm.agents (bypassing HM's mutateConfig)
 { config, lib, pkgs, ... }:
 
 let
   btm = import ../../lib/launchd-btm.nix { inherit lib pkgs; };
 
-  # ── Named Wrapper ──
   wrapper = btm.mkWrapper {
     name = "ClaudeConfig";
     text = ''
@@ -20,17 +14,9 @@ let
     '';
   };
 
-  # ── App Stub ──
-  stub = btm.mkAppStub {
-    name = "Claude";
-    bundleId = "com.local.claude.stub";
-    icon = ../../configs/icons/Claude.icns;
-  };
-
-  # ── Launchd Plist ──
   plist = btm.mkPlist {
     Label = "com.user.set-claude-config-dir";
-    ProgramArguments = [ "${wrapper}/bin/ClaudeConfig" ];
+    ProgramArguments = [ "${config.btm.stubDir}/Claude.app/Contents/MacOS/ClaudeConfig" ];
     RunAtLoad = true;
     AssociatedBundleIdentifiers = [ "com.local.claude.stub" ];
   };
@@ -38,5 +24,8 @@ let
 in
 {
   btm.agents."com.user.set-claude-config-dir" = plist;
-  btm.stubs."Claude" = stub;
+  btm.stubs."Claude" = {
+    src = ../../app-stubs/Claude.app;
+    wrappers = [{ drv = wrapper; bin = "ClaudeConfig"; }];
+  };
 }

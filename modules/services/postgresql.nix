@@ -149,17 +149,11 @@ let
     '';
   };
 
-  # ── App Stub (shared icon for both server + backup) ──
-  postgresStub = btm.mkAppStub {
-    name = "Postgres";
-    bundleId = "com.local.postgres.stub";
-    icon = ../../configs/icons/Postgre.icns;
-  };
-
   # ── Launchd Plists ──
+  # ProgramArguments points inside the stub so BTM finds the .app by path containment
   serverPlist = btm.mkPlist {
     Label = "org.postgresql.server";
-    ProgramArguments = [ "${serverWrapper}/bin/PostgresServer" ];
+    ProgramArguments = [ "${config.btm.stubDir}/Postgres.app/Contents/MacOS/PostgresServer" ];
     RunAtLoad = true;
     KeepAlive = true;
     ThrottleInterval = 10;
@@ -175,7 +169,7 @@ let
 
   backupPlist = btm.mkPlist {
     Label = "org.postgresql.backup";
-    ProgramArguments = [ "${backupWrapper}/bin/PostgresBackup" ];
+    ProgramArguments = [ "${config.btm.stubDir}/Postgres.app/Contents/MacOS/PostgresBackup" ];
     StartCalendarInterval = [ backupInterval ];
     StandardOutPath = "${logDir}/backup-stdout.log";
     StandardErrorPath = "${logDir}/backup-stderr.log";
@@ -217,8 +211,12 @@ in
     "org.postgresql.backup" = backupPlist;
   };
 
-  btm.stubs = {
-    "Postgres" = postgresStub;
+  btm.stubs."Postgres" = {
+    src = ../../app-stubs/Postgres.app;
+    wrappers = [
+      { drv = serverWrapper; bin = "PostgresServer"; }
+      { drv = backupWrapper; bin = "PostgresBackup"; }
+    ];
   };
 
   # ── Environment Variables ──

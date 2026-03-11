@@ -48,12 +48,13 @@ nix-collect-garbage -d
 ### BTM (Background Task Management) — macOS Launch Agents
 Bypasses home-manager's default `launchd.agents` which wraps `ProgramArguments` in `/bin/sh -c "wait4path..."`, causing macOS BTM to show "sh" for all agents.
 
-**3-layer architecture:**
-- `lib/launchd-btm.nix` — pure builders: `mkWrapper` (named shell binary with wait4path baked in), `mkAppStub` (minimal .app bundle for BTM icons), `mkPlist` (launchd plist from attrset)
-- `modules/services/btm.nix` — shared activation module: bootout/bootstrap lifecycle, stub installation, lsregister, cleanup of removed agents across generations
-- `modules/services/*.nix` — each service registers via `btm.agents.<label>` and `btm.stubs.<Name>`
+**Architecture:**
+- `lib/launchd-btm.nix` — pure builders: `mkWrapper` (named shell binary with wait4path baked in), `mkPlist` (launchd plist from attrset)
+- `app-stubs/` — static .app bundles (Info.plist, icon, dummy executable) for BTM icon resolution
+- `modules/services/btm.nix` — shared activation: copies stubs, embeds wrapper binaries, codesigns, lsregister, bootout/bootstrap lifecycle
+- `modules/services/*.nix` — each service registers via `btm.agents.<label>` and `btm.stubs.<Name> = { src, wrappers }`
 
-**How icons work:** plist `AssociatedBundleIdentifiers` → LaunchServices lookup → app stub `CFBundleIconFile`. After changes, run `sudo sfltool resetbtm` + reboot to refresh BTM cache.
+**How icons work:** ProgramArguments points to a wrapper binary inside the .app stub. BTM resolves icons by path containment (executable is inside a .app → use that app's icon). Stubs are ad-hoc codesigned at activation time so the wrapper + bundle share one identity. After icon changes, reboot to refresh BTM. Do NOT use `sfltool resetbtm` — it wipes ALL login items system-wide.
 
 **Current agents:** `postgresql.nix` (server + backup), `polymarket-monitor.nix`, `claude-agent.nix` (sets CLAUDE_CONFIG_DIR at login)
 
@@ -71,8 +72,8 @@ Sourced at shell init via `scripts/source.sh` which iterates `$HM/functions/*.sh
 
 `copy-files.sh` runs during `home.activation` after `writeBoundary`. It uses `envsubst` for templating and `jq` for merging JSON keys.
 
-### Icons
-`configs/icons/` — `.icns` files for BTM app stubs (Claude.icns, Script_Editor.icns, Postgre.icns)
+### App Stubs
+`app-stubs/` — Static `.app` bundles for BTM icons. Each contains `Info.plist`, `PkgInfo`, dummy executable, and `icon.icns`. Wrapper binaries are embedded at activation time by `btm.nix`.
 
 ### Claude Code Config
 Managed via `modules/apps/claude.nix`:

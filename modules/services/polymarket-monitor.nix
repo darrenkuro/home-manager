@@ -1,12 +1,6 @@
 # Polymarket Data Monitor — BTM-friendly launchd agent for macOS
 #
-# Uses the BTM module (btm.nix) instead of launchd.agents to avoid
-# the /bin/sh wrapper that makes BTM show "sh" as the process name.
-#
-# Creates:
-#   - PolymarketMonitor wrapper → named binary for BTM/ps display
-#   - ScriptEditor.app stub    → BTM icon (uses Script_Editor.icns)
-#   - Launchd plist via btm.agents (bypassing HM's mutateConfig)
+# Runs the data monitor script in the background with auto-restart.
 { config, lib, pkgs, ... }:
 
 let
@@ -15,8 +9,7 @@ let
   workDir = "/Users/darrenlu/Documents/dev/polymarket-trading-bot";
   logDir = "/tmp/polymarket";
 
-  # ── Named Wrapper ──
-  monitorWrapper = btm.mkWrapper {
+  wrapper = btm.mkWrapper {
     name = "PolymarketMonitor";
     runtimeInputs = [ pkgs.nodejs pkgs.pnpm ];
     text = ''
@@ -35,17 +28,9 @@ let
     '';
   };
 
-  # ── App Stub ──
-  monitorStub = btm.mkAppStub {
-    name = "Polymarket";
-    bundleId = "com.local.polymarket-monitor.stub";
-    icon = ../../configs/icons/Script_Editor.icns;
-  };
-
-  # ── Launchd Plist ──
-  monitorPlist = btm.mkPlist {
+  plist = btm.mkPlist {
     Label = "com.polymarket.data-monitor";
-    ProgramArguments = [ "${monitorWrapper}/bin/PolymarketMonitor" ];
+    ProgramArguments = [ "${config.btm.stubDir}/Polymarket.app/Contents/MacOS/PolymarketMonitor" ];
     WorkingDirectory = workDir;
     RunAtLoad = true;
     KeepAlive = true;
@@ -61,12 +46,13 @@ let
 
 in
 {
-  # ── Directory Setup ──
   home.activation.createPolymarketLogDir = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     mkdir -p ${logDir}
   '';
 
-  # ── BTM Registration ──
-  btm.agents."com.polymarket.data-monitor" = monitorPlist;
-  btm.stubs."Polymarket" = monitorStub;
+  btm.agents."com.polymarket.data-monitor" = plist;
+  btm.stubs."Polymarket" = {
+    src = ../../app-stubs/Polymarket.app;
+    wrappers = [{ drv = wrapper; bin = "PolymarketMonitor"; }];
+  };
 }
