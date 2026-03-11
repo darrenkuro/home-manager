@@ -55,7 +55,6 @@ in
   ] ''
     set +e
     _stub_macos="${stubDir}/Nix.app/Contents/MacOS"
-    _patched=0
 
     ${lib.concatMapStringsSep "\n" (d: ''
       if [ -f "${d.plist}" ]; then
@@ -73,7 +72,6 @@ in
               "${d.plist}" 2>/dev/null && \
               echo "  patched: $(basename "${d.plist}")" || \
               echo "  btm error: failed to patch $(basename "${d.plist}")" >&2
-            _patched=1
           else
             echo "BTM: Nix daemon plists need patching (requires sudo)."
             echo "  Run: sudo -v && re"

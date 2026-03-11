@@ -28,7 +28,7 @@ let
   homeDir = config.home.homeDirectory;
   agentDir = "${homeDir}/Library/LaunchAgents";
 
-  # Collect all agent labels across all stubs (for migration)
+  # Collect all agent labels across all stubs (for stale agent cleanup)
   allAgentLabels = lib.concatLists (lib.mapAttrsToList
     (_: stubCfg: lib.attrNames stubCfg.agents)
     cfg.stubs);
