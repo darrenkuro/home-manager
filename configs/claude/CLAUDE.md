@@ -76,6 +76,9 @@ When working in a TypeScript codebase:
 - `LICENSE` — MIT License, year from `date +%Y`, copyright holder "Darren Kuro"
 - `README.md` — use the `/readme-style` skill for formatting
 
+## Project Context
+- When entering a repo to work on a project, always check for a CLAUDE.md (or .claude/CLAUDE.md) first. If one exists, read it before doing anything else — it contains project-specific instructions that override defaults.
+
 ## Workflow Orchestration
 
 ### 1. Plan Mode Default
