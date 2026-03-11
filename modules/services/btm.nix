@@ -6,11 +6,12 @@
 #   btm.stubs.<Name>   = { src, wrappers }  (static .app from configs/app-stubs/)
 #
 # This module's activation script then:
-#   1. Copies app stubs from the repo, embeds wrapper binaries into Contents/MacOS/
+#   1. Copies app stubs from the repo, embeds wrapper binaries + Stub launcher into Contents/MacOS/
 #   2. Codesigns each stub with Apple Development identity (real Team ID for BTM)
 #   3. Registers stubs with LaunchServices for bundle ID → icon resolution
-#   4. Installs/updates plists whose ProgramArguments point inside the stub
-#   5. Removes agents from previous generations that are no longer registered
+#   4. Opens each stub app to register it as a parent app in BTM (enables AssociatedBundleIdentifiers)
+#   5. Installs/updates plists whose ProgramArguments point inside the stub
+#   6. Removes agents from previous generations that are no longer registered
 #
 # ── Why wrapper binaries go inside the .app ──
 # BTM resolves icons via path containment: if ProgramArguments points to a binary
@@ -136,6 +137,10 @@ in
           cp -R "$_stub_src" "$_stub_dst"
           chmod -R u+w "$_stub_dst"
 
+          # Create a no-op Stub binary so `open` can launch the app (registers it in BTM as a parent app)
+          printf '#!/bin/sh\nexit 0\n' > "$_stub_dst/Contents/MacOS/Stub"
+          chmod u+x "$_stub_dst/Contents/MacOS/Stub"
+
           # Embed wrapper binaries into Contents/MacOS/
           ${lib.concatMapStringsSep "\n" (w: ''
             cp "${w.drv}/bin/${w.bin}" "$_stub_dst/Contents/MacOS/${w.bin}"
@@ -155,6 +160,16 @@ in
           done
           echo "  registered stubs with LaunchServices"
         fi
+
+        # Open each stub app to register it as a parent app (type 0x2) in BTM.
+        # This is required for AssociatedBundleIdentifiers to link agents to their
+        # parent app, so the UI shows the app name + icon instead of developer name.
+        # LSUIElement=true keeps them out of the Dock; Stub binary exits immediately.
+        for app in "${cfg.stubDir}"/*.app; do
+          [ -d "$app" ] && /usr/bin/open "$app" 2>/dev/null
+        done
+        sleep 2
+        echo "  opened stubs to register in BTM"
       ''}
 
       # ── Install / update: only touch agents whose plist actually changed ──
