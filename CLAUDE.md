@@ -67,7 +67,7 @@ Bypasses home-manager's default `launchd.agents` which wraps `ProgramArguments` 
 Sourced at shell init via `scripts/source.sh` which iterates `$HM/functions/*.sh`.
 
 ### Config Files — Two Strategies
-1. **Nix-managed symlinks** (`xdg.configFile`) — for read-only configs (clang-format, starship, claude hooks/skills/CLAUDE.md)
+1. **Nix-managed symlinks** (`xdg.configFile`) — for read-only configs (clang-format, starship, claude hooks/CLAUDE.md, skills merged from flake inputs)
 2. **Copy-in-place** (`scripts/copy-files.sh`) — for configs that need to be writable at runtime (VSCode settings, taskrc, tmux, Claude `settings.json`)
 
 `copy-files.sh` runs during `home.activation` after `writeBoundary`. It uses `envsubst` for templating and `jq` for merging JSON keys.
@@ -77,7 +77,8 @@ Sourced at shell init via `scripts/source.sh` which iterates `$HM/functions/*.sh
 
 ### Claude Code Config
 Managed via `modules/apps/claude.nix`:
-- `CLAUDE.md`, `skills/`, `hooks/` — symlinked from `configs/claude/` (read-only, Nix-managed)
+- `CLAUDE.md`, `hooks/` — symlinked from `configs/claude/` (read-only, Nix-managed)
+- `skills/` — merged from 3 flake inputs (`claude-skills`, `claude-plugins-official`, `obsidian-skills`) via `symlinkJoin`
 - `settings.json` — owned by Claude Code; hm only injects the `hooks` key via `jq` merge in `copy-files.sh`
 
 ### Key Environment Variables
