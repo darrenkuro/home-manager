@@ -1,7 +1,7 @@
 # Claude Code configuration — skills, hooks, CLAUDE.md
 #
 # Cross-platform: imported on both macOS and Linux.
-{ config, lib, pkgs, claude-plugins-official, obsidian-skills, ... }:
+{ config, lib, pkgs, claude-plugins-official, obsidian-skills, claude-skills, ... }:
 let
   claudeConfigDir = ../../configs/claude;
 
@@ -54,7 +54,7 @@ let
   mergedSkills = pkgs.symlinkJoin {
     name = "claude-skills-merged";
     paths = [
-      (claudeConfigDir + "/skills")
+      (claude-skills + "/skills")
       officialSkills
       (obsidian-skills + "/skills")
     ];

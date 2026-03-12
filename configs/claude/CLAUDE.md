@@ -12,7 +12,7 @@
 
 ## Claude Code Config Paths
 - Claude config directory: `~/.config/claude/` (or `$CLAUDE_CONFIG_DIR` if set)
-- Claude skills location: `~/.config/claude/skills/` (symlinked from hm)
+- Claude skills location: `~/.config/claude/skills/` (merged from multiple sources by hm)
 - `settings.json`: owned by Claude Code (not hm-managed). Hooks key injected by hm on `re`
 - `hooks/`: symlinked from hm (`~/.config/home-manager/configs/claude/hooks/`)
 - Plugins: use `/plugin install` directly — settings.json is writable
@@ -63,7 +63,7 @@ When working in a TypeScript codebase:
 - **Never leave background agents unresolved.** When a background agent completes, immediately read its results and report to the user. Do not claim an agent is "still running" without checking — use `TaskList` or resume the agent to verify. If an agent's results are no longer needed, say so explicitly rather than silently dropping them.
 
 ## Skills
-- Skills are managed by home-manager — source files live in `~/.config/home-manager/configs/claude/skills/`. After editing any SKILL.md or reference file, git commit in the hm repo before moving on.
+- Skills live in a separate repo: `~/Documents/dev/claude-skills` (GitHub: `darrenkuro/claude-skills`). After editing any SKILL.md or reference file, commit and push in that repo, then run `nix flake update claude-skills` in hm and `re` to deploy.
 - When creating or updating skills, invoke the `skill-creator` plugin (enabled in settings.json) which provides the full skill creation lifecycle including evals, benchmarking, and description optimization
 
 ## Git

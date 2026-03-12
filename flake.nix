@@ -13,6 +13,10 @@
       url = "github:kepano/obsidian-skills";
       flake = false;
     };
+    claude-skills = {
+      url = "git+ssh://git@github.com/darrenkuro/claude-skills";
+      flake = false;
+    };
   };
 
   outputs = {
@@ -20,6 +24,7 @@
     home-manager,
     claude-plugins-official,
     obsidian-skills,
+    claude-skills,
     ...
   }: let
     mkHome = {
@@ -33,7 +38,7 @@
         };
         extraSpecialArgs = {
           inherit tag system;
-          inherit claude-plugins-official obsidian-skills;
+          inherit claude-plugins-official obsidian-skills claude-skills;
         };
         modules = [./home.nix];
       };

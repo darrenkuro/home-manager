@@ -16,6 +16,22 @@
         "type": "github"
       }
     },
+    "claude-skills": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1773311697,
+        "narHash": "sha256-qi6KzT9ydeWWgQW8pnfcLVNKFjA6LnGp4EcBceZaD+s=",
+        "ref": "refs/heads/main",
+        "rev": "97a3462daef434b200b1675363350998bd14c2eb",
+        "revCount": 1,
+        "type": "git",
+        "url": "ssh://git@github.com/darrenkuro/claude-skills"
+      },
+      "original": {
+        "type": "git",
+        "url": "ssh://git@github.com/darrenkuro/claude-skills"
+      }
+    },
     "home-manager": {
       "inputs": {
         "nixpkgs": [
@@ -71,6 +87,7 @@
     "root": {
       "inputs": {
         "claude-plugins-official": "claude-plugins-official",
+        "claude-skills": "claude-skills",
         "home-manager": "home-manager",
         "nixpkgs": "nixpkgs",
         "obsidian-skills": "obsidian-skills"
