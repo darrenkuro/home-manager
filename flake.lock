@@ -1,5 +1,21 @@
 {
   "nodes": {
+    "claude-config": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1773313174,
+        "narHash": "sha256-azFg6hgpdGrER8SIEW/8/BCikekP6kr/dlw1e2w4zOQ=",
+        "ref": "refs/heads/main",
+        "rev": "67314c06393f36ea7492493f6173c9b7a3b4e264",
+        "revCount": 2,
+        "type": "git",
+        "url": "ssh://git@github.com/darrenkuro/claude-config"
+      },
+      "original": {
+        "type": "git",
+        "url": "ssh://git@github.com/darrenkuro/claude-config"
+      }
+    },
     "claude-plugins-official": {
       "flake": false,
       "locked": {
@@ -14,22 +30,6 @@
         "owner": "anthropics",
         "repo": "claude-plugins-official",
         "type": "github"
-      }
-    },
-    "claude-skills": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1773311697,
-        "narHash": "sha256-qi6KzT9ydeWWgQW8pnfcLVNKFjA6LnGp4EcBceZaD+s=",
-        "ref": "refs/heads/main",
-        "rev": "97a3462daef434b200b1675363350998bd14c2eb",
-        "revCount": 1,
-        "type": "git",
-        "url": "ssh://git@github.com/darrenkuro/claude-skills"
-      },
-      "original": {
-        "type": "git",
-        "url": "ssh://git@github.com/darrenkuro/claude-skills"
       }
     },
     "home-manager": {
@@ -86,8 +86,8 @@
     },
     "root": {
       "inputs": {
+        "claude-config": "claude-config",
         "claude-plugins-official": "claude-plugins-official",
-        "claude-skills": "claude-skills",
         "home-manager": "home-manager",
         "nixpkgs": "nixpkgs",
         "obsidian-skills": "obsidian-skills"

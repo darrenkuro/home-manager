@@ -63,7 +63,7 @@ When working in a TypeScript codebase:
 - **Never leave background agents unresolved.** When a background agent completes, immediately read its results and report to the user. Do not claim an agent is "still running" without checking — use `TaskList` or resume the agent to verify. If an agent's results are no longer needed, say so explicitly rather than silently dropping them.
 
 ## Skills
-- Skills live in a separate repo: `~/Documents/dev/claude-skills` (GitHub: `darrenkuro/claude-skills`). After editing any SKILL.md or reference file, commit and push in that repo, then run `nix flake update claude-skills` in hm and `re` to deploy.
+- Skills and hooks live in a separate repo: `~/Documents/dev/claude-config` (GitHub: `darrenkuro/claude-config`). After editing any SKILL.md, hook, or reference file, commit and push in that repo, then run `nix flake update claude-config` in hm and `re` to deploy.
 - When creating or updating skills, invoke the `skill-creator` plugin (enabled in settings.json) which provides the full skill creation lifecycle including evals, benchmarking, and description optimization
 
 ## Git

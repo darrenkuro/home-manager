@@ -1,7 +1,7 @@
 # Claude Code configuration — skills, hooks, CLAUDE.md
 #
 # Cross-platform: imported on both macOS and Linux.
-{ config, lib, pkgs, claude-plugins-official, obsidian-skills, claude-skills, ... }:
+{ config, lib, pkgs, claude-plugins-official, obsidian-skills, claude-config, ... }:
 let
   claudeConfigDir = ../../configs/claude;
 
@@ -52,9 +52,9 @@ let
   '';
 
   mergedSkills = pkgs.symlinkJoin {
-    name = "claude-skills-merged";
+    name = "claude-config-skills-merged";
     paths = [
-      (claude-skills + "/skills")
+      (claude-config + "/skills")
       officialSkills
       (obsidian-skills + "/skills")
     ];
@@ -64,7 +64,7 @@ in
   xdg.configFile = {
     "claude/CLAUDE.md".source = claudeConfigDir + "/CLAUDE.md";
     "claude/skills".source = mergedSkills;
-    "claude/hooks".source = claudeConfigDir + "/hooks";
+    "claude/hooks".source = claude-config + "/hooks";
   };
 
   # Post-activation check for Claude plugins

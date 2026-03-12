@@ -77,8 +77,8 @@ Sourced at shell init via `scripts/source.sh` which iterates `$HM/functions/*.sh
 
 ### Claude Code Config
 Managed via `modules/apps/claude.nix`:
-- `CLAUDE.md`, `hooks/` — symlinked from `configs/claude/` (read-only, Nix-managed)
-- `skills/` — merged from 3 flake inputs (`claude-skills`, `claude-plugins-official`, `obsidian-skills`) via `symlinkJoin`
+- `CLAUDE.md` — symlinked from `configs/claude/` (read-only, Nix-managed)
+- `skills/`, `hooks/` — merged/sourced from flake inputs (`claude-config`, `claude-plugins-official`, `obsidian-skills`) via `symlinkJoin`
 - `settings.json` — owned by Claude Code; hm only injects the `hooks` key via `jq` merge in `copy-files.sh`
 
 ### Key Environment Variables
