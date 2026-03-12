@@ -16,7 +16,7 @@ $install || {
 
 # --- Dependency check
 _SCRIPT_NAME="$(basename "${BASH_SOURCE[0]:-$0}")"
-REQUIRED_TOOLS=(git tokei trap mktemp)
+REQUIRED_TOOLS=(git tokei)
 _missing_tools=()
 
 for cmd in "${REQUIRED_TOOLS[@]}"; do
@@ -51,7 +51,10 @@ function normalize_repo_url() {
 }
 
 function gloc() {
+  local old_opts
+  old_opts=$(set +o)
   set -uo pipefail
+  trap 'eval "$old_opts"' RETURN
 
   if [[ $# -lt 1 ]]; then
     echo "Usage: gloc <repo_url|user/repo>" >&2
@@ -64,6 +67,7 @@ function gloc() {
 
   local tmp_dir
   tmp_dir="$(mktemp -d)"
+  trap '/bin/rm -rf "$tmp_dir"; eval "$old_opts"' RETURN
 
   echo "📥 Cloning ${repo_url}..."
   if ! git clone --depth 1 "$repo_url" "$tmp_dir" > /dev/null 2>&1; then
@@ -77,6 +81,6 @@ function gloc() {
     return 1
   fi
 
-  echo "🧹 Cleaned up $tmp_dir"
   /bin/rm -rf "$tmp_dir"
+  echo "🧹 Cleaned up $tmp_dir"
 }

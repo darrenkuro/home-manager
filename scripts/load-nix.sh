@@ -1,4 +1,4 @@
-# ChatGPT really seems to believe that sourcing this in .env is very important
+# Ensure nix-daemon is on PATH when not already available (e.g. GUI shells)
 
 if [[ ${HM_TAG-} == "MAC" ]] &&
   ! command -v nix > /dev/null 2>&1 &&

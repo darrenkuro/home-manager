@@ -3,7 +3,7 @@
     enable = true;
     enableZshIntegration = true;
     enableBashIntegration = true;
-    configPath = "$HM/configs/starship.toml"; #faster change
+    configPath = "$HM/configs/starship.toml"; # resolve at runtime so edits apply without rebuild
   };
   xdg.configFile."starship.toml".source = ../../configs/starship.toml;
   programs.zsh.shellAliases = {

@@ -10,7 +10,7 @@ mkdir -p "$VSCODE_DIR"
 envsubst < "$HM/configs/vscode-settings.jsonc" > "$VSCODE_DIR/settings.json"
 chmod u+w "$VSCODE_DIR/settings.json"
 
-# Tmux, since we ft-linux needs it outside anyway
+# Tmux, since ft-linux needs it outside of nix
 mkdir -p "$XDG_CONFIG_HOME/tmux"
 envsubst < "$HM/configs/tmux.conf" > "$XDG_CONFIG_HOME/tmux/tmux.conf"
 chmod u+w "$XDG_CONFIG_HOME/tmux/tmux.conf"
@@ -24,7 +24,7 @@ if [[ ${HM_TAG-} == "FT" ]]; then
   # Tmux, add default command to always use nix env
   tmux_conf="$XDG_CONFIG_HOME/tmux/tmux.conf"
   tmp_conf="$tmux_conf.tmp"
-  printf '%s\n' "set -g default-command 'exec /home/dlu/bin/nix-user-chroot "$HOME/sgoinfre/nix" zsh -l'" | cat - "$tmux_conf" > "$tmp_conf"
+  printf '%s\n' "set -g default-command 'exec /home/dlu/bin/nix-user-chroot \"$HOME/sgoinfre/nix\" zsh -l'" | cat - "$tmux_conf" > "$tmp_conf"
   mv "$tmp_conf" "$tmux_conf"
 
   # bin for autoload tmux and nix

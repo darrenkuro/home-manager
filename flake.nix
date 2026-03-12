@@ -15,43 +15,38 @@
     };
   };
 
-  outputs =
-    {
-      nixpkgs,
-      home-manager,
-      claude-plugins-official,
-      obsidian-skills,
-      ...
+  outputs = {
+    nixpkgs,
+    home-manager,
+    claude-plugins-official,
+    obsidian-skills,
+    ...
+  }: let
+    mkHome = {
+      system,
+      tag,
     }:
-    let
-      mkHome =
-        {
-          system,
-          tag,
-        }:
-        home-manager.lib.homeManagerConfiguration {
-          pkgs = import nixpkgs {
-            inherit system;
-            config.allowUnfree = true;
-          };
-          extraSpecialArgs = {
-        inherit tag system;
-        inherit claude-plugins-official obsidian-skills;
+      home-manager.lib.homeManagerConfiguration {
+        pkgs = import nixpkgs {
+          inherit system;
+          config.allowUnfree = true;
+        };
+        extraSpecialArgs = {
+          inherit tag system;
+          inherit claude-plugins-official obsidian-skills;
+        };
+        modules = [./home.nix];
       };
-          modules = [ ./home.nix ];
-        };
-    in
-    {
-      nix.settings.use-xdg-base-directories = true;
-      homeConfigurations = {
-        mac = mkHome {
-          system = "aarch64-darwin";
-          tag = "mac";
-        };
-        ft = mkHome {
-          system = "x86_64-linux";
-          tag = "ft";
-        };
+  in {
+    homeConfigurations = {
+      mac = mkHome {
+        system = "aarch64-darwin";
+        tag = "mac";
+      };
+      ft = mkHome {
+        system = "x86_64-linux";
+        tag = "ft";
       };
     };
+  };
 }

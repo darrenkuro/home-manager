@@ -41,7 +41,7 @@ unset REQUIRED_TOOLS _missing_tools _SCRIPT_NAME
 function claude-usage {
   local config_dir="${CLAUDE_CONFIG_DIR:-$HOME/.config/claude}"
   local suffix
-  suffix=$(python3 -c "import hashlib; print(hashlib.sha256('$config_dir'.encode()).hexdigest()[:8])")
+  suffix=$(printf '%s' "$config_dir" | python3 -c "import sys,hashlib; print(hashlib.sha256(sys.stdin.read().encode()).hexdigest()[:8])")
   local svc="Claude Code-credentials-$suffix"
 
   local creds

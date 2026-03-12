@@ -49,9 +49,8 @@
       openssl # Apple ships LibreSSL
       gnused  # Apple ships BSD-sed
       cmake
-      #nerd-fonts.hack
-      # cachix
-      # (pkgs.nerd-fonts.override {fonts = ["Hack"];})
+      # nerd-fonts.hack — not cached for aarch64-darwin
+      # cachix — not currently needed
     ]
     ++ lib.optionals (tag == "mac") [
       rustc
@@ -86,13 +85,11 @@
       docker-buildx
 
       pandoc
-      # typst
-    ]
-    ++ lib.optionals (tag == "ft") [
+      # typst — not currently needed
     ];
 
   # Ensure directories used exist
-  home.activation.createStateDirs = ''
+  home.activation.createStateDirs = lib.hm.dag.entryAfter ["writeBoundary"] ''
     mkdir -p \
       "$HOME/.local/state/zsh" \
       "$HOME/.local/state/bash" \

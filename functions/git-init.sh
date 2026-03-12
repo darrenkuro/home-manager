@@ -36,7 +36,10 @@ unset REQUIRED_TOOLS _missing_tools _SCRIPT_NAME
 
 # --- Source
 function git-init() {
+  local old_opts
+  old_opts=$(set +o)
   set -uo pipefail
+  trap 'eval "$old_opts"' RETURN
 
   local dir="${1:-.}"
   local public_flag="${2:-}"
@@ -73,7 +76,7 @@ function git-init() {
   git add LICENSE README.md
   git commit -m "Initial commit"
 
-  gh repo create "$repo_name" $visibility
+  gh repo create "$repo_name" "$visibility"
   git remote add origin "https://github.com/darrenkuro/$repo_name.git"
   git push -u origin main
 

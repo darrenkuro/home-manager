@@ -14,27 +14,36 @@ $install || {
   return 0 2> /dev/null || exit 0 # Context-aware exit
 }
 
+# --- Dependency check
+_SCRIPT_NAME=${BASH_SOURCE[0]:-${(%):-%N}}
+_SCRIPT_NAME=${_SCRIPT_NAME##*/}
+REQUIRED_TOOLS=(cc grep)
+_missing_tools=()
+
+for cmd in "${REQUIRED_TOOLS[@]}"; do
+  if ! command -v "$cmd" > /dev/null 2>&1; then
+    _missing_tools+=("$cmd")
+  fi
+done
+
+if [ ${#_missing_tools[@]} -gt 0 ]; then
+  printf '⚠️ Skipping sourcing of %s — missing required tools: %s\n' \
+    "$_SCRIPT_NAME" "${_missing_tools[*]}" >&2
+  unset REQUIRED_TOOLS _missing_tools _SCRIPT_NAME INSTALL_TAG install
+  return 1 2> /dev/null || exit 1
+fi
+
+unset REQUIRED_TOOLS _missing_tools _SCRIPT_NAME INSTALL_TAG install
+
+# --- Source
 function run() {
   if [ $# -eq 0 ]; then
     cc -Wall -Wextra -Werror -x c <(grep -hv "////" *.c)
-    ./a.out
-    ret=$?
-    /bin/rm a.out
-    return $ret
+  else
+    cc -Wall -Wextra -Werror -x c <(grep -v "////" "$1")
   fi
-  if [ $# -eq 1 ]; then
-    cc -Wall -Wextra -Werror -x c <(grep -v "////" $1)
-    ./a.out
-    ret=$?
-    /bin/rm a.out
-    return $ret
-  fi
-  if [ $# -gt 1 ]; then
-    cc -Wall -Wextra -Werror -x c <(grep -v "////" $1)
-    # combining all arguments from 2nd one
-    ./a.out ${*:2}
-    ret=$? #save the return code to return later
-    /bin/rm a.out
-    return $ret
-  fi
+  ./a.out "${@:2}"
+  local ret=$?
+  /bin/rm a.out
+  return $ret
 }

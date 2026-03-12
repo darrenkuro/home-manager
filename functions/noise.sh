@@ -40,25 +40,24 @@ unset REQUIRED_TOOLS _missing_tools _SCRIPT_NAME
 # --- Source
 
 function noise {
-    AUDIO_PATH="$DBOX/audio/ambience-noise-30m.aiff"
-    PID_FILE="/tmp/loop_audio.pid"
+    local AUDIO_PATH="$DBOX/audio/ambience-noise-30m.aiff"
+    local PID_FILE="/tmp/loop_audio.pid"
 
     # Ensure the audio file exists
     if [ ! -f "$AUDIO_PATH" ]; then
-        # osascript -e 'display notification "Audio file not found ❌"'
         echo "❌ Audio file not found: $AUDIO_PATH"
         return 1
     fi
 
-    # If already playing
+    # If already playing, toggle off
     if [ -f "$PID_FILE" ]; then
+        local PID
         PID=$(cat "$PID_FILE")
         if kill -0 "$PID" 2>/dev/null; then
             # Kill afplay child first, then the subshell
             pkill -P "$PID" 2>/dev/null
             kill "$PID" 2>/dev/null
             /bin/rm "$PID_FILE"
-            # osascript -e 'display notification "Stopped audio loop 🔇"'
             return 0
         else
             # PID file is stale
@@ -66,7 +65,6 @@ function noise {
         fi
     fi
 
-    # ffplay -nodisp -loop 0 "$AUDIO_PATH" </dev/null &> /dev/null &!
     # afplay has no loop option, so use a shell loop with trap to kill child on exit
     (
         trap 'kill $PID 2>/dev/null; exit' TERM
@@ -77,5 +75,4 @@ function noise {
         done
     ) >/dev/null 2>&1 &!
     echo $! > "$PID_FILE"
-    # osascript -e 'display notification "Started audio loop 🔁"'
 }
