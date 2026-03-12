@@ -2,8 +2,7 @@ INSTALL_TAG=(MAC)
 REQUIRED_TOOLS=(brew)
 _check_preamble || return 0
 
-# --- Source
-function tidy() {
+tidy() {
   # Colors and formatting
   local CYAN='\033[0;36m'
   local GREEN='\033[0;32m'

@@ -2,8 +2,7 @@ INSTALL_TAG=(MAC FT)
 REQUIRED_TOOLS=(cc grep)
 _check_preamble || return 0
 
-# --- Source
-function run() {
+run() {
   if [ $# -eq 0 ]; then
     cc -Wall -Wextra -Werror -x c <(grep -hv "////" *.c)
   else

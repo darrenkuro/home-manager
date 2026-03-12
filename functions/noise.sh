@@ -2,9 +2,7 @@ INSTALL_TAG=(MAC)
 REQUIRED_TOOLS=(afplay)
 _check_preamble || return 0
 
-# --- Source
-
-function noise {
+noise() {
     local AUDIO_PATH="$DBOX/audio/ambience-noise-30m.aiff"
     local PID_FILE="/tmp/loop_audio.pid"
 

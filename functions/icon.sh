@@ -3,12 +3,10 @@ INSTALL_TAG=()
 REQUIRED_TOOLS=(iconutil magick)
 _check_preamble || return 0
 
-# --- Source
-
 # Apply an ImageMagick -modulate transformation to every size of an ICNS image.
 #   $1 - path to the ICNS to transform
 #   $2 - argument for the ImageMagick -modulate flag
-function modulate_icns {
+modulate_icns() {
   local icns_path="$1"
   local modulate_arg="$2"
   local filename icon_name iconset_path out_path
@@ -26,7 +24,7 @@ function modulate_icns {
 
 # Invert (negate) the RGB channels of every size in an ICNS image.
 #   $1 - path to the ICNS to negate
-function negate_icns {
+negate_icns() {
   local icns_path="$1"
   local filename icon_name iconset_path out_path
 

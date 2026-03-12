@@ -2,9 +2,7 @@ INSTALL_TAG=(MAC)
 REQUIRED_TOOLS=(security python3 curl)
 _check_preamble || return 0
 
-# --- Source
-
-function claude-usage {
+claude-usage() {
   local config_dir="${CLAUDE_CONFIG_DIR:-$HOME/.config/claude}"
   local suffix
   suffix=$(printf '%s' "$config_dir" | python3 -c "import sys,hashlib; print(hashlib.sha256(sys.stdin.read().encode()).hexdigest()[:8])")

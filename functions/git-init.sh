@@ -2,8 +2,7 @@ INSTALL_TAG=(MAC FT)
 REQUIRED_TOOLS=(gh git)
 _check_preamble || return 0
 
-# --- Source
-function git-init() {
+git-init() {
   local old_opts
   old_opts=$(set +o)
   set -uo pipefail

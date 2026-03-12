@@ -2,9 +2,7 @@ INSTALL_TAG=(MAC FT)
 REQUIRED_TOOLS=(git tokei)
 _check_preamble || return 0
 
-# --- Source
-
-function normalize_repo_url() {
+normalize_repo_url() {
   local input="$1"
   input="${input#"${input%%[![:space:]]*}"}" # trim leading space
   input="${input%"${input##*[![:space:]]}"}" # trim trailing space
@@ -18,7 +16,7 @@ function normalize_repo_url() {
   fi
 }
 
-function gloc() {
+gloc() {
   local old_opts
   old_opts=$(set +o)
   set -uo pipefail
