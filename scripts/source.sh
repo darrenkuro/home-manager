@@ -1,8 +1,10 @@
 # Source all functions in /function dir
-# _preamble.sh sorts first (underscore < letters) and defines _check_preamble.
-# Each remaining script uses it to gate on INSTALL_TAG and REQUIRED_TOOLS.
+# Each script uses _check_preamble to gate on INSTALL_TAG and REQUIRED_TOOLS.
+
+source "$HM/functions/_preamble.sh"
 
 for f in "$HM"/functions/*.sh; do
+  [[ "$f" == */_preamble.sh ]] && continue
   [ -r "$f" ] && source "$f"
 done
 

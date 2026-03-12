@@ -4,6 +4,17 @@
 # are installed. Prints a warning and returns 1 on failure.
 # Both arrays are unset after the check regardless of outcome.
 #
+# Naming: the underscore prefix serves two purposes:
+#   1. Visually marks this as infrastructure, not a user-facing function
+#   2. Prevents glob conflicts — source.sh sources this file explicitly
+#      before iterating functions/*.sh and skips it in the loop
+#
+# Why not rely on glob sort order? Glob expansion sorts by LC_COLLATE.
+# In the C locale, _ (0x5F) sorts before lowercase letters (0x61+).
+# But in en_US.UTF-8 and other locales, collation rules may place
+# punctuation after letters, breaking the assumed ordering.
+# Explicit sourcing in source.sh avoids this locale dependency.
+#
 # Usage in each function file:
 #   INSTALL_TAG=(MAC FT)
 #   REQUIRED_TOOLS=(gh git)
