@@ -1,40 +1,6 @@
 INSTALL_TAG=(MAC)
-
-# --- Installation check
-install=false
-for tag in "${INSTALL_TAG[@]}"; do
-  if [ "$tag" = "$HM_TAG" ]; then
-    install=true
-    break
-  fi
-done
-
-$install || {
-  unset INSTALL_TAG install
-  return 0 2> /dev/null || exit 0 # Context-aware exit
-}
-
-# --- Dependency check
 REQUIRED_TOOLS=(security python3 curl)
-_missing_tools=()
-
-_SCRIPT_NAME=${BASH_SOURCE[0]:-${(%):-%N}}
-_SCRIPT_NAME=${_SCRIPT_NAME##*/}
-
-for cmd in "${REQUIRED_TOOLS[@]}"; do
-  if ! command -v "$cmd" >/dev/null 2>&1; then
-    _missing_tools+=("$cmd")
-  fi
-done
-
-if [ ${#_missing_tools[@]} -gt 0 ]; then
-  printf '⚠️ Skipping sourcing of %s — missing required tools: %s\n' \
-    "$_SCRIPT_NAME" "${_missing_tools[*]}" >&2
-  unset REQUIRED_TOOLS _missing_tools _SCRIPT_NAME
-  return 1 2>/dev/null || exit 1
-fi
-
-unset REQUIRED_TOOLS _missing_tools _SCRIPT_NAME
+_check_preamble || return 0
 
 # --- Source
 
