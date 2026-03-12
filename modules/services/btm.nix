@@ -170,8 +170,8 @@ in
             /bin/launchctl bootstrap "gui/$UID" "$_dst" 2>&1 || \
               echo "  btm error: bootstrap ${label} failed" >&2
 
-            # Cache plist source for change detection
-            cp "${plistDrv}" "${cfg.stubDir}/.plist-src-${label}"
+            # Cache plist source for change detection (writable so future runs can overwrite)
+            install -m 644 "${plistDrv}" "${cfg.stubDir}/.plist-src-${label}"
           fi
         '') stubCfg.agents)
       ) cfg.stubs)}
