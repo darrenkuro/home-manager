@@ -1,6 +1,6 @@
 ---
 name: gh-repo-style
-description: Audits, reviews, or checks a GitHub repo for hygiene. Ensures required files exist (README.md, LICENSE), LICENSE has no placeholders, repo .gitignore has no redundancy with global gitignore, .npmrc has no unnecessary settings (e.g. shamefully-hoist in non-Docker projects), and GitHub metadata (description, topics) is set.
+description: Audits, reviews, or checks a GitHub repo for hygiene and code quality. Ensures required files, LICENSE validity, gitignore hygiene, GitHub metadata, project-type compliance, and runs a full code quality review (dead code, best practices, architecture, style, comments) via /code-review.
 ---
 
 # GitHub Repo Style Audit
@@ -131,6 +131,19 @@ Check the loaded skill's scaffold structure, required config files, and key conv
 
 If no skill matches, skip this check.
 
+### 8. Code Quality Review
+
+Load the `/code-review` skill and apply it to all source files in the repo. This covers:
+- Dead code (unused variables, commented-out code, stale TODOs)
+- Code quality (complexity, DRY, single responsibility)
+- Best practices (error handling, safety, resource cleanup)
+- Clean architecture (separation of concerns, module patterns)
+- Comments & documentation (preambles, no stale/misleading comments, conciseness)
+- Uniform style (naming conventions, formatting, pattern compliance)
+- Conciseness (no over-abstraction, no redundant checks)
+
+Report findings using the `/code-review` output format (severity + file:line citations), then include a summary line in the main checklist below.
+
 ## Output Format
 
 Report as a checklist:
@@ -142,6 +155,7 @@ Report as a checklist:
 - [ ] .npmrc has unnecessary shamefully-hoist=true (no Docker/esbuild found)
 - [ ] GitHub description missing
 - [x] npm-package compliance (or: no matching project skill)
+- [ ] Code quality: 0 errors, 3 warns, 2 infos (details in /code-review report below)
 ```
 
 Then offer to fix all failing checks.
