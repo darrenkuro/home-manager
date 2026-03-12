@@ -4,7 +4,7 @@
 source "$HM/functions/_preamble.sh"
 
 for f in "$HM"/functions/*.sh; do
-  [[ "$f" == */_preamble.sh ]] && continue
+  [[ "${f##*/}" == _* ]] && continue
   [ -r "$f" ] && source "$f"
 done
 

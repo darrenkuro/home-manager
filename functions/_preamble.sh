@@ -6,8 +6,8 @@
 #
 # Naming: the underscore prefix serves two purposes:
 #   1. Visually marks this as infrastructure, not a user-facing function
-#   2. Prevents glob conflicts — source.sh sources this file explicitly
-#      before iterating functions/*.sh and skips it in the loop
+#   2. source.sh skips all _*.sh files in the loop — underscore-prefixed
+#      files are sourced explicitly where needed, not auto-loaded
 #
 # Why not rely on glob sort order? Glob expansion sorts by LC_COLLATE.
 # In the C locale, _ (0x5F) sorts before lowercase letters (0x61+).
