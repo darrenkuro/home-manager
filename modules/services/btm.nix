@@ -5,11 +5,11 @@
 #   btm.stubs.<Name> = { src, wrappers, agents }
 #
 # This module's activation script:
-#   1. Copies app stubs from repo, embeds wrappers into Contents/MacOS/
-#   2. Codesigns each stub with Apple Development identity
-#   3. Opens each stub to register it as a BTM parent (enables grouping)
-#   4. Installs agent plists via launchctl with AssociatedBundleIdentifiers
-#      pointing to the stub's bundle ID → agents appear grouped under the stub
+#   1. Checks stub manifests — skips copy/codesign if Nix store paths unchanged
+#   2. If changed: copies app stubs, embeds wrappers, codesigns, opens to register
+#   3. Checks agent plists — skips bootstrap if plist source unchanged
+#   4. If changed: installs plist with AssociatedBundleIdentifiers for BTM grouping
+#   5. Cleans up stale agents removed from config
 #
 # For stubs without agents (e.g. Nix), only BTM parent registration is done.
 #
@@ -88,42 +88,53 @@ in
       echo "BTM: syncing stubs and agents..."
       mkdir -p "${cfg.stubDir}"
 
-      # ── Install stubs ──
-      ${lib.concatStringsSep "\n\n" (lib.mapAttrsToList (name: stubCfg: ''
+      # ── Install stubs (with change detection) ──
+      ${lib.concatStringsSep "\n\n" (lib.mapAttrsToList (name: stubCfg: let
+        # Build expected manifest from Nix store paths (evaluated at build time)
+        manifestLines = [ "src=${stubCfg.src}" ]
+          ++ map (w: "wrapper=${w.bin}:${w.drv}") stubCfg.wrappers;
+        expectedManifest = lib.concatStringsSep "\\n" manifestLines;
+      in ''
         # ── ${name} ──
         _stub_dst="${cfg.stubDir}/${name}.app"
-        _stub_src="${stubCfg.src}"
+        _manifest="${cfg.stubDir}/.stub-manifest-${name}"
+        _expected="$(printf '${expectedManifest}\n')"
 
-        echo "  installing stub: ${name}.app"
-        [ -d "$_stub_dst" ] && chmod -R u+w "$_stub_dst"
-        rm -rf "$_stub_dst"
-        cp -R "$_stub_src" "$_stub_dst"
-        chmod -R u+w "$_stub_dst"
-        mkdir -p "$_stub_dst/Contents/MacOS"
+        if [ -f "$_manifest" ] && [ "$(cat "$_manifest")" = "$_expected" ] && [ -d "$_stub_dst" ]; then
+          echo "  stub unchanged: ${name}.app"
+        else
+          echo "  installing stub: ${name}.app"
+          [ -d "$_stub_dst" ] && chmod -R u+w "$_stub_dst"
+          rm -rf "$_stub_dst"
+          cp -R "${stubCfg.src}" "$_stub_dst"
+          chmod -R u+w "$_stub_dst"
+          mkdir -p "$_stub_dst/Contents/MacOS"
 
-        # Embed wrapper binaries into Contents/MacOS/
-        ${lib.concatMapStringsSep "\n" (w: ''
-          cp "${w.drv}/bin/${w.bin}" "$_stub_dst/Contents/MacOS/${w.bin}"
-          chmod u+wx "$_stub_dst/Contents/MacOS/${w.bin}"
-        '') stubCfg.wrappers}
+          # Embed wrapper binaries into Contents/MacOS/
+          ${lib.concatMapStringsSep "\n" (w: ''
+            cp "${w.drv}/bin/${w.bin}" "$_stub_dst/Contents/MacOS/${w.bin}"
+            chmod u+wx "$_stub_dst/Contents/MacOS/${w.bin}"
+          '') stubCfg.wrappers}
 
-        # No-op Stub binary — `open` launches it to register the app in BTM
-        printf '#!/bin/sh\nexit 0\n' > "$_stub_dst/Contents/MacOS/Stub"
-        chmod u+x "$_stub_dst/Contents/MacOS/Stub"
+          # No-op Stub binary — `open` launches it to register the app in BTM
+          printf '#!/bin/sh\nexit 0\n' > "$_stub_dst/Contents/MacOS/Stub"
+          chmod u+x "$_stub_dst/Contents/MacOS/Stub"
 
-        # Codesign with real Apple Development identity
-        /usr/bin/codesign --force --deep \
-          -s "Apple Development: odon5ht@gmail.com (497TM5HK44)" \
-          "$_stub_dst" && \
-          echo "  codesigned: ${name}.app" || \
-          echo "  btm error: codesign failed for ${name}.app" >&2
+          # Codesign with real Apple Development identity
+          /usr/bin/codesign --force --deep \
+            -s "Apple Development: odon5ht@gmail.com (497TM5HK44)" \
+            "$_stub_dst" && \
+            echo "  codesigned: ${name}.app" || \
+            echo "  btm error: codesign failed for ${name}.app" >&2
+
+          # Register as BTM parent app (only needed on install/update)
+          /usr/bin/open "$_stub_dst" 2>/dev/null
+          sleep 1
+
+          # Cache manifest for change detection
+          printf '%s\n' "$_expected" > "$_manifest"
+        fi
       '') cfg.stubs)}
-
-      # ── Open stubs to register as BTM parent apps ──
-      for app in "${cfg.stubDir}"/*.app; do
-        [ -d "$app" ] && /usr/bin/open "$app" 2>/dev/null
-      done
-      sleep 1
 
       # ── Install / update agents via launchctl ──
       # Converts BundleProgram → ProgramArguments and adds AssociatedBundleIdentifiers
