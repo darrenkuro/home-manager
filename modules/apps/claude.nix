@@ -106,6 +106,7 @@ in
   # cc = claude code
   programs.zsh.shellAliases = {
     ccd = "claude --dangerously-skip-permissions";
+    clauded = "claude --dangerously-skip-permissions";
     ccu = "claude-usage";
   };
 }
