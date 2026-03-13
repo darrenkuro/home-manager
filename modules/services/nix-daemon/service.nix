@@ -20,18 +20,28 @@ let
   nixStoreMountWrapper = btm.mkWrapper {
     name = "NixStoreMount";
     text = ''
-      # Dynamically find the Nix Store volume UUID by name
-      # This handles UUID changes after Nix reinstalls
-      nixVolumeUUID=$(/usr/sbin/diskutil apfs list | \
-        /usr/bin/awk '/Volume disk.*[0-9A-F-]{36}/ {uuid=$NF} /Nix Store/ && uuid {print uuid; exit}')
+      # Find the Nix Store volume device identifier (e.g., disk3s7)
+      # Parse the line BEFORE "Nix Store" which contains the device
+      nixVolumeDev=$(/usr/sbin/diskutil apfs list | \
+        /usr/bin/awk '/Nix Store/ {print prev} {prev=$0}' | \
+        /usr/bin/grep -o 'disk[0-9]*s[0-9]*')
 
-      if [ -z "$nixVolumeUUID" ]; then
-        echo "Error: Could not find Nix Store volume UUID" >&2
+      if [ -z "$nixVolumeDev" ]; then
+        echo "Error: Could not find Nix Store volume device" >&2
         exit 1
       fi
 
-      /usr/bin/security find-generic-password -s "$nixVolumeUUID" -w | \
-        /usr/sbin/diskutil apfs unlockVolume "$nixVolumeUUID" -mountpoint /nix -stdinpassphrase
+      # Get the crypto user UUID from the volume
+      nixCryptoUUID=$(/usr/sbin/diskutil apfs listCryptoUsers "$nixVolumeDev" -plist | \
+        /usr/bin/plutil -extract Users.0.APFSCryptoUserUUID raw -)
+
+      if [ -z "$nixCryptoUUID" ]; then
+        echo "Error: Could not find Nix Store crypto user UUID" >&2
+        exit 1
+      fi
+
+      /usr/bin/security find-generic-password -s "$nixCryptoUUID" -w | \
+        /usr/sbin/diskutil apfs unlockVolume "$nixVolumeDev" -stdinpassphrase -user "$nixCryptoUUID"
     '';
   };
 in
