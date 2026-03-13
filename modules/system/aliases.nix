@@ -49,6 +49,9 @@
       kotr = "nix-shell -p whisper-cpp --run 'whisper-stream -m $HOME/.local/share/whisper-cpp/ggml-medium.bin -l ko -tr'";
       remoteon = "sudo systemsetup -setremotelogin on";
       remoteoff = "sudo systemsetup -setremotelogin off";
+      # brew install tmux --HEAD (next-tmux 3.7) fixes Claude Code rendering issue.
+      # Delete this alias and move back to nix-managed tmux once officially released.
+      tmux = "/opt/homebrew/bin/tmux";
     })
 
     # ---- ft-only aliases

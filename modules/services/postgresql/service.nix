@@ -11,7 +11,7 @@
 { config, lib, pkgs, ... }:
 
 let
-  btm = import ../../lib/launchd-btm.nix { inherit lib pkgs; };
+  btm = import ../../../lib/launchd-btm.nix { inherit lib pkgs; };
 
   # ── Tunable Parameters ──
   pg = pkgs.postgresql_17.withPackages (ps: [ ps.pgvector ]);
@@ -54,7 +54,7 @@ let
     lc_messages = 'C'
   '';
 
-  pgHba = ../../configs/postgresql/pg_hba.conf;
+  pgHba = ../../../configs/postgresql/pg_hba.conf;
 
   # ── Named Wrappers ──
   # These become the Program in the plist — BTM shows "PostgresServer" / "PostgresBackup"
@@ -206,7 +206,7 @@ in
 
   # ── Register with BTM module ──
   btm.stubs."Postgres" = {
-    src = ../../app-stubs/Postgres.app;
+    src = ./Postgres.app;
     wrappers = [
       { drv = serverWrapper; bin = "PostgresServer"; }
       { drv = backupWrapper; bin = "PostgresBackup"; }

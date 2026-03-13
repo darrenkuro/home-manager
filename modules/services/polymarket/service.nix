@@ -4,7 +4,7 @@
 { config, lib, pkgs, ... }:
 
 let
-  btm = import ../../lib/launchd-btm.nix { inherit lib pkgs; };
+  btm = import ../../../lib/launchd-btm.nix { inherit lib pkgs; };
 
   workDir = "${config.home.homeDirectory}/Documents/dev/polymarket-trading-bot";
   logDir = "/tmp/polymarket";
@@ -50,7 +50,7 @@ in
   '';
 
   btm.stubs."Polymarket" = {
-    src = ../../app-stubs/Polymarket.app;
+    src = ./Polymarket.app;
     wrappers = [{ drv = wrapper; bin = "PolymarketMonitor"; }];
     agents = { "com.polymarket.data-monitor" = plist; };
   };

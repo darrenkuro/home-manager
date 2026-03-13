@@ -29,7 +29,7 @@ let
 
   nixWrappers = pkgs.stdenv.mkDerivation {
     name = "nix-btm-wrappers";
-    src = ./nix-wrappers;
+    src = ./wrappers;
     buildPhase = ''
       cc -O2 -o NixDaemonStart NixDaemonStart.c
       cc -O2 -DNIX_VOLUME_UUID="\"${nixVolumeUUID}\"" -o NixStoreMount NixStoreMount.c
@@ -42,7 +42,7 @@ let
 in
 {
   btm.stubs."Nix" = {
-    src = ../../app-stubs/Nix.app;
+    src = ./Nix.app;
     wrappers = [
       { drv = nixWrappers; bin = "NixDaemonStart"; }
       { drv = nixWrappers; bin = "NixStoreMount"; }
