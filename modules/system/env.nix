@@ -1,4 +1,4 @@
-{tag, ...}: {
+{tag, lib, ...}: {
   home.sessionVariables = {
     # ── System ──
     HM_TAG =
@@ -55,7 +55,11 @@
     HOMEBREW_NO_ENV_HINTS = "1";
   };
 
-  home.sessionPath = [
-    "$HOME/Library/pnpm"
-  ];
+  home.sessionPath =
+    [
+      "$HOME/Library/pnpm"
+    ]
+    ++ lib.optionals (tag == "mac") [
+      "/opt/homebrew/bin"
+    ];
 }
