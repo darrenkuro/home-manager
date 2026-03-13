@@ -5,7 +5,7 @@
 # path back to an app bundle.
 #
 # This module:
-#   1. Registers Nix.app stub with embedded Mach-O wrappers via btm.stubs
+#   1. Registers Nix.app stub with embedded shell wrappers via btm.stubs
 #   2. Patches the Nix LaunchDaemon plists to point ProgramArguments at the
 #      wrappers inside Nix.app and add AssociatedBundleIdentifiers
 #
@@ -14,6 +14,8 @@
 { config, lib, pkgs, ... }:
 
 let
+  btm = import ../../../lib/launchd-btm.nix { inherit lib pkgs; };
+
   nixBundleId = "com.local.nix.stub";
   stubDir = config.btm.stubDir;
 
@@ -27,25 +29,29 @@ let
     { plist = "/Library/LaunchDaemons/org.nixos.darwin-store.plist"; wrapper = "NixStoreMount"; }
   ];
 
-  nixWrappers = pkgs.stdenv.mkDerivation {
-    name = "nix-btm-wrappers";
-    src = ./nix-wrappers;
-    buildPhase = ''
-      cc -O2 -o NixDaemonStart NixDaemonStart.c
-      cc -O2 -DNIX_VOLUME_UUID="\"${nixVolumeUUID}\"" -o NixStoreMount NixStoreMount.c
+  # Shell wrapper equivalents of the C binaries
+  nixDaemonWrapper = btm.mkWrapper {
+    name = "NixDaemonStart";
+    text = ''
+      /bin/wait4path /nix/var/nix/profiles/default/bin/nix-daemon
+      exec /nix/var/nix/profiles/default/bin/nix-daemon
     '';
-    installPhase = ''
-      mkdir -p $out/bin
-      cp NixDaemonStart NixStoreMount $out/bin/
+  };
+
+  nixStoreMountWrapper = btm.mkWrapper {
+    name = "NixStoreMount";
+    text = ''
+      /usr/bin/security find-generic-password -s "${nixVolumeUUID}" -w | \
+        /usr/sbin/diskutil apfs unlockVolume "${nixVolumeUUID}" -mountpoint /nix -stdinpassphrase
     '';
   };
 in
 {
   btm.stubs."Nix" = {
-    src = ../../app-stubs/Nix.app;
+    src = ./Nix.app;
     wrappers = [
-      { drv = nixWrappers; bin = "NixDaemonStart"; }
-      { drv = nixWrappers; bin = "NixStoreMount"; }
+      { drv = nixDaemonWrapper; bin = "NixDaemonStart"; }
+      { drv = nixStoreMountWrapper; bin = "NixStoreMount"; }
     ];
   };
 

@@ -160,10 +160,10 @@
     ++ lib.optionals (tag == "mac") [
       ./modules/system/macos.nix
       ./modules/services/btm.nix
-      ./modules/services/nix-btm.nix
-      ./modules/services/env-setter.nix
-      ./modules/services/polymarket-monitor.nix
-      ./modules/services/postgresql.nix
+      ./modules/services/nix-daemon/service.nix
+      ./modules/services/env-setter/service.nix
+      ./modules/services/polymarket/service.nix
+      ./modules/services/postgresql/service.nix
     ]
     ++ lib.optionals (tag == "ft") [
       ./modules/system/linux-ft.nix

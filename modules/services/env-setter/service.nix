@@ -10,7 +10,7 @@
 { config, lib, pkgs, ... }:
 
 let
-  btm = import ../../lib/launchd-btm.nix { inherit lib pkgs; };
+  btm = import ../../../lib/launchd-btm.nix { inherit lib pkgs; };
   homeDir = config.home.homeDirectory;
   label = "com.user.env-setter";
 
@@ -52,7 +52,7 @@ let
 in
 {
   btm.stubs."Env" = {
-    src = ../../app-stubs/Env.app;
+    src = ./Env.app;
     wrappers = [{ drv = wrapper; bin = "EnvSetter"; }];
     agents = { "${label}" = plist; };
   };
