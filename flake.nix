@@ -3,6 +3,8 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    nix-darwin.url = "github:nix-darwin/nix-darwin";
+    nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     claude-plugins-official = {
@@ -21,12 +23,16 @@
 
   outputs = {
     nixpkgs,
+    nix-darwin,
     home-manager,
     claude-plugins-official,
     obsidian-skills,
     claude-config,
     ...
   }: let
+    hmExtraArgs = {
+      inherit claude-plugins-official obsidian-skills claude-config;
+    };
     mkHome = {
       system,
       tag,
@@ -36,13 +42,32 @@
           inherit system;
           config.allowUnfree = true;
         };
-        extraSpecialArgs = {
+        extraSpecialArgs = hmExtraArgs // {
           inherit tag system;
-          inherit claude-plugins-official obsidian-skills claude-config;
         };
         modules = [./home.nix];
       };
   in {
+    # nix-darwin (mac system-level + embedded HM)
+    darwinConfigurations.mac = nix-darwin.lib.darwinSystem {
+      system = "aarch64-darwin";
+      modules = [
+        ./darwin.nix
+        home-manager.darwinModules.home-manager
+        {
+          nixpkgs.config.allowUnfree = true;
+          home-manager.useGlobalPkgs = true;
+          home-manager.useUserPackages = true;
+          home-manager.extraSpecialArgs = hmExtraArgs // {
+            tag = "mac";
+            system = "aarch64-darwin";
+          };
+          home-manager.users.darrenlu = import ./home.nix;
+        }
+      ];
+    };
+
+    # Standalone HM (keep existing outputs during transition)
     homeConfigurations = {
       mac = mkHome {
         system = "aarch64-darwin";
