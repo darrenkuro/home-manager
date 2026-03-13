@@ -39,7 +39,7 @@
     (lib.mkIf (tag == "mac") {
       p = "hx $HM/modules/system/macos.nix";
       hm = "code $HM";
-      re = "sudo -v && sudo darwin-rebuild switch --flake $HM#mac && exec zsh";
+      re = "sudo -v && sudo darwin-rebuild switch --flake $HM#mac && sudo $HM/scripts/btm-patch-nix.sh && exec zsh";
 
       dbox = "cd $DBOX";
       hide = "chflags hidden";

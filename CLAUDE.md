@@ -14,14 +14,17 @@ The `tag` parameter (`"mac"` or `"ft"`) flows through the entire config to condi
 
 ```bash
 # Apply config (re-evaluates flake, rebuilds env, restarts shell)
-# On mac:
-home-manager switch --flake ~/.config/home-manager#mac && exec zsh
-# On ft:
+# On mac (runs both nix-darwin + home-manager):
+sudo darwin-rebuild switch --flake ~/.config/home-manager#mac && exec zsh
+# On ft (home-manager only):
 home-manager switch --flake ~/.config/home-manager#ft && exec zsh
 # Or use the alias:
 re
 
-# Update flake inputs (nixpkgs, home-manager)
+# First-time install (mac only, also runs btm-patch-nix.sh):
+sudo -v && sudo nix --extra-experimental-features "nix-command flakes" run nix-darwin -- switch --flake ~/.config/home-manager#mac && sudo ~/.config/home-manager/scripts/btm-patch-nix.sh && exec zsh
+
+# Update flake inputs (nixpkgs, home-manager, nix-darwin)
 nix flake update
 
 # Format Nix files
@@ -37,13 +40,19 @@ nix-collect-garbage -d
 ## Architecture
 
 ### Entry Points
-- `flake.nix` — defines two homeConfigurations (`mac`, `ft`) via `mkHome`, passing `tag` to all modules
+- `flake.nix` — defines two configurations:
+  - `darwinConfigurations.mac` — nix-darwin system config with embedded home-manager for macOS
+  - `homeConfigurations.ft` — standalone home-manager config for Linux
+  - Legacy `homeConfigurations.mac` exists during transition but should not be used
+- `darwin.nix` — nix-darwin system-level config for macOS (LaunchDaemons, system settings)
 - `home.nix` — main module: packages, shell config, zsh init chain, XDG config files, conditional imports
 
 ### Module Organization
 - `modules/system/` — aliases (`aliases.nix` shared, `aliases-cp.nix` clipboard badges, `aliases-man.nix`), env vars (`env.nix`), platform-specific (`macos.nix`, `linux-ft.nix`)
 - `modules/apps/` — per-app config: `git.nix`, `helix.nix`, `starship.nix`, `claude.nix`, `ssh.nix`
-- `modules/services/` — macOS-only launchd services via BTM module (see below)
+- `modules/services/` — launchd services (macOS only):
+  - `btm.nix` — user-level Launch Agents via BTM module (Postgres, Polymarket, env-setter)
+  - `nix-daemon/service.nix` — system-level Launch Daemons managed by nix-darwin (nix-daemon, darwin-store)
 
 ### BTM (Background Task Management) — macOS Launch Agents
 Bypasses home-manager's default `launchd.agents` which wraps `ProgramArguments` in `/bin/sh -c "wait4path..."`, causing macOS BTM to show "sh" for all agents.
@@ -56,7 +65,12 @@ Bypasses home-manager's default `launchd.agents` which wraps `ProgramArguments` 
 
 **How icons work:** ProgramArguments points to a wrapper binary inside the .app stub. BTM resolves icons by path containment (executable is inside a .app → use that app's icon). Stubs are ad-hoc codesigned at activation time so the wrapper + bundle share one identity. After icon changes, reboot to refresh BTM. Do NOT use `sfltool resetbtm` — it wipes ALL login items system-wide.
 
-**Current agents:** `postgresql.nix` (server + backup), `polymarket-monitor.nix`, `env-setter.nix` (propagates env vars to GUI domain via launchctl setenv)
+**User-level agents (BTM):** `postgresql.nix` (server + backup), `polymarket-monitor.nix`, `env-setter.nix` (propagates env vars to GUI domain via launchctl setenv)
+
+**System-level daemons (nix-darwin):** `nix-daemon/service.nix` creates a Nix.app stub with wrappers for nix-daemon and darwin-store. The `darwin.nix` config references these wrappers. The `scripts/btm-patch-nix.sh` script patches the `activate-system` plist post-activation to also use the Nix.app bundle ID for BTM grouping. The script is idempotent and dynamically extracts store paths from plists, so it can be run multiple times safely.
+
+### Nix Store Volume UUID Handling
+The darwin-store wrapper dynamically looks up the Nix Store volume UUID by name at runtime instead of hardcoding it. This prevents issues after Nix reinstalls when the volume UUID changes. The wrapper uses `diskutil apfs list` to find the UUID of the volume named "Nix Store".
 
 ### Shell Functions
 `functions/*.sh` — each file has a preamble pattern:
