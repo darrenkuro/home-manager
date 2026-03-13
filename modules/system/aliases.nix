@@ -39,7 +39,7 @@
     (lib.mkIf (tag == "mac") {
       p = "hx $HM/modules/system/macos.nix";
       hm = "code $HM";
-      re = "home-manager switch --flake $HM#mac && exec zsh";
+      re = "darwin-rebuild switch --flake $HM#mac && exec zsh";
 
       dbox = "cd $DBOX";
       hide = "chflags hidden";
