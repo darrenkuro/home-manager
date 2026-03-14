@@ -141,10 +141,17 @@
   xdg.configFile."clang-format".source = ./configs/clang-format.yml;
   xdg.configFile."prettier.json".source = ./configs/prettier-config.json;
 
+  # Variables injected from Nix - ensures activation scripts work
+  # regardless of shell environment (standalone HM or nix-darwin)
   home.activation.configCopy =
     lib.hm.dag.entryAfter ["writeBoundary"]
-    (lib.concatStringsSep "\n"
-      [(builtins.readFile ./scripts/copy-files.sh)]);
+    ''
+      HM="${config.home.homeDirectory}/.config/home-manager"
+      XDG_CONFIG_HOME="${config.xdg.configHome}"
+      HM_TAG="${lib.toUpper tag}"
+
+      ${builtins.readFile ./scripts/copy-files.sh}
+    '';
 
   imports =
     [
@@ -158,7 +165,6 @@
       ./modules/apps/ssh.nix
     ]
     ++ lib.optionals (tag == "mac") [
-      ./modules/system/macos.nix
       ./modules/services/btm.nix
       ./modules/services/nix-daemon/service.nix
       ./modules/services/env-setter/service.nix

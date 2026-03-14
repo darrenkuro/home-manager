@@ -1,6 +1,7 @@
-# Copy files in Place since these are important outside of nix env
+# Copy files in place — these need to be writable at runtime
+# Variables (HM, XDG_CONFIG_HOME, HM_TAG) are injected by Nix in home.nix
 
-case ${HM_TAG-} in
+case $HM_TAG in
   MAC) VSCODE_DIR="$HOME/Library/Application Support/Code/User" ;;
   FT) VSCODE_DIR="$HOME/.config/Code/User" ;;
 esac
