@@ -1,5 +1,3 @@
-# Secret Test Phrase: fredrik is cool
-
 # User Preferences
 
 ## Package Manager

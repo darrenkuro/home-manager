@@ -68,5 +68,3 @@ pkgs.writeTextFile {
 - Simplified btm.nix (removed agent logic, ~120 lines deleted)
 - Added system.defaults from audit (NSGlobalDomain, dock, finder, trackpad, menuExtraClock)
 
-### Remaining
-- Remove secret test phrase from `configs/claude/CLAUDE.md` after verifying Claude Desktop reads env vars
