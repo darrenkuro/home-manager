@@ -10,14 +10,9 @@ let
   # Map agent labels to their parent app stubs for BTM grouping
   # Format: { "label" = "AppName"; } where stub is at ${btmStubDir}/AppName.app
   btmAgentMapping = {
-    # Test agents (remove .test suffix after verification)
-    "org.postgresql.server.test" = "Postgres";
-    "org.postgresql.backup.test" = "Postgres";
-    "com.polymarket.data-monitor.test" = "Polymarket";
-    # Production agents (uncomment after migration)
-    # "org.postgresql.server" = "Postgres";
-    # "org.postgresql.backup" = "Postgres";
-    # "com.polymarket.data-monitor" = "Polymarket";
+    "org.postgresql.server" = "Postgres";
+    "org.postgresql.backup" = "Postgres";
+    "com.polymarket.data-monitor" = "Polymarket";
   };
 
   # Generate patching commands for all mapped agents
@@ -129,20 +124,14 @@ in
   };
 
   # ═══════════════════════════════════════════════════════════════════════════
-  # TEST: LaunchAgents via nix-darwin (parallel to BTM for verification)
-  # Uses .test suffix to avoid label conflicts with BTM-managed agents.
-  # Points to same wrapper binaries inside BTM-managed .app stubs.
-  #
-  # AFTER CONFIRMING THESE WORK:
-  # 1. Remove btm.stubs entries from: postgresql/service.nix, polymarket/service.nix
-  # 2. Remove btm.agents from those files (keep stubs for BTM icon grouping)
-  # 3. Rename labels here (remove .test suffix)
-  # 4. Delete these TEST comments
+  # LaunchAgents via nix-darwin
+  # Agents use wrapper binaries inside BTM-managed .app stubs for icon grouping.
+  # Post-activation script patches plists with AssociatedBundleIdentifiers.
   # ═══════════════════════════════════════════════════════════════════════════
 
-  launchd.user.agents.postgresql-server-test = {
+  launchd.user.agents.postgresql-server = {
     serviceConfig = {
-      Label = "org.postgresql.server.test";
+      Label = "org.postgresql.server";
       ProgramArguments = [ "${btmStubDir}/Postgres.app/Contents/MacOS/PostgresServer" ];
       RunAtLoad = true;
       KeepAlive = true;
@@ -156,9 +145,9 @@ in
     };
   };
 
-  launchd.user.agents.postgresql-backup-test = {
+  launchd.user.agents.postgresql-backup = {
     serviceConfig = {
-      Label = "org.postgresql.backup.test";
+      Label = "org.postgresql.backup";
       ProgramArguments = [ "${btmStubDir}/Postgres.app/Contents/MacOS/PostgresBackup" ];
       StartCalendarInterval = [{ Hour = 3; Minute = 0; }];
       StandardOutPath = "/Users/darrenlu/.local/state/postgresql/backup-stdout.log";
@@ -169,9 +158,9 @@ in
     };
   };
 
-  launchd.user.agents.polymarket-monitor-test = {
+  launchd.user.agents.polymarket-monitor = {
     serviceConfig = {
-      Label = "com.polymarket.data-monitor.test";
+      Label = "com.polymarket.data-monitor";
       ProgramArguments = [ "${btmStubDir}/Polymarket.app/Contents/MacOS/PolymarketMonitor" ];
       WorkingDirectory = "/Users/darrenlu/Documents/dev/polymarket-trading-bot";
       RunAtLoad = true;

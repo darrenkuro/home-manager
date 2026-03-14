@@ -1,6 +1,4 @@
-# Polymarket Data Monitor — BTM-friendly launchd agent for macOS
-#
-# Runs the data monitor script in the background with auto-restart.
+# Polymarket Data Monitor — LaunchAgent managed in darwin.nix
 { config, lib, pkgs, ... }:
 
 let
@@ -28,21 +26,6 @@ let
     '';
   };
 
-  plist = btm.mkPlist {
-    Label = "com.polymarket.data-monitor";
-    BundleProgram = "Contents/MacOS/PolymarketMonitor";
-    WorkingDirectory = workDir;
-    RunAtLoad = true;
-    KeepAlive = true;
-    ThrottleInterval = 10;
-    StandardOutPath = "${logDir}/monitor.log";
-    StandardErrorPath = "${logDir}/monitor.err";
-    EnvironmentVariables = {
-      PATH = "${pkgs.nodejs_22}/bin:${pkgs.pnpm}/bin:/usr/bin:/bin";
-      HOME = config.home.homeDirectory;
-    };
-  };
-
 in
 {
   home.activation.createPolymarketLogDir = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
@@ -52,6 +35,5 @@ in
   btm.stubs."Polymarket" = {
     src = ./Polymarket.app;
     wrappers = [{ drv = wrapper; bin = "PolymarketMonitor"; }];
-    agents = { "com.polymarket.data-monitor" = plist; };
   };
 }

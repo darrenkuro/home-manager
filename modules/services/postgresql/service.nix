@@ -1,13 +1,12 @@
-# PostgreSQL server + automated backup — BTM-friendly launchd agents for macOS
+# PostgreSQL server + automated backup
 #
-# Uses the BTM module (btm.nix) instead of launchd.agents to avoid
-# the /bin/sh wrapper that makes BTM show "sh" as the process name.
+# Creates wrapper binaries for BTM icon grouping. LaunchAgents are now
+# managed in darwin.nix via nix-darwin's launchd.user.agents.
 #
-# Creates:
-#   - PostgresServer wrapper     → named binary for the server agent
-#   - PostgresBackup wrapper     → named binary for the backup agent
-#   - Postgres.app stub          → shared BTM icon for both agents
-#   - Two launchd plists via btm.agents (bypassing HM's mutateConfig)
+# Components:
+#   - PostgresServer wrapper     → binary for server agent
+#   - PostgresBackup wrapper     → binary for backup agent
+#   - Postgres.app stub          → BTM icon bundle (wrappers embedded at activation)
 { config, lib, pkgs, ... }:
 
 let
@@ -23,7 +22,6 @@ let
 
   backupBaseDir = "${config.home.homeDirectory}/.local/share/postgresql/backups";
   backupDestinations = [ backupBaseDir ];
-  backupInterval = { Hour = 3; Minute = 0; };
 
   # ── Generated Configs ──
   pgConf = pkgs.writeText "postgresql.conf" ''
@@ -149,36 +147,6 @@ let
     '';
   };
 
-  # ── Launchd Plists ──
-  # BundleProgram is relative to the .app bundle root — btm.nix converts it to
-  # absolute ProgramArguments and adds AssociatedBundleIdentifiers at install time.
-  serverPlist = btm.mkPlist {
-    Label = "org.postgresql.server";
-    BundleProgram = "Contents/MacOS/PostgresServer";
-    RunAtLoad = true;
-    KeepAlive = true;
-    ThrottleInterval = 10;
-    StandardOutPath = "${logDir}/launchd-stdout.log";
-    StandardErrorPath = "${logDir}/launchd-stderr.log";
-    EnvironmentVariables = {
-      PATH = "${pg}/bin:/usr/bin:/bin";
-      HOME = config.home.homeDirectory;
-      PGDATA = dataDir;
-    };
-  };
-
-  backupPlist = btm.mkPlist {
-    Label = "org.postgresql.backup";
-    BundleProgram = "Contents/MacOS/PostgresBackup";
-    StartCalendarInterval = [ backupInterval ];
-    StandardOutPath = "${logDir}/backup-stdout.log";
-    StandardErrorPath = "${logDir}/backup-stderr.log";
-    EnvironmentVariables = {
-      PATH = "${pg}/bin:/usr/bin:/bin";
-      HOME = config.home.homeDirectory;
-    };
-  };
-
 in
 {
   # ── Directory Setup ──
@@ -204,17 +172,13 @@ in
     fi
   '';
 
-  # ── Register with BTM module ──
+  # ── Register with BTM module (stubs only, agents in darwin.nix) ──
   btm.stubs."Postgres" = {
     src = ./Postgres.app;
     wrappers = [
       { drv = serverWrapper; bin = "PostgresServer"; }
       { drv = backupWrapper; bin = "PostgresBackup"; }
     ];
-    agents = {
-      "org.postgresql.server" = serverPlist;
-      "org.postgresql.backup" = backupPlist;
-    };
   };
 
   # ── Environment Variables ──
