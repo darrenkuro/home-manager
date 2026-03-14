@@ -54,8 +54,10 @@ in {
     if useSystemBash
     then
       # For pre-mount scripts: use /bin/bash, no wait4path (store doesn't exist yet)
+      # Must output to bin/ subdirectory to match writeShellApplication structure
       pkgs.writeTextFile {
         inherit name;
+        destination = "/bin/${name}";
         executable = true;
         text = ''
           #!/bin/bash
