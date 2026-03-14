@@ -42,6 +42,8 @@ Use global `~/.config/claude/` only when not in a project context.
 ### Workflow
 - **Plan first**: Enter plan mode for non-trivial tasks (3+ steps)
 - **Use subagents**: Offload research/exploration to keep context clean
+- **Subagent limits**: Limit scope to avoid 32k output limit; for PDF-heavy tasks use smaller batches
+- **Never leave agents unresolved**: When done, read results and report — don't claim "still running" without checking
 - **Self-improve**: After corrections, update `.claude/lessons.md`
 - **Verify before done**: Prove it works — run tests, check logs
 - **Autonomous**: Fix bugs and failing CI without hand-holding
