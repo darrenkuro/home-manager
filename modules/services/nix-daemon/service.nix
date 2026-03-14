@@ -3,10 +3,12 @@
 # Creates Nix.app stub with wrapper scripts that nix-darwin's launchd.daemons
 # configuration (in darwin.nix) points to. The wrappers are inside the .app
 # bundle so BTM can resolve the association and display "Nix" with a custom icon.
-{ lib, pkgs, ... }:
-
-let
-  btm = import ../../../lib/launchd-btm.nix { inherit lib pkgs; };
+{
+  lib,
+  pkgs,
+  ...
+}: let
+  btm = import ../../../lib/launchd-btm.nix {inherit lib pkgs;};
 
   # Shell wrappers embedded in Nix.app
   nixDaemonWrapper = btm.mkWrapper {
@@ -17,8 +19,10 @@ let
     '';
   };
 
+  # CRITICAL: useSystemBash = true because this runs BEFORE /nix is mounted
   nixStoreMountWrapper = btm.mkWrapper {
     name = "NixStoreMount";
+    useSystemBash = true;
     text = ''
       # Find the Nix Store volume device identifier (e.g., disk3s7)
       # Parse the line BEFORE "Nix Store" which contains the device
@@ -44,13 +48,18 @@ let
         /usr/sbin/diskutil apfs unlockVolume "$nixVolumeDev" -stdinpassphrase -user "$nixCryptoUUID"
     '';
   };
-in
-{
+in {
   btm.stubs."Nix" = {
     src = ./Nix.app;
     wrappers = [
-      { drv = nixDaemonWrapper; bin = "NixDaemonStart"; }
-      { drv = nixStoreMountWrapper; bin = "NixStoreMount"; }
+      {
+        drv = nixDaemonWrapper;
+        bin = "NixDaemonStart";
+      }
+      {
+        drv = nixStoreMountWrapper;
+        bin = "NixStoreMount";
+      }
     ];
   };
 }

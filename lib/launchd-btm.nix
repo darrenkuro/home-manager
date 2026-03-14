@@ -21,26 +21,43 @@
 #
 # Usage in service modules:
 #   let btm = import ../../lib/launchd-btm.nix { inherit lib pkgs; };
-{ lib, pkgs }:
-
-let
-  inherit (lib.generators) toPlist;
-in
 {
-  mkWrapper =
-    { name
-    , text
-    , runtimeInputs ? []
-    , excludeShellChecks ? []
-    }:
-    pkgs.writeShellApplication {
-      inherit name runtimeInputs excludeShellChecks;
-      text = ''
-        /bin/wait4path /nix/store &>/dev/null
-        ${text}
-      '';
-    };
+  lib,
+  pkgs,
+}: let
+  inherit (lib.generators) toPlist;
+in {
+  # mkWrapper — creates a named shell script for launchd ProgramArguments.
+  # By default uses Nix's bash via writeShellApplication.
+  # Set useSystemBash = true for scripts that must run BEFORE /nix is mounted.
+  mkWrapper = {
+    name,
+    text,
+    runtimeInputs ? [],
+    excludeShellChecks ? [],
+    useSystemBash ? false,
+  }:
+    if useSystemBash
+    then
+      # For pre-mount scripts: use /bin/bash, no wait4path (store doesn't exist yet)
+      pkgs.writeTextFile {
+        inherit name;
+        executable = true;
+        text = ''
+          #!/bin/bash
+          set -euo pipefail
+          ${text}
+        '';
+      }
+    else
+      pkgs.writeShellApplication {
+        inherit name runtimeInputs excludeShellChecks;
+        text = ''
+          /bin/wait4path /nix/store &>/dev/null
+          ${text}
+        '';
+      };
 
   mkPlist = config:
-    pkgs.writeText "${config.Label}.plist" (toPlist { escape = true; } config);
+    pkgs.writeText "${config.Label}.plist" (toPlist {escape = true;} config);
 }
