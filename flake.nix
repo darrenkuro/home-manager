@@ -42,9 +42,11 @@
           inherit system;
           config.allowUnfree = true;
         };
-        extraSpecialArgs = hmExtraArgs // {
-          inherit tag system;
-        };
+        extraSpecialArgs =
+          hmExtraArgs
+          // {
+            inherit tag system;
+          };
         modules = [./home.nix];
       };
   in {
@@ -58,10 +60,12 @@
           nixpkgs.config.allowUnfree = true;
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
-          home-manager.extraSpecialArgs = hmExtraArgs // {
-            tag = "mac";
-            system = "aarch64-darwin";
-          };
+          home-manager.extraSpecialArgs =
+            hmExtraArgs
+            // {
+              tag = "mac";
+              system = "aarch64-darwin";
+            };
           home-manager.users.darrenlu = import ./home.nix;
         }
       ];

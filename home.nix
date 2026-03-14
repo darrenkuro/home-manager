@@ -4,8 +4,7 @@
   tag,
   lib,
   ...
-}:
-{
+}: {
   # ----------- Base Settings
   home.username =
     if tag == "mac"
@@ -47,7 +46,7 @@
 
       # Ensure Consistency
       openssl # Apple ships LibreSSL
-      gnused  # Apple ships BSD-sed
+      gnused # Apple ships BSD-sed
       cmake
       # nerd-fonts.hack — not cached for aarch64-darwin
       # cachix — not currently needed
@@ -73,7 +72,7 @@
       poppler-utils # PDF tools
       yt-dlp # Youtube download
 
-      (postgresql_17.withPackages (ps: [ ps.pgvector ]))
+      (postgresql_17.withPackages (ps: [ps.pgvector]))
 
       pnpm
       bun
@@ -165,8 +164,6 @@
       ./modules/apps/ssh.nix
     ]
     ++ lib.optionals (tag == "mac") [
-      ./modules/services/btm.nix
-      ./modules/services/nix-daemon/service.nix
       ./modules/services/polymarket/service.nix
       ./modules/services/postgresql/service.nix
     ]

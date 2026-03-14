@@ -15,7 +15,6 @@
       devg = "cd $DEV"; # dev go
       hmg = "cd $HM"; # hm go
 
-
       ncg = "nix-collect-garbage -d";
       clean = builtins.concatStringsSep " && " [
         # Caches (safe, all regenerate)
@@ -39,8 +38,8 @@
     (lib.mkIf (tag == "mac") {
       p = "hx $HM/darwin.nix";
       hm = "code $HM";
-      re = "nix run home-manager -- switch --flake $HM#mac && exec zsh";  # HM only (no brew, system.defaults, launchd)
-      sure = "sudo darwin-rebuild switch --flake $HM#mac && sudo $HM/scripts/btm-patch-nix.sh && exec zsh";  # full system + BTM
+      re = "nix run home-manager -- switch --flake $HM#mac && exec zsh"; # HM only (no brew, system.defaults, launchd)
+      sure = "sudo darwin-rebuild switch --flake $HM#mac && sudo $HM/scripts/btm-patch-nix.sh && exec zsh"; # full system + BTM
 
       dbox = "cd $DBOX";
       hide = "chflags hidden";
@@ -68,5 +67,5 @@
   imports = [
     ./aliases-cp.nix
     ./aliases-man.nix
-     ];
+  ];
 }

@@ -8,19 +8,22 @@ BTM controls what appears in System Settings → General → Login Items. The go
 
 ## Architecture
 
-- **LaunchAgents** → defined in `darwin.nix` via `launchd.user.agents`
-- **App stubs** → registered via `btm.stubs` for icon grouping
-- **BTM patching** → darwin.nix post-activation adds `AssociatedBundleIdentifiers`
+All BTM logic is in `darwin.nix`:
+- **Wrappers** — named shell scripts via `lib/launchd-btm.nix`
+- **App stubs** — static .app bundles with embedded wrappers
+- **LaunchAgents/Daemons** — defined via `launchd.user.agents` and `launchd.daemons`
+- **Activation** — postActivation installs stubs, codesigns, patches AssociatedBundleIdentifiers
 
 ## Key Files
 
-- `lib/launchd-btm.nix` — `mkWrapper` for named binaries
-- `modules/services/btm.nix` — copies stubs, embeds wrappers, codesigns
-- `darwin.nix` — LaunchAgents + BTM patching in post-activation
+- `darwin.nix` — all BTM: wrappers, stubs config, activation, launchd agents
+- `lib/launchd-btm.nix` — `mkWrapper` builder for named binaries
+- `scripts/btm-patch-nix.sh` — patches Nix system daemons (activate-system)
+- `modules/services/*/` — only contain .app stub bundles now (no code)
 
 ## mkWrapper
 
-Creates a named shell script:
+Creates a named shell script with wait4path:
 
 ```nix
 btm.mkWrapper {
@@ -32,43 +35,61 @@ btm.mkWrapper {
 
 Use `useSystemBash = true` for scripts that run before /nix is mounted.
 
-## Registering a Service
+## Adding a New Service
 
+1. Create .app stub in `modules/services/<name>/<Name>.app`
+2. In `darwin.nix`:
+   - Define wrapper with `btm.mkWrapper`
+   - Add to `btmStubs` config
+   - Add `btmAgentMapping` entry
+   - Define `launchd.user.agents.<name>`
+
+Example:
 ```nix
-# In service.nix — stub only
-btm.stubs."Postgres" = {
-  src = ./Postgres.app;
-  wrappers = [
-    { drv = serverWrapper; bin = "PostgresServer"; }
-  ];
+# In darwin.nix let block
+myWrapper = btm.mkWrapper {
+  name = "MyService";
+  runtimeInputs = [ pkgs.mytool ];
+  text = ''exec mytool --daemon'';
 };
 
-# In darwin.nix — agent definition
-launchd.user.agents.postgresql-server = {
-  serviceConfig = {
-    Label = "org.postgresql.server";
-    ProgramArguments = [ "${btmStubDir}/Postgres.app/Contents/MacOS/PostgresServer" ];
-    RunAtLoad = true;
-    KeepAlive = true;
+btmStubs = {
+  MyApp = {
+    src = ./modules/services/myapp/MyApp.app;
+    wrappers = [{ drv = myWrapper; bin = "MyService"; }];
   };
 };
 
-# In darwin.nix — BTM mapping for icon grouping
 btmAgentMapping = {
-  "org.postgresql.server" = "Postgres";
+  "com.example.myservice" = "MyApp";
+};
+
+# In config block
+launchd.user.agents.my-service = {
+  serviceConfig = {
+    Label = "com.example.myservice";
+    ProgramArguments = [ "${btmStubDir}/MyApp.app/Contents/MacOS/MyService" ];
+    RunAtLoad = true;
+    KeepAlive = true;
+  };
 };
 ```
 
 ## App Stub Structure
 
 ```
-Postgres.app/
+MyApp.app/
 ├── Contents/
 │   ├── Info.plist      # CFBundleIdentifier
-│   ├── MacOS/          # Wrapper binaries embedded here
+│   ├── MacOS/          # Wrapper binaries embedded at activation
 │   └── Resources/
 │       └── icon.icns
 ```
+
+## Rebuild Commands
+
+- `re` — home-manager only (no BTM, no sudo)
+- `sure` — full darwin-rebuild + btm-patch-nix.sh (with sudo)
 
 ## Gotchas
 

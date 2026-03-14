@@ -1,8 +1,15 @@
 # Claude Code configuration — skills, hooks, CLAUDE.md
 #
 # Cross-platform: imported on both macOS and Linux.
-{ config, lib, pkgs, claude-plugins-official, obsidian-skills, claude-config, ... }:
-let
+{
+  config,
+  lib,
+  pkgs,
+  claude-plugins-official,
+  obsidian-skills,
+  claude-config,
+  ...
+}: let
   claudeConfigDir = ../../configs/claude;
 
   # Plugins extracted as hm-managed skills (disable these in Claude Code)
@@ -15,10 +22,10 @@ let
   ];
 
   # Plugins with skills/ dirs to copy directly
-  skillPlugins = [ "frontend-design" "claude-code-setup" "claude-md-management" "skill-creator" ];
+  skillPlugins = ["frontend-design" "claude-code-setup" "claude-md-management" "skill-creator"];
 
   # Plugins with commands/ dirs to convert to skills format
-  commandPlugins = [ "claude-md-management" "commit-commands" ];
+  commandPlugins = ["claude-md-management" "commit-commands"];
 
   # Required plugins that must remain installed via Claude Code
   requiredPlugins = [
@@ -37,18 +44,20 @@ let
     mkdir -p $out
 
     # Copy skills/ directories
-    ${lib.concatMapStringsSep "\n" (p:
-      "cp -r ${claude-plugins-official}/plugins/${p}/skills/* $out/"
-    ) skillPlugins}
+    ${lib.concatMapStringsSep "\n" (
+        p: "cp -r ${claude-plugins-official}/plugins/${p}/skills/* $out/"
+      )
+      skillPlugins}
 
     # Convert commands to skills format (commands/*.md → <name>/SKILL.md)
     ${lib.concatMapStringsSep "\n" (p: ''
-      for cmd in ${claude-plugins-official}/plugins/${p}/commands/*.md; do
-        name=$(basename "$cmd" .md)
-        mkdir -p "$out/$name"
-        cp "$cmd" "$out/$name/SKILL.md"
-      done
-    '') commandPlugins}
+        for cmd in ${claude-plugins-official}/plugins/${p}/commands/*.md; do
+          name=$(basename "$cmd" .md)
+          mkdir -p "$out/$name"
+          cp "$cmd" "$out/$name/SKILL.md"
+        done
+      '')
+      commandPlugins}
   '';
 
   mergedSkills = pkgs.symlinkJoin {
@@ -59,8 +68,7 @@ let
       (obsidian-skills + "/skills")
     ];
   };
-in
-{
+in {
   xdg.configFile = {
     "claude/CLAUDE.md".source = claudeConfigDir + "/CLAUDE.md";
     "claude/skills".source = mergedSkills;
@@ -68,7 +76,7 @@ in
   };
 
   # Post-activation check for Claude plugins
-  home.activation.checkClaudePlugins = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+  home.activation.checkClaudePlugins = lib.hm.dag.entryAfter ["writeBoundary"] ''
     settings="$HOME/.config/claude/settings.json"
     if [ -f "$settings" ]; then
       # Plugins now managed as hm skills — warn if still enabled

@@ -1,5 +1,4 @@
-{ ... }:
-{
+{...}: {
   programs.helix = {
     enable = true;
     defaultEditor = true;
@@ -27,7 +26,7 @@
         auto-format = true;
         formatter = {
           command = "clang-format";
-          args = [ "-style=file" ];
+          args = ["-style=file"];
         };
       }
       {
@@ -35,7 +34,7 @@
         auto-format = true;
         formatter = {
           command = "clang-format";
-          args = [ "-style=file" ];
+          args = ["-style=file"];
         };
       }
       {
@@ -43,7 +42,7 @@
         auto-format = true;
         formatter = {
           command = "alejandra";
-          args = [ "-q" ]; # quiet mode
+          args = ["-q"]; # quiet mode
         };
       }
       {
@@ -62,7 +61,7 @@
         auto-format = true;
         formatter = {
           command = "black";
-          args = [ "-" ]; # reads from stdin
+          args = ["-"]; # reads from stdin
         };
       }
       {
@@ -70,7 +69,7 @@
         auto-format = true;
         formatter = {
           command = "prettierd";
-          args = [ "--stdin-filepath" ];
+          args = ["--stdin-filepath"];
         };
       }
       {
@@ -78,7 +77,7 @@
         auto-format = true;
         formatter = {
           command = "prettierd";
-          args = [ "--stdin-filepath" ];
+          args = ["--stdin-filepath"];
         };
       }
     ];
