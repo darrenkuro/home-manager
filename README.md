@@ -106,19 +106,23 @@ The most common issue. Check if `/nix/store` is empty or missing:
 ls /nix/store
 ```
 
-If empty, mount manually:
+If empty, the encrypted APFS volume needs to be unlocked and mounted:
 
 ```bash
-# Find the Nix Store volume
+# Find the Nix Store volume device and crypto user UUID
 diskutil apfs list | grep -B3 "Nix Store"
+diskutil apfs listCryptoUsers disk3s7  # replace with actual device
 
-# Mount it (replace disk3s6 with actual device from above)
-sudo /System/Library/Filesystems/apfs.fs/Contents/Resources/mount_apfs \
-  -o nobrowse -o noauto -o allow_other \
-  /dev/disk3s6 /nix
+# Unlock and mount (replace disk3s7 and UUID with values from above)
+sudo security find-generic-password -s 7F2237ED-FBD0-463A-B08C-EC01257136DA -w | \
+  sudo diskutil apfs unlockVolume disk3s7 -stdinpassphrase -user 7F2237ED-FBD0-463A-B08C-EC01257136DA
 ```
 
-Or just reboot — the `darwin-store` LaunchDaemon runs early in boot and handles this automatically.
+The `darwin-store` LaunchDaemon should handle this automatically on boot. If it's failing, check the logs:
+
+```bash
+log show --predicate 'senderImagePath contains "NixStoreMount"' --last 5m
+```
 
 ### 2. nix-daemon Not Running
 
