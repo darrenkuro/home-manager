@@ -373,7 +373,7 @@ in {
         "/System/Library/CoreServices/Finder.app"
         "/System/Applications/Mail.app"
         "/System/Applications/Calendar.app"
-        "/Applications/Safari.app"
+        "/System/Applications/Safari.app"
         "/Applications/Brave Browser.app"
         "/Applications/Obsidian.app"
         "/Applications/Ghostty.app"
