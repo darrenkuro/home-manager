@@ -84,6 +84,7 @@ When working in a TypeScript codebase:
 
 ## Project Context
 - When entering a repo to work on a project, always check for a CLAUDE.md (or .claude/CLAUDE.md) first. If one exists, read it before doing anything else — it contains project-specific instructions that override defaults.
+- **Cross-repo editing**: If asked to edit files in a repo that isn't the current working directory, attempt to load that repo's CLAUDE.md first. It may contain a catalog of project-specific skills, conventions, or instructions that should be followed.
 
 ## Project-Local Files
 All working files (plans, tasks, lessons, memories) should be kept **local to the project**, not in global `~/.config/claude/`.
