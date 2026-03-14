@@ -70,4 +70,3 @@ pkgs.writeTextFile {
 
 ### Remaining
 - Remove secret test phrase from `configs/claude/CLAUDE.md` after verifying Claude Desktop reads env vars
-- Add homebrew.casks and homebrew.masApps from audit

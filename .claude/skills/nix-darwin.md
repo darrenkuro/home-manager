@@ -61,12 +61,13 @@ homebrew = {
   };
   brews = [
     "tmux"
-    { name = "some-formula"; args = ["HEAD"]; }  # For HEAD versions
+    { name = "some-formula"; args = ["HEAD"]; }
   ];
-  casks = [
-    "visual-studio-code"
-    "alacritty"
-  ];
+  casks = [ "visual-studio-code" "obsidian" ];
+  masApps = {
+    "Xcode" = 497799835;
+    "Final Cut Pro" = 424389933;
+  };
 };
 ```
 
