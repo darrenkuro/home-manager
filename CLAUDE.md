@@ -49,7 +49,7 @@ nix-collect-garbage -d
 ### Module Organization
 - `modules/system/` — aliases, env vars, platform-specific (`linux-ft.nix`)
 - `modules/apps/` — per-app config: `git.nix`, `helix.nix`, `starship.nix`, `claude.nix`, `ssh.nix`
-- `modules/services/` — service-specific activation and .app stubs (postgres, polymarket, nix-daemon)
+- `modules/services/*/` — BTM app stubs only (`.app` bundles, no `.nix` files)
 
 ### BTM (Background Task Management) — macOS Launch Agents
 
@@ -83,7 +83,7 @@ Sourced at shell init via `scripts/source.sh` which iterates `$HM/functions/*.sh
 `copy-files.sh` runs during `home.activation` after `writeBoundary`. It uses `envsubst` for templating and `jq` for merging JSON keys.
 
 ### App Stubs
-`modules/services/*/` — Static `.app` bundles for BTM icons (Postgres.app, Polymarket.app, Nix.app). Each contains `Info.plist`, `PkgInfo`, and `icon.icns`. Wrapper binaries are embedded at activation time by `darwin.nix` postActivation.
+`modules/services/*/` — Static `.app` bundles for BTM icons (Postgres.app, Polymarket.app, Nix.app). Each contains `Info.plist`, `PkgInfo`, and `icon.icns`. Wrapper binaries are embedded at activation time by `darwin.nix` postActivation. No `.nix` files in these directories — service logic is inlined in `home.nix` (activation, env vars, aliases) and `darwin.nix` (wrappers, launchd agents).
 
 ### Claude Code Config
 Managed via `modules/apps/claude.nix`:

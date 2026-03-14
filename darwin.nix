@@ -216,6 +216,7 @@
   };
 
   # Generate BTM stub installation commands
+  # Note: runs as root via sudo, so we use SUDO_USER to codesign with user's keychain
   btmStubCommands = lib.concatStringsSep "\n\n" (lib.mapAttrsToList (name: stubCfg: let
       manifestLines =
         ["src=${stubCfg.src}"]
@@ -225,6 +226,7 @@
       _stub_dst="${btmStubDir}/${name}.app"
       _manifest="${btmStubDir}/.stub-manifest-${name}"
       _expected="$(printf '${expectedManifest}\n')"
+      _real_user="''${SUDO_USER:-$(whoami)}"
 
       if [ -f "$_manifest" ] && [ "$(cat "$_manifest")" = "$_expected" ] && [ -d "$_stub_dst" ]; then
         echo "  stub unchanged: ${name}.app"
@@ -245,15 +247,18 @@
         printf '#!/bin/sh\nexit 0\n' > "$_stub_dst/Contents/MacOS/Stub"
         chmod u+x "$_stub_dst/Contents/MacOS/Stub"
 
-        /usr/bin/codesign --force --deep \
+        # Fix ownership and codesign as real user (sudo removes keychain access)
+        chown -R "$_real_user:staff" "$_stub_dst"
+        sudo -u "$_real_user" /usr/bin/codesign --force --deep \
           -s "Apple Development: odon5ht@gmail.com (497TM5HK44)" \
           "$_stub_dst" && \
           echo "  codesigned: ${name}.app" || \
           echo "  btm error: codesign failed for ${name}.app" >&2
 
-        /usr/bin/open "$_stub_dst" 2>/dev/null
+        sudo -u "$_real_user" /usr/bin/open "$_stub_dst" 2>/dev/null
         sleep 1
         printf '%s\n' "$_expected" > "$_manifest"
+        chown "$_real_user:staff" "$_manifest"
       fi
     '')
     btmStubs);
@@ -406,7 +411,9 @@ in {
 
     # ── BTM: Install app stubs with embedded wrappers ──
     echo "BTM: syncing stubs..."
+    _btm_user="''${SUDO_USER:-$(whoami)}"
     mkdir -p "${btmStubDir}"
+    chown "$_btm_user:staff" "${btmStubDir}"
     ${btmStubCommands}
 
     # ── BTM: Patch user agents with AssociatedBundleIdentifiers ──

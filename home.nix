@@ -4,7 +4,16 @@
   tag,
   lib,
   ...
-}: {
+}: let
+  # ── PostgreSQL (mac only) ──
+  pg = pkgs.postgresql_17.withPackages (ps: [ps.pgvector]);
+  pgDataDir = "${config.home.homeDirectory}/.local/share/postgresql/data";
+  pgLogDir = "${config.home.homeDirectory}/.local/state/postgresql";
+  pgBackupDir = "${config.home.homeDirectory}/.local/share/postgresql/backups";
+  pgSocket = "/tmp";
+  pgPort = "5432";
+  pgMajor = "17";
+in {
   # ----------- Base Settings
   home.username =
     if tag == "mac"
@@ -87,17 +96,66 @@
       # typst — not currently needed
     ];
 
-  # Ensure directories used exist
-  home.activation.createStateDirs = lib.hm.dag.entryAfter ["writeBoundary"] ''
-    mkdir -p \
-      "$HOME/.local/state/zsh" \
-      "$HOME/.local/state/bash" \
-      "$HOME/.local/state/less" \
-      "$HOME/.local/state/sessions" \
-      "$HOME/.local/state/wakatime" \
-      "$HOME/.cache/zsh" \
-      "$HOME/.local/state/postgresql"
-  '';
+  # ── Activation Scripts ──
+  home.activation = lib.mkMerge [
+    {
+      # Shared: ensure XDG state directories exist
+      createStateDirs = lib.hm.dag.entryAfter ["writeBoundary"] ''
+        mkdir -p \
+          "$HOME/.local/state/zsh" \
+          "$HOME/.local/state/bash" \
+          "$HOME/.local/state/less" \
+          "$HOME/.local/state/sessions" \
+          "$HOME/.local/state/wakatime" \
+          "$HOME/.cache/zsh"
+      '';
+
+      # Shared: copy writable configs
+      configCopy = lib.hm.dag.entryAfter ["writeBoundary"] ''
+        HM="${config.home.homeDirectory}/.config/home-manager"
+        XDG_CONFIG_HOME="${config.xdg.configHome}"
+        HM_TAG="${lib.toUpper tag}"
+
+        ${builtins.readFile ./scripts/copy-files.sh}
+      '';
+    }
+
+    # Mac: PostgreSQL init
+    (lib.mkIf (tag == "mac") {
+      postgresqlInit = lib.hm.dag.entryAfter ["writeBoundary"] ''
+        mkdir -p "${pgLogDir}" "${pgBackupDir}"
+
+        if [ -d "${pgDataDir}" ]; then
+          if [ -f "${pgDataDir}/PG_VERSION" ]; then
+            CURRENT=$(cat "${pgDataDir}/PG_VERSION")
+            if [ "$CURRENT" != "${pgMajor}" ]; then
+              echo "WARNING: PostgreSQL version mismatch: data=$CURRENT, package=${pgMajor}"
+              echo "  Manual pg_upgrade required. Data dir: ${pgDataDir}"
+            fi
+          fi
+        else
+          echo "Initializing PostgreSQL ${pgMajor} database..."
+          ${pg}/bin/initdb \
+            -D "${pgDataDir}" \
+            --locale=C \
+            --encoding=UTF8 \
+            --auth=trust \
+            --username="$(whoami)"
+        fi
+      '';
+
+      # Mac: Polymarket log dir
+      createPolymarketLogDir = lib.hm.dag.entryAfter ["writeBoundary"] ''
+        mkdir -p /tmp/polymarket
+      '';
+    })
+  ];
+
+  # ── Session Variables (mac: PostgreSQL) ──
+  home.sessionVariables = lib.mkIf (tag == "mac") {
+    PGDATA = pgDataDir;
+    PGHOST = pgSocket;
+  };
 
   programs.home-manager.enable = true;
   programs.bash = {
@@ -129,6 +187,13 @@
       ++ lib.optionals (tag == "ft") [
         (builtins.readFile ./scripts/repeat-rate.sh)
       ]);
+
+    # Mac: PostgreSQL aliases
+    shellAliases = lib.mkIf (tag == "mac") {
+      pglog = "tail -f ${pgLogDir}/postgresql-$(date +%a).log";
+      pgbackuplog = "tail -f ${pgLogDir}/backup.log";
+      pgstatus = "pg_isready -h ${pgSocket} -p ${pgPort}";
+    };
   };
   programs.direnv = {
     enable = true;
@@ -140,18 +205,6 @@
   xdg.configFile."clang-format".source = ./configs/clang-format.yml;
   xdg.configFile."prettier.json".source = ./configs/prettier-config.json;
 
-  # Variables injected from Nix - ensures activation scripts work
-  # regardless of shell environment (standalone HM or nix-darwin)
-  home.activation.configCopy =
-    lib.hm.dag.entryAfter ["writeBoundary"]
-    ''
-      HM="${config.home.homeDirectory}/.config/home-manager"
-      XDG_CONFIG_HOME="${config.xdg.configHome}"
-      HM_TAG="${lib.toUpper tag}"
-
-      ${builtins.readFile ./scripts/copy-files.sh}
-    '';
-
   imports =
     [
       ./modules/system/aliases.nix
@@ -162,10 +215,6 @@
       ./modules/apps/helix.nix
       ./modules/apps/claude.nix
       ./modules/apps/ssh.nix
-    ]
-    ++ lib.optionals (tag == "mac") [
-      ./modules/services/polymarket/service.nix
-      ./modules/services/postgresql/service.nix
     ]
     ++ lib.optionals (tag == "ft") [
       ./modules/system/linux-ft.nix

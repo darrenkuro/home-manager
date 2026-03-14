@@ -19,7 +19,7 @@ All BTM logic is in `darwin.nix`:
 - `darwin.nix` — all BTM: wrappers, stubs config, activation, launchd agents
 - `lib/launchd-btm.nix` — `mkWrapper` builder for named binaries
 - `scripts/btm-patch-nix.sh` — patches Nix system daemons (activate-system)
-- `modules/services/*/` — only contain .app stub bundles now (no code)
+- `modules/services/*/` — .app stub bundles only (no .nix files)
 
 ## mkWrapper
 
