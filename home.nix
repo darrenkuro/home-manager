@@ -77,7 +77,6 @@ in {
       darwin.trash # Replace rm (safer)
       ghostty-bin
       ffmpeg
-      tmux
       poppler-utils # PDF tools
       yt-dlp # Youtube download
 

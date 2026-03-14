@@ -5,7 +5,6 @@ Reference for setting up a fresh macOS machine. Most config is now declarative v
 ## Prerequisites
 
 1. Sign into iCloud (for App Store, Photos sync)
-2. Install Homebrew: `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`
 
 ## Nix + Home Manager Bootstrap
 
@@ -28,7 +27,8 @@ After this, `re` (fast) and `sure` (full) aliases are available.
 
 ### Homebrew Casks (darwin.nix)
 
-- alfred, brave-browser, calibre, claude, claude-code, dropbox, notion, obsidian, pearcleaner, sf-symbols, steam, visual-studio-code
+- alfred, anki, brave-browser, calibre, claude, claude-code, dropbox, notion, obsidian, pearcleaner, sf-symbols, steam, visual-studio-code
+- Greedy (auto-update sync): brave-browser, claude, claude-code, notion, obsidian, visual-studio-code
 
 ### Homebrew Brews
 
@@ -44,7 +44,7 @@ After this, `re` (fast) and `sure` (full) aliases are available.
 - Dev: clang-tools, alejandra, nil, shfmt, shellcheck, cargo, rust-analyzer, rustfmt, clippy
 - Node: nodejs_22, typescript, typescript-language-server, pnpm, bun
 - Python: python313, pip, virtualenv, black, flake8
-- Mac: trash, ghostty-bin, ffmpeg, tmux, poppler-utils, yt-dlp, colima, docker-\*
+- Mac: trash, ghostty-bin, ffmpeg, poppler-utils, yt-dlp, colima, docker-\*
 
 ### System Defaults (darwin.nix)
 
@@ -78,9 +78,7 @@ pkg-config
 ```nix
 # Consider adding to darwin.nix casks:
 "google-chrome"
-"anki"
 "cursor"
-"the-unarchiver"
 ```
 
 ### App Store Apps to Add (not yet in masApps)

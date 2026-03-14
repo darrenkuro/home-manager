@@ -303,24 +303,37 @@ in {
     ];
     casks = [
       "alfred"
-      "brave-browser"
+      "anki"
+      {
+        name = "brave-browser";
+        greedy = true;
+      }
       "calibre"
       {
         name = "claude";
         greedy = true;
-      } # Desktop app, fast-updating
+      }
       {
         name = "claude-code";
         greedy = true;
-      } # CLI, fast-updating
+      }
       "dropbox"
       "font-carlito"
-      "notion"
-      "obsidian"
+      {
+        name = "notion";
+        greedy = true;
+      }
+      {
+        name = "obsidian";
+        greedy = true;
+      }
       "pearcleaner"
       "sf-symbols"
       "steam"
-      "visual-studio-code"
+      {
+        name = "visual-studio-code";
+        greedy = true;
+      }
     ];
     masApps = {
       "CleanMyMac" = 1339170533;
