@@ -17,6 +17,8 @@ This file: `~/.config/home-manager/configs/claude/CLAUDE.md` (edit, then `re` to
 
 **Skills**: Live in `~/Documents/dev/claude-config`. Edit there, commit/push, then `nix flake update claude-config && re` in hm.
 
+**hm** (home-manager): `~/.config/home-manager` — when editing, load its CLAUDE.md first (has commit-after-change rule).
+
 ## Behavior
 
 ### Project Context
