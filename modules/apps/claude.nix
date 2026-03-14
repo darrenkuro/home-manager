@@ -75,8 +75,8 @@ in {
     "claude/hooks".source = claude-config + "/hooks";
   };
 
-  # Post-activation check for Claude plugins
-  home.activation.checkClaudePlugins = lib.hm.dag.entryAfter ["writeBoundary"] ''
+  # Validate Claude Code plugin configuration
+  home.activation.claudePlugins = lib.hm.dag.entryAfter ["writeBoundary"] ''
     settings="$HOME/.config/claude/settings.json"
     if [ -f "$settings" ]; then
       # Plugins now managed as hm skills — warn if still enabled

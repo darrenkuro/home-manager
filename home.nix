@@ -99,9 +99,9 @@ in {
   # ── Activation Scripts ──
   home.activation = lib.mkMerge [
     {
-      # Shared: ensure XDG state directories exist
-      createStateDirs = lib.hm.dag.entryAfter ["writeBoundary"] ''
-        mkdir -p \
+      # Create XDG state/cache directories for shell history, sessions, etc.
+      xdgStateDirs = lib.hm.dag.entryAfter ["writeBoundary"] ''
+        run mkdir -p \
           "$HOME/.local/state/zsh" \
           "$HOME/.local/state/bash" \
           "$HOME/.local/state/less" \
@@ -110,8 +110,8 @@ in {
           "$HOME/.cache/zsh"
       '';
 
-      # Shared: copy writable configs
-      configCopy = lib.hm.dag.entryAfter ["writeBoundary"] ''
+      # Copy writable configs (VSCode, taskrc, tmux, Claude settings.json hooks)
+      writableConfigs = lib.hm.dag.entryAfter ["writeBoundary"] ''
         HM="${config.home.homeDirectory}/.config/home-manager"
         XDG_CONFIG_HOME="${config.xdg.configHome}"
         HM_TAG="${lib.toUpper tag}"
@@ -120,10 +120,11 @@ in {
       '';
     }
 
-    # Mac: PostgreSQL init
+    # Mac-only services
     (lib.mkIf (tag == "mac") {
-      postgresqlInit = lib.hm.dag.entryAfter ["writeBoundary"] ''
-        mkdir -p "${pgLogDir}" "${pgBackupDir}"
+      # Initialize PostgreSQL data directory and check version compatibility
+      postgresql = lib.hm.dag.entryAfter ["writeBoundary"] ''
+        run mkdir -p "${pgLogDir}" "${pgBackupDir}"
 
         if [ -d "${pgDataDir}" ]; then
           if [ -f "${pgDataDir}/PG_VERSION" ]; then
@@ -144,9 +145,9 @@ in {
         fi
       '';
 
-      # Mac: Polymarket log dir
-      createPolymarketLogDir = lib.hm.dag.entryAfter ["writeBoundary"] ''
-        mkdir -p /tmp/polymarket
+      # Create temp directories for services
+      serviceTmpDirs = lib.hm.dag.entryAfter ["writeBoundary"] ''
+        run mkdir -p /tmp/polymarket
       '';
     })
   ];
