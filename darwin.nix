@@ -14,14 +14,10 @@ let
     "org.postgresql.backup" = "Postgres";
     "com.polymarket.data-monitor" = "Polymarket";
   };
-  btmDaemonMapping = {
-    "org.nixos.nix-daemon" = "Nix";
-    "org.nixos.darwin-store" = "Nix";
-  };
 
-  # Generate patching commands for agents and daemons
-  mkPatchCommands = plistDir: mapping: lib.concatStringsSep "\n" (lib.mapAttrsToList (label: appName: ''
-    _plist="${plistDir}/${label}.plist"
+  # Generate patching commands for user agents
+  patchAgentCommands = lib.concatStringsSep "\n" (lib.mapAttrsToList (label: appName: ''
+    _plist="${agentDir}/${label}.plist"
     _stub="${btmStubDir}/${appName}.app"
     if [[ -f "$_plist" ]] && [[ -d "$_stub" ]]; then
       _bid=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$_stub/Contents/Info.plist" 2>/dev/null)
@@ -37,9 +33,7 @@ let
         fi
       fi
     fi
-  '') mapping);
-  patchAgentCommands = mkPatchCommands agentDir btmAgentMapping;
-  patchDaemonCommands = mkPatchCommands "/Library/LaunchDaemons" btmDaemonMapping;
+  '') btmAgentMapping);
 in
 {
   # Nix settings
@@ -150,11 +144,10 @@ in
     /usr/bin/defaults write com.apple.AppleMultitouchTrackpad FirstClickThreshold -int 0
     /usr/bin/defaults write com.apple.AppleMultitouchTrackpad SecondClickThreshold -int 0
 
-    # ── BTM: Patch plists with AssociatedBundleIdentifiers ──
+    # ── BTM: Patch user agents with AssociatedBundleIdentifiers ──
+    # System daemons (Nix) are patched by scripts/btm-patch-nix.sh (run via res alias)
     echo "BTM: patching LaunchAgents..."
     ${patchAgentCommands}
-    echo "BTM: patching LaunchDaemons..."
-    ${patchDaemonCommands}
   '';
 
   # User (needed for home-manager integration to infer home.homeDirectory)
