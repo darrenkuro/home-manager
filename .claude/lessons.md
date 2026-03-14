@@ -59,3 +59,31 @@ pkgs.writeTextFile {
   text = "...";
 }
 ```
+
+## nix-darwin Migration (In Progress)
+
+### Cleanup After Confirming LaunchAgents Work
+
+After verifying that nix-darwin's `launchd.user.agents` work correctly post-reboot:
+
+1. **Remove BTM agent registrations** (keep stubs for icon grouping):
+   - `modules/services/postgresql/service.nix`: Remove `agents = {...}` from `btm.stubs."Postgres"`
+   - `modules/services/polymarket/service.nix`: Remove `agents = {...}` from `btm.stubs."Polymarket"`
+
+2. **Remove env-setter service entirely** (if `launchd.user.envVariables` works):
+   - Delete `modules/services/env-setter/` directory
+   - Remove import from `home.nix`
+
+3. **Rename test labels in darwin.nix**:
+   - `org.postgresql.server.test` → `org.postgresql.server`
+   - `org.postgresql.backup.test` → `org.postgresql.backup`
+   - `com.polymarket.data-monitor.test` → `com.polymarket.data-monitor`
+
+4. **Remove TEST comments** from darwin.nix
+
+5. **Remove secret test phrase** from `configs/claude/CLAUDE.md`
+
+6. **Simplify btm.nix**:
+   - Remove agent bootstrap/bootout logic (nix-darwin handles this)
+   - Keep stub copy, wrapper embedding, codesigning
+   - ~100 lines can be deleted

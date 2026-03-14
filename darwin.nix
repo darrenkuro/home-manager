@@ -86,6 +86,63 @@ in
     };
   };
 
+  # ═══════════════════════════════════════════════════════════════════════════
+  # TEST: LaunchAgents via nix-darwin (parallel to BTM for verification)
+  # Uses .test suffix to avoid label conflicts with BTM-managed agents.
+  # Points to same wrapper binaries inside BTM-managed .app stubs.
+  #
+  # AFTER CONFIRMING THESE WORK:
+  # 1. Remove btm.stubs entries from: postgresql/service.nix, polymarket/service.nix
+  # 2. Remove btm.agents from those files (keep stubs for BTM icon grouping)
+  # 3. Rename labels here (remove .test suffix)
+  # 4. Delete these TEST comments
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  launchd.user.agents.postgresql-server-test = {
+    serviceConfig = {
+      Label = "org.postgresql.server.test";
+      ProgramArguments = [ "${btmStubDir}/Postgres.app/Contents/MacOS/PostgresServer" ];
+      RunAtLoad = true;
+      KeepAlive = true;
+      ThrottleInterval = 10;
+      StandardOutPath = "/Users/darrenlu/.local/state/postgresql/launchd-stdout.log";
+      StandardErrorPath = "/Users/darrenlu/.local/state/postgresql/launchd-stderr.log";
+      EnvironmentVariables = {
+        HOME = "/Users/darrenlu";
+        PGDATA = "/Users/darrenlu/.local/share/postgresql/data";
+      };
+    };
+  };
+
+  launchd.user.agents.postgresql-backup-test = {
+    serviceConfig = {
+      Label = "org.postgresql.backup.test";
+      ProgramArguments = [ "${btmStubDir}/Postgres.app/Contents/MacOS/PostgresBackup" ];
+      StartCalendarInterval = [{ Hour = 3; Minute = 0; }];
+      StandardOutPath = "/Users/darrenlu/.local/state/postgresql/backup-stdout.log";
+      StandardErrorPath = "/Users/darrenlu/.local/state/postgresql/backup-stderr.log";
+      EnvironmentVariables = {
+        HOME = "/Users/darrenlu";
+      };
+    };
+  };
+
+  launchd.user.agents.polymarket-monitor-test = {
+    serviceConfig = {
+      Label = "com.polymarket.data-monitor.test";
+      ProgramArguments = [ "${btmStubDir}/Polymarket.app/Contents/MacOS/PolymarketMonitor" ];
+      WorkingDirectory = "/Users/darrenlu/Documents/dev/polymarket-trading-bot";
+      RunAtLoad = true;
+      KeepAlive = true;
+      ThrottleInterval = 10;
+      StandardOutPath = "/tmp/polymarket/monitor.log";
+      StandardErrorPath = "/tmp/polymarket/monitor.err";
+      EnvironmentVariables = {
+        HOME = "/Users/darrenlu";
+      };
+    };
+  };
+
   # nix-darwin state version
   system.stateVersion = 5;
 }
