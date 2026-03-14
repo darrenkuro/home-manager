@@ -58,6 +58,14 @@ After this, `re` (fast) and `sure` (full) aliases are available.
 
 ## Manual Setup Required
 
+### Nix Packages to Add (not yet in home.nix)
+```nix
+# Consider adding:
+imagemagick
+marksman  # Markdown LSP
+pkg-config
+```
+
 ### Casks to Add (not yet in darwin.nix)
 ```nix
 # Consider adding to darwin.nix casks:
@@ -106,6 +114,12 @@ Manual selection
 ### Trackpad: 3-Finger Lookup
 System Settings > Trackpad > Point & Click > Look up & data detectors > "Tap with three fingers"
 (Currently not managed by nix-darwin)
+
+### Safari
+View > Show Favorites Bar
+
+### VPN
+Install NordVPN from App Store, sign in
 
 ---
 
