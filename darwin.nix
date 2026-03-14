@@ -42,16 +42,73 @@ in
 
   # macOS system defaults (declarative)
   system.defaults = {
-    dock.show-recents = false;
+    # ── NSGlobalDomain ──
+    NSGlobalDomain = {
+      AppleInterfaceStyle = "Dark";
+      ApplePressAndHoldEnabled = false;  # Key repeat instead of accent popup
+      InitialKeyRepeat = 15;  # Default 25
+      KeyRepeat = 2;  # Default 6
+      "com.apple.trackpad.scaling" = 3.0;
+      NSAutomaticPeriodSubstitutionEnabled = false;
+    };
+
+    # ── Dock ──
+    dock = {
+      autohide = true;
+      show-recents = false;
+      tilesize = 61;
+      show-process-indicators = true;
+      wvous-br-corner = 1;  # Disabled hot corner
+    };
+
+    # ── Finder ──
+    finder = {
+      FXPreferredViewStyle = "clmv";  # Column view
+      ShowPathbar = true;
+      ShowStatusBar = false;
+    };
+
+    # ── Trackpad ──
+    trackpad = {
+      Clicking = true;  # Tap to click
+      TrackpadThreeFingerDrag = false;
+    };
+
+    # ── Menu Bar Clock ──
+    menuExtraClock = {
+      ShowAMPM = true;
+      ShowDayOfWeek = true;
+      ShowSeconds = true;
+      IsAnalog = false;
+    };
   };
 
   # Post-activation: settings not in nix-darwin + BTM agent patching
   system.activationScripts.postActivation.text = ''
     # ── macOS defaults not in nix-darwin ──
     /usr/bin/defaults write -g NSRecentDocumentsLimit 0
+    /usr/bin/defaults write -g AppleMeasurementUnits -string "Centimeters"
+    /usr/bin/defaults write -g AppleMetricUnits -int 1
+    /usr/bin/defaults write -g AppleTemperatureUnit -string "Celsius"
+    /usr/bin/defaults write -g "com.apple.mouse.scaling" -float 3
+    /usr/bin/defaults write -g "com.apple.sound.beep.feedback" -int 0
+    /usr/bin/defaults write -g "com.apple.sound.beep.flash" -int 0
+
+    # Finder: custom window target
+    /usr/bin/defaults write com.apple.finder NewWindowTarget -string "PfLo"
+    /usr/bin/defaults write com.apple.finder NewWindowTargetPath -string "file:///Users/darrenlu/Dropbox/"
+    /usr/bin/defaults write com.apple.finder ShowHardDrivesOnDesktop -bool false
+    /usr/bin/defaults write com.apple.finder ShowExternalHardDrivesOnDesktop -bool true
+    /usr/bin/defaults write com.apple.finder ShowRemovableMediaOnDesktop -bool true
+
+    # Trackpad: force touch and click settings
+    /usr/bin/defaults write com.apple.AppleMultitouchTrackpad TrackpadRightClick -int 1
+    /usr/bin/defaults write com.apple.AppleMultitouchTrackpad ForceSuppressed -int 1
+    /usr/bin/defaults write com.apple.AppleMultitouchTrackpad ActuationStrength -int 0
+    /usr/bin/defaults write com.apple.AppleMultitouchTrackpad FirstClickThreshold -int 0
+    /usr/bin/defaults write com.apple.AppleMultitouchTrackpad SecondClickThreshold -int 0
 
     # ── BTM: Patch LaunchAgents with AssociatedBundleIdentifiers ──
-    # Groups agents under their parent app icon in Login Items
     echo "BTM: patching LaunchAgents..."
     ${patchCommands}
   '';

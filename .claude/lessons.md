@@ -60,22 +60,14 @@ pkgs.writeTextFile {
 }
 ```
 
-## nix-darwin Migration
+## nix-darwin Migration (Complete)
 
-### Done
 - LaunchAgents migrated to darwin.nix (`launchd.user.agents`)
 - BTM patching moved to darwin.nix post-activation script
-- Removed btm.agents from postgresql/service.nix and polymarket/service.nix
-- Cleaned up launchd-btm.nix comments
-- Fixed `p` alias (darwin.nix) and simplified `re` alias
+- Removed env-setter (replaced by `launchd.user.envVariables`)
+- Simplified btm.nix (removed agent logic, ~120 lines deleted)
+- Added system.defaults from audit (NSGlobalDomain, dock, finder, trackpad, menuExtraClock)
 
-### Remaining (after reboot verification)
-1. **Remove env-setter service** (if `launchd.user.envVariables` works):
-   - Delete `modules/services/env-setter/` directory
-   - Remove import from `home.nix`
-
-2. **Remove secret test phrase** from `configs/claude/CLAUDE.md`
-
-3. **Simplify btm.nix** (once env-setter is removed):
-   - Remove agent bootstrap/bootout logic (only env-setter still uses it)
-   - Keep stub copy, wrapper embedding, codesigning
+### Remaining
+- Remove secret test phrase from `configs/claude/CLAUDE.md` after verifying Claude Desktop reads env vars
+- Add homebrew.casks and homebrew.masApps from audit
