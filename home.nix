@@ -75,7 +75,6 @@ in {
       python313Packages.virtualenv
 
       darwin.trash # Replace rm (safer)
-      ghostty-bin
       ffmpeg
       poppler-utils # PDF tools
       yt-dlp # Youtube download

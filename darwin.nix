@@ -320,6 +320,10 @@ in {
       "dropbox"
       "font-carlito"
       {
+        name = "ghostty";
+        greedy = true;
+      }
+      {
         name = "notion";
         greedy = true;
       }
@@ -372,7 +376,7 @@ in {
         "/Applications/Safari.app"
         "/Applications/Brave Browser.app"
         "/Applications/Obsidian.app"
-        "${homeDir}/Applications/Home Manager Apps/Ghostty.app"
+        "/Applications/Ghostty.app"
         "/Applications/Visual Studio Code.app"
         "/System/Applications/Utilities/Activity Monitor.app"
         "/System/Applications/System Settings.app"

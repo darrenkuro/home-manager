@@ -27,8 +27,8 @@ After this, `re` (fast) and `sure` (full) aliases are available.
 
 ### Homebrew Casks (darwin.nix)
 
-- alfred, anki, brave-browser, calibre, claude, claude-code, dropbox, notion, obsidian, pearcleaner, sf-symbols, steam, visual-studio-code
-- Greedy (auto-update sync): brave-browser, claude, claude-code, notion, obsidian, visual-studio-code
+- alfred, anki, brave-browser, calibre, claude, claude-code, dropbox, ghostty, notion, obsidian, pearcleaner, sf-symbols, steam, visual-studio-code
+- Greedy (auto-update sync): brave-browser, claude, claude-code, ghostty, notion, obsidian, visual-studio-code
 
 ### Homebrew Brews
 
@@ -44,7 +44,7 @@ After this, `re` (fast) and `sure` (full) aliases are available.
 - Dev: clang-tools, alejandra, nil, shfmt, shellcheck, cargo, rust-analyzer, rustfmt, clippy
 - Node: nodejs_22, typescript, typescript-language-server, pnpm, bun
 - Python: python313, pip, virtualenv, black, flake8
-- Mac: trash, ghostty-bin, ffmpeg, poppler-utils, yt-dlp, colima, docker-\*
+- Mac: trash, ffmpeg, poppler-utils, yt-dlp, colima, docker-\*
 
 ### System Defaults (darwin.nix)
 
