@@ -40,7 +40,7 @@
       p = "hx $HM/darwin.nix";
       hm = "code $HM";
       re = "darwin-rebuild switch --flake $HM#mac && exec zsh";
-      res = "sudo darwin-rebuild switch --flake $HM#mac && sudo $HM/scripts/btm-patch-nix.sh && exec zsh";
+      sure = "sudo darwin-rebuild switch --flake $HM#mac && sudo $HM/scripts/btm-patch-nix.sh && exec zsh";  # su + re
 
       dbox = "cd $DBOX";
       hide = "chflags hidden";
