@@ -6,6 +6,7 @@
 
 ## Abbreviations
 - "hm" = home manager, located at ~/.config/home-manager
+- This file's source: `~/.config/home-manager/configs/claude/CLAUDE.md` (run `re` to deploy)
 
 ## Code Standards (TypeScript projects)
 When working in a TypeScript codebase:
