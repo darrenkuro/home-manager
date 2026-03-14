@@ -40,6 +40,42 @@ in
   # Nix settings
   nix.settings.experimental-features = ["nix-command" "flakes"];
 
+  # ── Homebrew ──
+  homebrew = {
+    enable = true;
+    onActivation = {
+      cleanup = "zap";  # Remove unlisted packages
+      autoUpdate = false;  # Don't auto-update on rebuild
+      upgrade = true;
+    };
+    casks = [
+      "alfred"
+      "brave-browser"
+      "calibre"
+      "dropbox"
+      "font-carlito"
+      "notion"
+      "obsidian"
+      "pearcleaner"
+      "sf-symbols"
+      "steam"
+      "visual-studio-code"
+      "vlc"
+    ];
+    masApps = {
+      "Affinity Designer" = 1274090551;
+      "CleanMyMac" = 1339170533;
+      "Developer" = 640199958;
+      "Final Cut Pro" = 424389933;
+      "iA Writer" = 775737590;
+      "Mirror Magnet" = 1563698880;
+      "OmniFocus 4" = 1542143627;
+      "Scrivener 3" = 1310686187;
+      "Xcode" = 497799835;
+      "Yoink" = 457622435;
+    };
+  };
+
   # macOS system defaults (declarative)
   system.defaults = {
     # ── NSGlobalDomain ──
