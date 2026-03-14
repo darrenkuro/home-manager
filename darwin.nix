@@ -4,6 +4,42 @@
 let
   # BTM stub location (managed by home-manager btm module)
   btmStubDir = "/Users/darrenlu/.local/share/app-stubs";
+  homeDir = "/Users/darrenlu";
+  agentDir = "${homeDir}/Library/LaunchAgents";
+
+  # Map agent labels to their parent app stubs for BTM grouping
+  # Format: { "label" = "AppName"; } where stub is at ${btmStubDir}/AppName.app
+  btmAgentMapping = {
+    # Test agents (remove .test suffix after verification)
+    "org.postgresql.server.test" = "Postgres";
+    "org.postgresql.backup.test" = "Postgres";
+    "com.polymarket.data-monitor.test" = "Polymarket";
+    # Production agents (uncomment after migration)
+    # "org.postgresql.server" = "Postgres";
+    # "org.postgresql.backup" = "Postgres";
+    # "com.polymarket.data-monitor" = "Polymarket";
+  };
+
+  # Generate patching commands for all mapped agents
+  patchCommands = lib.concatStringsSep "\n" (lib.mapAttrsToList (label: appName: ''
+    _plist="${agentDir}/${label}.plist"
+    _stub="${btmStubDir}/${appName}.app"
+    if [[ -f "$_plist" ]] && [[ -d "$_stub" ]]; then
+      _bid=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$_stub/Contents/Info.plist" 2>/dev/null)
+      if [[ -n "$_bid" ]]; then
+        # Check if already patched
+        _existing=$(/usr/libexec/PlistBuddy -c "Print :AssociatedBundleIdentifiers:0" "$_plist" 2>/dev/null || true)
+        if [[ "$_existing" != "$_bid" ]]; then
+          /usr/libexec/PlistBuddy \
+            -c "Delete :AssociatedBundleIdentifiers" "$_plist" 2>/dev/null || true
+          /usr/libexec/PlistBuddy \
+            -c "Add :AssociatedBundleIdentifiers array" \
+            -c "Add :AssociatedBundleIdentifiers:0 string $_bid" \
+            "$_plist" 2>/dev/null && echo "  BTM: patched ${label} -> ${appName}"
+        fi
+      fi
+    fi
+  '') btmAgentMapping);
 in
 {
   # Nix settings
@@ -14,9 +50,15 @@ in
     dock.show-recents = false;
   };
 
-  # NSRecentDocumentsLimit not available in nix-darwin — use activation script
+  # Post-activation: settings not in nix-darwin + BTM agent patching
   system.activationScripts.postActivation.text = ''
+    # ── macOS defaults not in nix-darwin ──
     /usr/bin/defaults write -g NSRecentDocumentsLimit 0
+
+    # ── BTM: Patch LaunchAgents with AssociatedBundleIdentifiers ──
+    # Groups agents under their parent app icon in Login Items
+    echo "BTM: patching LaunchAgents..."
+    ${patchCommands}
   '';
 
   # User (needed for home-manager integration to infer home.homeDirectory)
