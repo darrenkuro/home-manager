@@ -247,12 +247,10 @@
         printf '#!/bin/sh\nexit 0\n' > "$_stub_dst/Contents/MacOS/Stub"
         chmod u+x "$_stub_dst/Contents/MacOS/Stub"
 
-        # Fix ownership and codesign as real user (sudo removes keychain access)
+        # Fix ownership and ad-hoc codesign (real signing not available during activation)
         chown -R "$_real_user:staff" "$_stub_dst"
-        sudo -u "$_real_user" /usr/bin/codesign --force --deep \
-          -s "Apple Development: odon5ht@gmail.com (497TM5HK44)" \
-          "$_stub_dst" && \
-          echo "  codesigned: ${name}.app" || \
+        /usr/bin/codesign --force --deep -s - "$_stub_dst" && \
+          echo "  codesigned (ad-hoc): ${name}.app" || \
           echo "  btm error: codesign failed for ${name}.app" >&2
 
         sudo -u "$_real_user" /usr/bin/open "$_stub_dst" 2>/dev/null
