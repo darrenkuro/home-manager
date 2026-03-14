@@ -9,17 +9,24 @@ in
   # Nix settings
   nix.settings.experimental-features = ["nix-command" "flakes"];
 
-  # macOS system defaults (declarative, replaces `defaults write` commands)
+  # macOS system defaults (declarative)
   system.defaults = {
-    NSGlobalDomain.NSRecentDocumentsLimit = 0;
     dock.show-recents = false;
   };
+
+  # NSRecentDocumentsLimit not available in nix-darwin — use activation script
+  system.activationScripts.postActivation.text = ''
+    /usr/bin/defaults write -g NSRecentDocumentsLimit 0
+  '';
 
   # User (needed for home-manager integration to infer home.homeDirectory)
   users.users.darrenlu = {
     name = "darrenlu";
     home = "/Users/darrenlu";
   };
+
+  # Required for user-level options (launchd.user.agents, system.defaults.dock, etc.)
+  system.primaryUser = "darrenlu";
 
   # Take over Nix daemon management from installer for BTM integration
   # This replaces /Library/LaunchDaemons/org.nixos.nix-daemon.plist
