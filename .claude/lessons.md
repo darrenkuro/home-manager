@@ -42,3 +42,20 @@ security find-generic-password -s "$nixCryptoUUID" -w | \
 - Wrapper binaries must be INSIDE the .app bundle for BTM icon resolution
 - After icon changes, REBOOT to refresh BTM (don't use `sfltool resetbtm`)
 - `sfltool resetbtm` wipes ALL login items system-wide — never use it
+
+## Nix Derivation Output Structures
+
+### writeShellApplication vs writeTextFile
+- `writeShellApplication` outputs to `$out/bin/<name>`
+- `writeTextFile` outputs to `$out` directly (just the file)
+- btm.nix expects `${drv}/bin/${name}` structure for all wrappers
+
+**Fix:** When using `writeTextFile`, set `destination = "/bin/${name}"` to match the expected structure:
+```nix
+pkgs.writeTextFile {
+  inherit name;
+  destination = "/bin/${name}";  # <-- critical!
+  executable = true;
+  text = "...";
+}
+```
