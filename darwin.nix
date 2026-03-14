@@ -9,6 +9,12 @@ in
   # Nix settings
   nix.settings.experimental-features = ["nix-command" "flakes"];
 
+  # macOS system defaults (declarative, replaces `defaults write` commands)
+  system.defaults = {
+    NSGlobalDomain.NSRecentDocumentsLimit = 0;
+    dock.show-recents = false;
+  };
+
   # User (needed for home-manager integration to infer home.homeDirectory)
   users.users.darrenlu = {
     name = "darrenlu";
