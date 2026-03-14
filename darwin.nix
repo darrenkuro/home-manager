@@ -7,22 +7,25 @@ let
   homeDir = "/Users/darrenlu";
   agentDir = "${homeDir}/Library/LaunchAgents";
 
-  # Map agent labels to their parent app stubs for BTM grouping
+  # Map labels to app stubs for BTM grouping
   # Format: { "label" = "AppName"; } where stub is at ${btmStubDir}/AppName.app
   btmAgentMapping = {
     "org.postgresql.server" = "Postgres";
     "org.postgresql.backup" = "Postgres";
     "com.polymarket.data-monitor" = "Polymarket";
   };
+  btmDaemonMapping = {
+    "org.nixos.nix-daemon" = "Nix";
+    "org.nixos.darwin-store" = "Nix";
+  };
 
-  # Generate patching commands for all mapped agents
-  patchCommands = lib.concatStringsSep "\n" (lib.mapAttrsToList (label: appName: ''
-    _plist="${agentDir}/${label}.plist"
+  # Generate patching commands for agents and daemons
+  mkPatchCommands = plistDir: mapping: lib.concatStringsSep "\n" (lib.mapAttrsToList (label: appName: ''
+    _plist="${plistDir}/${label}.plist"
     _stub="${btmStubDir}/${appName}.app"
     if [[ -f "$_plist" ]] && [[ -d "$_stub" ]]; then
       _bid=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$_stub/Contents/Info.plist" 2>/dev/null)
       if [[ -n "$_bid" ]]; then
-        # Check if already patched
         _existing=$(/usr/libexec/PlistBuddy -c "Print :AssociatedBundleIdentifiers:0" "$_plist" 2>/dev/null || true)
         if [[ "$_existing" != "$_bid" ]]; then
           /usr/libexec/PlistBuddy \
@@ -34,7 +37,9 @@ let
         fi
       fi
     fi
-  '') btmAgentMapping);
+  '') mapping);
+  patchAgentCommands = mkPatchCommands agentDir btmAgentMapping;
+  patchDaemonCommands = mkPatchCommands "/Library/LaunchDaemons" btmDaemonMapping;
 in
 {
   # Nix settings
@@ -145,9 +150,11 @@ in
     /usr/bin/defaults write com.apple.AppleMultitouchTrackpad FirstClickThreshold -int 0
     /usr/bin/defaults write com.apple.AppleMultitouchTrackpad SecondClickThreshold -int 0
 
-    # ── BTM: Patch LaunchAgents with AssociatedBundleIdentifiers ──
+    # ── BTM: Patch plists with AssociatedBundleIdentifiers ──
     echo "BTM: patching LaunchAgents..."
-    ${patchCommands}
+    ${patchAgentCommands}
+    echo "BTM: patching LaunchDaemons..."
+    ${patchDaemonCommands}
   '';
 
   # User (needed for home-manager integration to infer home.homeDirectory)
