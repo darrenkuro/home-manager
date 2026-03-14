@@ -352,6 +352,18 @@ in {
       tilesize = 61;
       show-process-indicators = true;
       wvous-br-corner = 1; # Disabled hot corner
+      persistent-apps = [
+        "/System/Library/CoreServices/Finder.app"
+        "/System/Applications/Mail.app"
+        "/System/Applications/Calendar.app"
+        "/Applications/Safari.app"
+        "/Applications/Brave Browser.app"
+        "/Applications/Obsidian.app"
+        "${homeDir}/Applications/Home Manager Apps/Ghostty.app"
+        "/Applications/Visual Studio Code.app"
+        "/System/Applications/Utilities/Activity Monitor.app"
+        "/System/Applications/System Settings.app"
+      ];
     };
 
     # ── Finder ──
