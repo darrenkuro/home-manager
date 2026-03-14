@@ -8,13 +8,6 @@
 - "hm" = home manager, located at ~/.config/home-manager
 - This file's source: `~/.config/home-manager/configs/claude/CLAUDE.md` (run `re` to deploy)
 
-## Code Standards (TypeScript projects)
-When working in a TypeScript codebase:
-- TypeScript-first with proper types. Do not use `any` unless absolutely necessary. Co-locate types with their modules unless shared across multiple files.
-- **Error handling**: Use `neverthrow` and return `Result`/`Option` types instead of throwing. Only deviate if explicitly told otherwise.
-- **Functional style**: Prefer arrow functions (`const foo = () => {}`) over `function` declarations. Only use `function` if explicitly told otherwise.
-- **No classes**: Prefer closures and factory functions. Only use classes if explicitly told otherwise.
-
 ## Refactoring Guidelines
 - When refactoring or reorganizing files, make ALL changes in a single atomic pass — move files, update all imports, and verify compilation before reporting completion. Do not leave partial moves.
 
