@@ -101,6 +101,9 @@ fi
 # This must run as the real user to access keychain
 echo "BTM: signing app stubs..."
 if [[ -d "$STUBS_DIR" ]]; then
+  # Fix ownership (wrapper binaries are copied as root during darwin-rebuild)
+  chown -R "$real_user:staff" "$STUBS_DIR"
+
   for app in "$STUBS_DIR"/*.app; do
     [[ -d "$app" ]] || continue
     app_name=$(basename "$app")
