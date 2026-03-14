@@ -48,26 +48,25 @@ nix-collect-garbage -d
 - `home.nix` — main module: packages, shell config, zsh init chain, XDG config files, conditional imports
 
 ### Module Organization
-- `modules/system/` — aliases (`aliases.nix` shared, `aliases-cp.nix` clipboard badges, `aliases-man.nix`), env vars (`env.nix`), platform-specific (`macos.nix`, `linux-ft.nix`)
+- `modules/system/` — aliases (`aliases.nix` shared, `aliases-cp.nix` clipboard badges, `aliases-man.nix`), env vars (`env.nix`), platform-specific (`linux-ft.nix`)
 - `modules/apps/` — per-app config: `git.nix`, `helix.nix`, `starship.nix`, `claude.nix`, `ssh.nix`
-- `modules/services/` — launchd services (macOS only):
-  - `btm.nix` — user-level Launch Agents via BTM module (Postgres, Polymarket, env-setter)
-  - `nix-daemon/service.nix` — system-level Launch Daemons managed by nix-darwin (nix-daemon, darwin-store)
+- `modules/services/` — macOS services:
+  - `btm.nix` — copies app stubs, embeds wrappers, codesigns for BTM icon grouping
+  - `nix-daemon/service.nix` — Nix.app stub with wrappers for nix-daemon and darwin-store
 
 ### BTM (Background Task Management) — macOS Launch Agents
-Bypasses home-manager's default `launchd.agents` which wraps `ProgramArguments` in `/bin/sh -c "wait4path..."`, causing macOS BTM to show "sh" for all agents.
 
 **Architecture:**
-- `lib/launchd-btm.nix` — pure builders: `mkWrapper` (named shell binary with wait4path baked in), `mkPlist` (launchd plist from attrset)
-- `app-stubs/` — static .app bundles (Info.plist, icon, dummy executable) for BTM icon resolution
-- `modules/services/btm.nix` — shared activation: copies stubs, embeds wrapper binaries, codesigns, lsregister, bootout/bootstrap lifecycle
-- `modules/services/*.nix` — each service registers via `btm.agents.<label>` and `btm.stubs.<Name> = { src, wrappers }`
+- `darwin.nix` — LaunchAgents via `launchd.user.agents`, BTM patching via post-activation
+- `lib/launchd-btm.nix` — `mkWrapper` for named shell binaries
+- `modules/services/btm.nix` — copies stubs, embeds wrappers, codesigns
+- `modules/services/*.nix` — each service registers stubs: `btm.stubs.<Name> = { src, wrappers }`
 
-**How icons work:** ProgramArguments points to a wrapper binary inside the .app stub. BTM resolves icons by path containment (executable is inside a .app → use that app's icon). Stubs are ad-hoc codesigned at activation time so the wrapper + bundle share one identity. After icon changes, reboot to refresh BTM. Do NOT use `sfltool resetbtm` — it wipes ALL login items system-wide.
+**How icons work:** ProgramArguments points to a wrapper binary inside the .app stub. BTM resolves icons by path containment. darwin.nix post-activation patches plists with `AssociatedBundleIdentifiers` for grouping. After icon changes, reboot to refresh BTM.
 
-**User-level agents (BTM):** `postgresql.nix` (server + backup), `polymarket-monitor.nix`, `env-setter.nix` (propagates env vars to GUI domain via launchctl setenv)
+**User-level agents:** defined in `darwin.nix` (postgresql server/backup, polymarket monitor)
 
-**System-level daemons (nix-darwin):** `nix-daemon/service.nix` creates a Nix.app stub with wrappers for nix-daemon and darwin-store. The `darwin.nix` config references these wrappers. The `scripts/btm-patch-nix.sh` script patches the `activate-system` plist post-activation to also use the Nix.app bundle ID for BTM grouping. The script is idempotent and dynamically extracts store paths from plists, so it can be run multiple times safely.
+**System-level daemons:** nix-daemon and darwin-store via `launchd.daemons` in darwin.nix, using Nix.app wrappers for BTM icons.
 
 ### Nix Store Volume UUID Handling
 The darwin-store wrapper dynamically looks up the Nix Store volume UUID by name at runtime instead of hardcoding it. This prevents issues after Nix reinstalls when the volume UUID changes. The wrapper uses `diskutil apfs list` to find the UUID of the volume named "Nix Store".

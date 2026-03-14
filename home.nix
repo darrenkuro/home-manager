@@ -167,7 +167,6 @@
     ++ lib.optionals (tag == "mac") [
       ./modules/services/btm.nix
       ./modules/services/nix-daemon/service.nix
-      ./modules/services/env-setter/service.nix
       ./modules/services/polymarket/service.nix
       ./modules/services/postgresql/service.nix
     ]

@@ -1,14 +1,9 @@
-# lib/launchd-btm.nix — Helpers for BTM-friendly launchd agents.
-#
-# mkWrapper — Named shell binary (shows "PostgresServer" in BTM, not "sh")
-# mkPlist — Generates launchd plist from Nix attrset
-# useSystemBash — For pre-mount scripts (darwin-store) that run before /nix exists
+# lib/launchd-btm.nix — mkWrapper for BTM-friendly named binaries.
+# useSystemBash — For pre-mount scripts (darwin-store) that run before /nix exists.
 {
   lib,
   pkgs,
-}: let
-  inherit (lib.generators) toPlist;
-in {
+}: {
   mkWrapper = {
     name,
     text,
@@ -18,7 +13,6 @@ in {
   }:
     if useSystemBash
     then
-      # Pre-mount: /bin/bash, no wait4path
       pkgs.writeTextFile {
         inherit name;
         destination = "/bin/${name}";
@@ -37,7 +31,4 @@ in {
           ${text}
         '';
       };
-
-  mkPlist = config:
-    pkgs.writeText "${config.Label}.plist" (toPlist {escape = true;} config);
 }
