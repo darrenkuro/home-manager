@@ -39,8 +39,8 @@
     (lib.mkIf (tag == "mac") {
       p = "hx $HM/darwin.nix";
       hm = "code $HM";
-      re = "nix run home-manager -- switch --flake $HM#mac && exec zsh";  # HM only, no system changes
-      sure = "sudo darwin-rebuild switch --flake $HM#mac && sudo $HM/scripts/btm-patch-nix.sh && exec zsh";  # su + re
+      re = "nix run home-manager -- switch --flake $HM#mac && exec zsh";  # HM only (no brew, system.defaults, launchd)
+      sure = "sudo darwin-rebuild switch --flake $HM#mac && sudo $HM/scripts/btm-patch-nix.sh && exec zsh";  # full system + BTM
 
       dbox = "cd $DBOX";
       hide = "chflags hidden";
