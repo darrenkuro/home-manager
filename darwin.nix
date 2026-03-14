@@ -48,10 +48,14 @@ in
       autoUpdate = false;  # Don't auto-update on rebuild
       upgrade = true;
     };
+    brews = [
+      { name = "tmux"; args = ["HEAD"]; }  # HEAD fixes Claude Code rendering
+    ];
     casks = [
       "alfred"
       "brave-browser"
       "calibre"
+      { name = "claude"; greedy = true; }  # Fast-updating, always check
       "dropbox"
       "font-carlito"
       "notion"
