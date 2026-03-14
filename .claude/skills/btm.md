@@ -12,13 +12,14 @@ All BTM logic is in `darwin.nix`:
 - **Wrappers** — named shell scripts via `lib/launchd-btm.nix`
 - **App stubs** — static .app bundles with embedded wrappers
 - **LaunchAgents/Daemons** — defined via `launchd.user.agents` and `launchd.daemons`
-- **Activation** — postActivation installs stubs, codesigns, patches AssociatedBundleIdentifiers
+- **Activation** — postActivation installs stubs (no codesigning, ownership only)
+- **Post-activation** — btm-patch-nix.sh signs all stubs with real identity
 
 ## Key Files
 
 - `darwin.nix` — all BTM: wrappers, stubs config, activation, launchd agents
 - `lib/launchd-btm.nix` — `mkWrapper` builder for named binaries
-- `scripts/btm-patch-nix.sh` — patches Nix system daemons (activate-system)
+- `scripts/btm-patch-nix.sh` — signs all app stubs + patches Nix daemon plists
 - `modules/services/*/` — .app stub bundles only (no .nix files)
 
 ## mkWrapper
@@ -95,4 +96,5 @@ MyApp.app/
 
 1. **Icon refresh requires reboot** — After changing icons, reboot
 2. **Never use `sfltool resetbtm`** — Wipes ALL login items system-wide
-3. **Codesign with real identity** — Ad-hoc signing may not work
+3. **Codesign happens post-activation** — Keychain not accessible during sudo darwin-rebuild; btm-patch-nix.sh signs as real user
+4. **Always use real identity** — Ad-hoc signing (`-s -`) defeats BTM icon grouping

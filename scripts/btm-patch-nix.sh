@@ -45,6 +45,11 @@ for plist in "${PLISTS[@]}" "$ACTIVATE_PLIST"; do
   fi
 done
 
+# Get the real user (not root when running via sudo)
+real_user="${SUDO_USER:-$(whoami)}"
+STUBS_DIR="$HOME/.local/share/app-stubs"
+CODESIGN_ID="Apple Development: odon5ht@gmail.com (497TM5HK44)"
+
 # Special handling for activate-system: create wrapper if needed
 if [[ -f "$ACTIVATE_PLIST" ]] && ! uses_wrapper "$ACTIVATE_PLIST"; then
   echo "  patching activate-system wrapper..."
@@ -68,9 +73,6 @@ if [[ -f "$ACTIVATE_PLIST" ]] && ! uses_wrapper "$ACTIVATE_PLIST"; then
 
   wrapper="$NIX_APP/Contents/MacOS/NixActivateSystem"
 
-  # Get the real user (not root when running via sudo)
-  real_user="${SUDO_USER:-$(whoami)}"
-
   # Create wrapper script
   cat > "$wrapper" << 'WRAPPER_EOF'
 #!/bin/bash
@@ -88,14 +90,27 @@ WRAPPER_EOF
     -c "Add :ProgramArguments:0 string $wrapper" \
     "$ACTIVATE_PLIST" && echo "  updated ProgramArguments: $(basename "$ACTIVATE_PLIST")"
 
-  # Re-sign the app bundle as user (needs keychain access)
-  sudo -u "$real_user" codesign -fs "Apple Development: odon5ht@gmail.com (497TM5HK44)" --deep "$NIX_APP" && \
-    echo "  re-signed: Nix.app"
-
   # Refresh LaunchServices registration
   /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f "$NIX_APP" 2>/dev/null
 else
   echo "  activate-system already uses wrapper"
+fi
+
+# Sign all app stubs with real Apple Development identity
+# This must run as the real user to access keychain
+echo "BTM: signing app stubs..."
+if [[ -d "$STUBS_DIR" ]]; then
+  for app in "$STUBS_DIR"/*.app; do
+    [[ -d "$app" ]] || continue
+    app_name=$(basename "$app")
+    if sudo -u "$real_user" codesign -fs "$CODESIGN_ID" --deep "$app" 2>/dev/null; then
+      echo "  signed: $app_name"
+    else
+      echo "  error: codesign failed for $app_name" >&2
+    fi
+  done
+else
+  echo "  no stubs directory found: $STUBS_DIR"
 fi
 
 echo "BTM: done"
