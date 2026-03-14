@@ -85,6 +85,27 @@ When working in a TypeScript codebase:
 ## Project Context
 - When entering a repo to work on a project, always check for a CLAUDE.md (or .claude/CLAUDE.md) first. If one exists, read it before doing anything else — it contains project-specific instructions that override defaults.
 
+## Project-Local Files
+All working files (plans, tasks, lessons, memories) should be kept **local to the project**, not in global `~/.config/claude/`.
+
+**Directory structure** (within project root):
+- `.claude/lessons.md` — project-specific learnings
+- `.claude/settings.local.json` — local Claude settings (if needed)
+- `tasks/todo.md` — current task list
+- `tasks/architecture-*.md` — plans and design docs
+
+**When to use project-local:**
+- Any directory under `~/Documents/dev/`
+- Any git repository
+- The home-manager repo (`~/.config/home-manager`)
+
+**When to use global** (fallback only):
+- When working in `$HOME` directly with no project context
+- System directories (`/etc`, `/tmp`, etc.)
+- One-off queries with no associated project
+
+**Rationale**: Project files should travel with the repo (can be .gitignored if private). This keeps context co-located and avoids polluting the global config.
+
 ## Workflow Orchestration
 
 ### 1. Plan Mode Default
