@@ -39,7 +39,7 @@
     (lib.mkIf (tag == "mac") {
       p = "hx $HM/darwin.nix";
       hm = "code $HM";
-      re = "darwin-rebuild switch --flake $HM#mac && exec zsh";
+      re = "home-manager switch --flake $HM#mac && exec zsh";  # HM only, no system changes
       sure = "sudo darwin-rebuild switch --flake $HM#mac && sudo $HM/scripts/btm-patch-nix.sh && exec zsh";  # su + re
 
       dbox = "cd $DBOX";
