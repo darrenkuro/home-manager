@@ -55,7 +55,8 @@ in
       "alfred"
       "brave-browser"
       "calibre"
-      { name = "claude"; greedy = true; }  # Fast-updating, always check
+      { name = "claude"; greedy = true; }  # Desktop app, fast-updating
+      { name = "claude-code"; greedy = true; }  # CLI, fast-updating
       "dropbox"
       "font-carlito"
       "notion"
