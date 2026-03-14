@@ -103,3 +103,6 @@ Defined in `modules/system/env.nix`:
 - Use `lib.optionals (tag == "...")` for conditional list items (packages, imports)
 - Same attribute defined across different files merges automatically (home-manager behavior)
 - Format with `alejandra` (not `nixfmt`)
+
+## Workflow
+- After making any changes to home-manager files, always git commit immediately before moving on to the next task

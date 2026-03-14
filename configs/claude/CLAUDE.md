@@ -7,9 +7,6 @@
 ## Abbreviations
 - "hm" = home manager, located at ~/.config/home-manager
 
-## Home Manager Workflow
-- After making any changes to home-manager files, always git commit immediately before moving on to the next task
-
 ## Claude Code Config Paths
 - Claude config directory: `~/.config/claude/` (or `$CLAUDE_CONFIG_DIR` if set)
 - Claude skills location: `~/.config/claude/skills/` (merged from multiple sources by hm)
