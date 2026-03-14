@@ -28,6 +28,33 @@ in
   # Required for user-level options (launchd.user.agents, system.defaults.dock, etc.)
   system.primaryUser = "darrenlu";
 
+  # GUI env vars — replaces env-setter service after reboot verification
+  # These are the vars from home.sessionVariables minus shell-only ones (denyList)
+  launchd.user.envVariables = {
+    # XDG Base Directories
+    XDG_CONFIG_HOME = "/Users/darrenlu/.config";
+    XDG_CACHE_HOME = "/Users/darrenlu/.cache";
+    XDG_DATA_HOME = "/Users/darrenlu/.local/share";
+    XDG_STATE_HOME = "/Users/darrenlu/.local/state";
+    # XDG Overrides (keep $HOME clean)
+    WAKATIME_HOME = "/Users/darrenlu/.local/state/wakatime";
+    CLAUDE_CONFIG_DIR = "/Users/darrenlu/.config/claude";
+    NPM_CONFIG_USERCONFIG = "/Users/darrenlu/.config/npm/npmrc";
+    NPM_CONFIG_CACHE = "/Users/darrenlu/.cache/npm";
+    CARGO_HOME = "/Users/darrenlu/.local/share/cargo";
+    DOCKER_CONFIG = "/Users/darrenlu/.config/docker";
+    ANDROID_USER_HOME = "/Users/darrenlu/.local/share/android";
+    BUNDLE_USER_HOME = "/Users/darrenlu/.local/share/bundle";
+    GEM_HOME = "/Users/darrenlu/.local/share/gem";
+    RBENV_ROOT = "/Users/darrenlu/.local/share/rbenv";
+    DOTNET_CLI_HOME = "/Users/darrenlu/.local/share";
+    NUGET_PACKAGES = "/Users/darrenlu/.local/share/NuGet/packages";
+    DOTNET_CLI_TELEMETRY_OPTOUT = "1";
+    MPLCONFIGDIR = "/Users/darrenlu/.config/matplotlib";
+    # Tools
+    PNPM_HOME = "/Users/darrenlu/Library/pnpm";
+  };
+
   # Take over Nix daemon management from installer for BTM integration
   # This replaces /Library/LaunchDaemons/org.nixos.nix-daemon.plist
   launchd.daemons.nix-daemon = {
