@@ -7,8 +7,14 @@
 
 set -euo pipefail
 
+# Get real user info (not root when running via sudo)
+real_user="${SUDO_USER:-$(whoami)}"
+real_home=$(eval echo "~$real_user")
+
 BUNDLE_ID="com.local.nix.stub"
-NIX_APP="$HOME/.local/share/app-stubs/Nix.app"
+STUBS_DIR="$real_home/.local/share/app-stubs"
+NIX_APP="$STUBS_DIR/Nix.app"
+CODESIGN_ID="Apple Development: odon5ht@gmail.com (497TM5HK44)"
 ACTIVATE_PLIST="/Library/LaunchDaemons/org.nixos.activate-system.plist"
 
 # Plists that need AssociatedBundleIdentifiers
@@ -44,11 +50,6 @@ for plist in "${PLISTS[@]}" "$ACTIVATE_PLIST"; do
     fi
   fi
 done
-
-# Get the real user (not root when running via sudo)
-real_user="${SUDO_USER:-$(whoami)}"
-STUBS_DIR="$HOME/.local/share/app-stubs"
-CODESIGN_ID="Apple Development: odon5ht@gmail.com (497TM5HK44)"
 
 # Special handling for activate-system: create wrapper if needed
 if [[ -f "$ACTIVATE_PLIST" ]] && ! uses_wrapper "$ACTIVATE_PLIST"; then
@@ -103,10 +104,10 @@ if [[ -d "$STUBS_DIR" ]]; then
   for app in "$STUBS_DIR"/*.app; do
     [[ -d "$app" ]] || continue
     app_name=$(basename "$app")
-    if sudo -u "$real_user" codesign -fs "$CODESIGN_ID" --deep "$app" 2>/dev/null; then
+    if sudo -u "$real_user" codesign -fs "$CODESIGN_ID" --deep "$app"; then
       echo "  signed: $app_name"
     else
-      echo "  error: codesign failed for $app_name" >&2
+      echo "  error: codesign failed for $app_name (exit code: $?)" >&2
     fi
   done
 else
