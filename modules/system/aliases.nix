@@ -39,7 +39,8 @@
     (lib.mkIf (tag == "mac") {
       p = "hx $HM/darwin.nix";
       hm = "code $HM";
-      re = "sudo darwin-rebuild switch --flake $HM#mac && exec zsh";
+      re = "darwin-rebuild switch --flake $HM#mac && exec zsh";
+      res = "sudo darwin-rebuild switch --flake $HM#mac && exec zsh";
 
       dbox = "cd $DBOX";
       hide = "chflags hidden";
