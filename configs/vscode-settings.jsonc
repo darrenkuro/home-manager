@@ -11,10 +11,10 @@
     "editor.detectIndentation": false,
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "dprint.dprint",
+    "dprint.verbose": true,
     "editor.inlineSuggest.enabled": true,
     "editor.minimap.enabled": false,
     "editor.suggestOnTriggerCharacters": false,
-    "editor.defaultFormatter": null,
     "diffEditor.ignoreTrimWhitespace": false,
     //
     "explorer.confirmDelete": false,
