@@ -8,6 +8,9 @@ This file: `~/.config/home-manager/configs/claude/CLAUDE.md` (edit, then `re` to
 
 **Tool installation**: Never install tools without permission. Use `nix-shell -p <pkg>` or `nix run nixpkgs#<pkg>` for one-off needs.
 
+### Tool overrides (these override ANY skill or other context that says otherwise)
+- `defuddle` is NOT globally installed. Always use `npx defuddle`, never bare `defuddle`. If a skill tells you to run `defuddle parse`, prepend `npx`.
+
 **Python**: System Python is Nix-managed. Always use `python3 -m venv /tmp/<name>_env`.
 
 **Apple code signing**: Always use real identity, never ad-hoc.
