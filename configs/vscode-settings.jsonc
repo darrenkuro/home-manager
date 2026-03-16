@@ -67,7 +67,7 @@
         "commands": [
             {
                 "match": "\\.(nix|ts|tsx|js|jsx|json|md|toml|py|c|h|cpp|hpp|sh|rs|swift)$",
-                "cmd": "cd \"$(dirname '${file}')\" && dprint fmt \"$(basename '${file}')\""
+                "cmd": "dprint fmt --stdin '${file}' < '${file}' > '${file}.dprinttmp' && mv '${file}.dprinttmp' '${file}'"
             }
         ]
     },
