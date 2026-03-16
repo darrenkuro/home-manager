@@ -61,6 +61,9 @@
     //
     "security.workspace.trust.enabled": true,
     "security.workspace.trust.startupPrompt": "never",
+    "json.schemaDownload.trustedDomains": {
+        "https://plugins.dprint.dev": true
+    },
     //
     "42header.username": "dlu",
     "42header.email": "dlu@student.42berlin.de",
