@@ -41,8 +41,7 @@ in {
       gettext # envsubst
       wakatime-cli
       clang-tools # C, CPP
-      alejandra # Nix formatter — KEEP as fallback, remove after dprint proven stable
-      dprint # Configurable formatter (width-based, replaces alejandra + prettierd + black)
+      dprint # Unified formatter (nix, ts, json, md, toml, python, c/cpp, shell, rust, swift)
       nil # Nix LSP
       shfmt
       shellcheck
@@ -52,7 +51,6 @@ in {
       clippy
       asm-lsp
       asmfmt
-      nodePackages.prettier
 
       # Ensure Consistency
       openssl # Apple ships LibreSSL
@@ -67,9 +65,7 @@ in {
       typescript
       nodePackages.typescript-language-server
 
-      python313Packages.black
       python313Packages.flake8
-      prettierd
 
       python313
       python313Packages.pip
@@ -202,8 +198,6 @@ in {
 
   fonts.fontconfig.enable = true;
 
-  xdg.configFile."clang-format".source = ./configs/clang-format.yml;
-  xdg.configFile."prettier.json".source = ./configs/prettier-config.json;
   xdg.configFile."dprint/dprint.json".source = ./configs/dprint.json;
 
   imports =

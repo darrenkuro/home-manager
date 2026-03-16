@@ -370,10 +370,9 @@ in {
       show-process-indicators = true;
       wvous-br-corner = 1; # Disabled hot corner
       persistent-apps = [
-        "/System/Library/CoreServices/Finder.app"
         "/System/Applications/Mail.app"
         "/System/Applications/Calendar.app"
-        "/Applications/Safari.app"
+        "/System/Cryptexes/App/System/Applications/Safari.app"
         "/Applications/Brave Browser.app"
         "/Applications/Obsidian.app"
         "/Applications/Ghostty.app"
