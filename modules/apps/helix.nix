@@ -25,16 +25,16 @@
         name = "c";
         auto-format = true;
         formatter = {
-          command = "clang-format";
-          args = ["-style=file"];
+          command = "dprint";
+          args = ["fmt" "--stdin" "file.c"];
         };
       }
       {
         name = "cpp";
         auto-format = true;
         formatter = {
-          command = "clang-format";
-          args = ["-style=file"];
+          command = "dprint";
+          args = ["fmt" "--stdin" "file.cpp"];
         };
       }
       {
@@ -49,11 +49,8 @@
         name = "rust";
         auto-format = true;
         formatter = {
-          command = "rustfmt";
-          args = [
-            "--emit"
-            "files"
-          ];
+          command = "dprint";
+          args = ["fmt" "--stdin" "file.rs"];
         };
       }
       {
@@ -102,6 +99,14 @@
         formatter = {
           command = "dprint";
           args = ["fmt" "--stdin" "file.toml"];
+        };
+      }
+      {
+        name = "bash";
+        auto-format = true;
+        formatter = {
+          command = "dprint";
+          args = ["fmt" "--stdin" "file.sh"];
         };
       }
     ];
