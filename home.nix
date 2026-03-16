@@ -41,7 +41,8 @@ in {
       gettext # envsubst
       wakatime-cli
       clang-tools # C, CPP
-      alejandra # Nix formatter
+      alejandra # Nix formatter — KEEP as fallback, remove after dprint proven stable
+      dprint # Configurable formatter (width-based, replaces alejandra + prettierd + black)
       nil # Nix LSP
       shfmt
       shellcheck
@@ -91,6 +92,7 @@ in {
       docker-buildx
 
       pandoc
+      defuddle-cli # Extract clean markdown from web pages
       # typst — not currently needed
     ];
 
@@ -203,6 +205,7 @@ in {
 
   xdg.configFile."clang-format".source = ./configs/clang-format.yml;
   xdg.configFile."prettier.json".source = ./configs/prettier-config.json;
+  xdg.configFile."dprint/dprint.json".source = ./configs/dprint.json;
 
   imports =
     [

@@ -85,9 +85,11 @@
                 "match": "\\.(rs)$",
                 "cmd": "rustfmt '${${q}file}'"
             }
+            // Nix/JS/TS/JSON/MD/TOML/Python: use dprint VSCode extension (dprint.dprint)
+            // Or via runonsave:
             // {
-            //     "match": "\\.(nix)$",
-            //     "cmd": "alejandra '${${q}file}'"
+            //     "match": "\\.(nix|js|ts|jsx|tsx|json|md|toml|py)$",
+            //     "cmd": "dprint fmt '${${q}file}'"
             // }
         ]
     },

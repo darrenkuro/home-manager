@@ -26,8 +26,8 @@ sudo -v && sudo nix --extra-experimental-features "nix-command flakes" run nix-d
 # Update flake inputs (nixpkgs, home-manager, nix-darwin)
 nix flake update
 
-# Format Nix files
-alejandra .
+# Format all supported files (Nix, JS/TS, JSON, Markdown, TOML, Python)
+dprint fmt
 
 # Lint shell scripts
 shellcheck functions/*.sh scripts/*.sh
@@ -102,7 +102,7 @@ Defined in `modules/system/env.nix`:
 - Use `lib.mkMerge` + `lib.mkIf (tag == "...")` for conditional attribute sets within a single file
 - Use `lib.optionals (tag == "...")` for conditional list items (packages, imports)
 - Same attribute defined across different files merges automatically (home-manager behavior)
-- Format with `alejandra` (not `nixfmt`)
+- Format with `dprint fmt` (not `alejandra` or `nixfmt`)
 
 ## Workflow
 - After making any changes to home-manager files, always git commit immediately before moving on to the next task

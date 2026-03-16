@@ -41,8 +41,8 @@
         name = "nix";
         auto-format = true;
         formatter = {
-          command = "alejandra";
-          args = ["-q"]; # quiet mode
+          command = "dprint";
+          args = ["fmt" "--stdin" "file.nix"];
         };
       }
       {
@@ -60,24 +60,48 @@
         name = "python";
         auto-format = true;
         formatter = {
-          command = "black";
-          args = ["-"]; # reads from stdin
+          command = "dprint";
+          args = ["fmt" "--stdin" "file.py"];
         };
       }
       {
         name = "javascript";
         auto-format = true;
         formatter = {
-          command = "prettierd";
-          args = ["--stdin-filepath"];
+          command = "dprint";
+          args = ["fmt" "--stdin" "file.js"];
         };
       }
       {
         name = "typescript";
         auto-format = true;
         formatter = {
-          command = "prettierd";
-          args = ["--stdin-filepath"];
+          command = "dprint";
+          args = ["fmt" "--stdin" "file.ts"];
+        };
+      }
+      {
+        name = "json";
+        auto-format = true;
+        formatter = {
+          command = "dprint";
+          args = ["fmt" "--stdin" "file.json"];
+        };
+      }
+      {
+        name = "markdown";
+        auto-format = true;
+        formatter = {
+          command = "dprint";
+          args = ["fmt" "--stdin" "file.md"];
+        };
+      }
+      {
+        name = "toml";
+        auto-format = true;
+        formatter = {
+          command = "dprint";
+          args = ["fmt" "--stdin" "file.toml"];
         };
       }
     ];

@@ -179,7 +179,7 @@ After extracting services, darwin.nix becomes ~150 lines:
 ## Verification
 
 After each phase:
-1. `alejandra .` — format
+1. `dprint fmt` — format
 2. `re` — fast home-manager rebuild
 3. Check shell aliases work
 4. `sure` — full darwin-rebuild

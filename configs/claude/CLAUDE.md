@@ -32,6 +32,7 @@ Keep plans, tasks, lessons **local to the project** in `.claude/`:
 - `.claude/architecture-*.md` — plans
 - `.claude/settings.local.json` — local settings (if needed)
 
+Plans from plan mode go here too — never write plans to `~/.config/claude/plans/`.
 Use global `~/.config/claude/` only when not in a project context.
 
 ### Core Principles
