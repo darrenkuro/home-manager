@@ -66,7 +66,7 @@
     "emeraldwalk.runonsave": {
         "commands": [
             {
-                "match": "\\.(nix|ts|tsx|js|jsx|json|md|toml|py|c|h|cpp|hpp|sh|rs)$",
+                "match": "\\.(nix|ts|tsx|js|jsx|json|md|toml|py|c|h|cpp|hpp|sh|rs|swift)$",
                 "cmd": "dprint fmt '${${q}file}'"
             }
         ]

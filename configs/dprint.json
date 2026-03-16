@@ -19,10 +19,14 @@
       {
         "command": "rustfmt",
         "exts": ["rs"]
+      },
+      {
+        "command": "swift format",
+        "exts": ["swift"]
       }
     ]
   },
-  "includes": ["**/*.{nix,ts,tsx,js,jsx,json,md,toml,py,c,h,cpp,hpp,sh,rs}"],
+  "includes": ["**/*.{nix,ts,tsx,js,jsx,json,md,toml,py,c,h,cpp,hpp,sh,rs,swift}"],
   "excludes": ["**/node_modules", "**/result", "**/target"],
   "plugins": [
     "file:///Users/darrenlu/Documents/dev/dprint-plugin-nix/target/wasm32-unknown-unknown/release/dprint_plugin_nix.wasm",

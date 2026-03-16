@@ -109,6 +109,14 @@
           args = ["fmt" "--stdin" "file.sh"];
         };
       }
+      {
+        name = "swift";
+        auto-format = true;
+        formatter = {
+          command = "dprint";
+          args = ["fmt" "--stdin" "file.swift"];
+        };
+      }
     ];
   };
 
