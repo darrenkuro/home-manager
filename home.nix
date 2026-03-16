@@ -92,7 +92,6 @@ in {
       docker-buildx
 
       pandoc
-      # defuddle-cli — broken in nixpkgs (npm build fails), use npx or nix run instead
       # typst — not currently needed
     ];
 
