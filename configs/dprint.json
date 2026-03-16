@@ -29,7 +29,7 @@
   "includes": ["**/*.{nix,ts,tsx,js,jsx,json,md,toml,py,c,h,cpp,hpp,sh,rs,swift}"],
   "excludes": ["**/node_modules", "**/result", "**/target"],
   "plugins": [
-    "file:///Users/darrenlu/Documents/dev/dprint-plugin-nix/target/wasm32-unknown-unknown/release/dprint_plugin_nix.wasm",
+    "https://github.com/darrenkuro/dprint-plugin-nix/releases/download/v0.1.0/dprint_plugin_nix.wasm",
     "https://plugins.dprint.dev/typescript-0.95.15.wasm",
     "https://plugins.dprint.dev/json-0.21.1.wasm",
     "https://plugins.dprint.dev/markdown-0.21.1.wasm",
