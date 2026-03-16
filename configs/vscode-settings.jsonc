@@ -9,9 +9,8 @@
     "editor.insertSpaces": true,
     "editor.acceptSuggestionOnCommitCharacter": false,
     "editor.detectIndentation": false,
-    "editor.formatOnSave": true,
+    "editor.formatOnSave": false,
     "editor.defaultFormatter": "dprint.dprint",
-    "dprint.verbose": true,
     "editor.inlineSuggest.enabled": true,
     "editor.minimap.enabled": false,
     "editor.suggestOnTriggerCharacters": false,
@@ -67,6 +66,14 @@
     //
     "42header.username": "dlu",
     "42header.email": "dlu@student.42berlin.de",
+    "emeraldwalk.runonsave": {
+        "commands": [
+            {
+                "match": "\\.(nix|ts|tsx|js|jsx|json|md|toml|py|c|h|cpp|hpp|sh|rs|swift)$",
+                "cmd": "dprint fmt '${file}'"
+            }
+        ]
+    },
     "[shellscript]": {
         "editor.bracketPairColorization.enabled": false // For case syntax token )
     }

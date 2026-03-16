@@ -190,7 +190,7 @@ in
 
     fonts.fontconfig.enable = true;
 
-    home.file.".dprint.json".source = ./configs/dprint.json;
+    xdg.configFile."dprint/dprint.json".source = ./configs/dprint.json;
 
     imports = [
         ./modules/system/aliases.nix
