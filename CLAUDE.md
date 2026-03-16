@@ -12,6 +12,8 @@ The `tag` parameter (`"mac"` or `"ft"`) flows through the entire config to condi
 
 ## Commands
 
+> **Always `git commit` before `re`/`sure`.** Nix flakes evaluate from the git tree — uncommitted or untracked files cause "path does not exist" errors. Stage only your files (`git add <specific files>`), never `git add -A`.
+
 ```bash
 # On mac — two rebuild modes:
 re      # home-manager only (no sudo, no brew/system changes)
@@ -105,4 +107,5 @@ Defined in `modules/system/env.nix`:
 - Format with `dprint fmt` (not `alejandra` or `nixfmt`)
 
 ## Workflow
-- After making any changes to home-manager files, always git commit immediately before moving on to the next task
+- Always `git commit` before running `re` or `sure` — flakes only see committed files, and new files need `git add` first
+- Stage only files you changed (`git add <file> ...`), not `git add -A` — the working tree may have unrelated dirty files

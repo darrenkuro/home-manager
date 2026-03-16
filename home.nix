@@ -92,7 +92,7 @@ in {
       docker-buildx
 
       pandoc
-      defuddle-cli # Extract clean markdown from web pages
+      # defuddle-cli — broken in nixpkgs (npm build fails), use npx or nix run instead
       # typst — not currently needed
     ];
 
