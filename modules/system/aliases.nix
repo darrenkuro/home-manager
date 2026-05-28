@@ -44,9 +44,11 @@
       dbox = "cd $DBOX";
       hide = "chflags hidden";
       unhide = "chflags nohidden";
+      sync-local = "swift -e 'import Foundation; let p = CommandLine.arguments[1]; let u = URL(fileURLWithPath: p); var d: ObjCBool = false; FileManager.default.fileExists(atPath: p, isDirectory: &d); if d.boolValue { if let e = FileManager.default.enumerator(at: u, includingPropertiesForKeys: nil) { for case let f as URL in e { try FileManager.default.startDownloadingUbiquitousItem(at: f) } } } else { try FileManager.default.startDownloadingUbiquitousItem(at: u) }'";
+      sync-cloud = "swift -e 'import Foundation; try FileManager.default.evictUbiquitousItem(at: URL(fileURLWithPath: CommandLine.arguments[1]))'";
       rm = "echo \"☠️$YELLOW DANGEROUS CMD: using trash instread!$RESET\" && trash";
       ytd = "yt-dlp -t mp4 --cookies-from-browser brave";
-      kotr = "nix-shell -p whisper-cpp --run 'whisper-stream -m $HOME/.local/share/whisper-cpp/ggml-medium.bin -l ko -tr'";
+      kotr = "nix-shell -p whisper-cpp --run 'whisper-stream -m $HOME/.local/share/whisper-cpp/ggml-large-v3-turbo.bin -l ko -tr'";
       remoteon = "sudo systemsetup -setremotelogin on";
       remoteoff = "sudo systemsetup -setremotelogin off";
       # brew install tmux --HEAD (next-tmux 3.7) fixes Claude Code rendering issue.
