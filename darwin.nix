@@ -14,6 +14,11 @@
 #   - Directory creation (activation scripts)
 #
 { lib, pkgs, ... }: let
+    # Feature flag: gate the polymarket data-monitor LaunchAgent without
+    # removing the wrapper, BTM stub, or agent-mapping code. Flip to true
+    # and run `sure` to re-enable.
+    enableDataCollector = false;
+
     homeDir = "/Users/darrenlu";
     agentDir = "${homeDir}/Library/LaunchAgents";
     btmStubDir = "${homeDir}/.local/share/app-stubs";
@@ -181,16 +186,17 @@
                 { drv = postgresBackupWrapper; bin = "PostgresBackup"; }
             ];
         };
-        Polymarket = {
-            src = ./modules/services/polymarket/Polymarket.app;
-            wrappers = [ { drv = polymarketWrapper; bin = "PolymarketMonitor"; } ];
-        };
         Nix = {
             src = ./modules/services/nix-daemon/Nix.app;
             wrappers = [
                 { drv = nixDaemonWrapper; bin = "NixDaemonStart"; }
                 { drv = nixStoreMountWrapper; bin = "NixStoreMount"; }
             ];
+        };
+    } // lib.optionalAttrs enableDataCollector {
+        Polymarket = {
+            src = ./modules/services/polymarket/Polymarket.app;
+            wrappers = [ { drv = polymarketWrapper; bin = "PolymarketMonitor"; } ];
         };
     };
 
@@ -237,6 +243,7 @@
     btmAgentMapping = {
         "org.postgresql.server" = "Postgres";
         "org.postgresql.backup" = "Postgres";
+    } // lib.optionalAttrs enableDataCollector {
         "com.polymarket.data-monitor" = "Polymarket";
     };
 
@@ -490,7 +497,7 @@ in
         };
     };
 
-    launchd.user.agents.polymarket-monitor = {
+    launchd.user.agents.polymarket-monitor = lib.mkIf enableDataCollector {
         serviceConfig = {
             Label = "com.polymarket.data-monitor";
             ProgramArguments = [ "${btmStubDir}/Polymarket.app/Contents/MacOS/PolymarketMonitor" ];
