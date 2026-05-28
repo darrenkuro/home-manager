@@ -13,30 +13,26 @@
 #   - XDG dotfiles and app configs
 #   - Directory creation (activation scripts)
 #
-{
-  lib,
-  pkgs,
-  ...
-}: let
-  homeDir = "/Users/darrenlu";
-  agentDir = "${homeDir}/Library/LaunchAgents";
-  btmStubDir = "${homeDir}/.local/share/app-stubs";
+{ lib, pkgs, ... }: let
+    homeDir = "/Users/darrenlu";
+    agentDir = "${homeDir}/Library/LaunchAgents";
+    btmStubDir = "${homeDir}/.local/share/app-stubs";
 
-  # ═══════════════════════════════════════════════════════════════════════════
-  # BTM (Background Task Management) — app stubs for icon grouping
-  # ═══════════════════════════════════════════════════════════════════════════
+    # ═══════════════════════════════════════════════════════════════════════════
+    # BTM (Background Task Management) — app stubs for icon grouping
+    # ═══════════════════════════════════════════════════════════════════════════
 
-  btm = import ./lib/launchd-btm.nix {inherit lib pkgs;};
+    btm = import ./lib/launchd-btm.nix { inherit lib pkgs; };
 
-  # ── PostgreSQL Wrappers ──
-  pg = pkgs.postgresql_17.withPackages (ps: [ps.pgvector]);
-  pgDataDir = "${homeDir}/.local/share/postgresql/data";
-  pgLogDir = "${homeDir}/.local/state/postgresql";
-  pgSocket = "/tmp";
-  pgPort = "5432";
-  pgBackupDir = "${homeDir}/.local/share/postgresql/backups";
+    # ── PostgreSQL Wrappers ──
+    pg = pkgs.postgresql_17.withPackages ( ps: [ ps.pgvector ] );
+    pgDataDir = "${homeDir}/.local/share/postgresql/data";
+    pgLogDir = "${homeDir}/.local/state/postgresql";
+    pgSocket = "/tmp";
+    pgPort = "5432";
+    pgBackupDir = "${homeDir}/.local/share/postgresql/backups";
 
-  pgConf = pkgs.writeText "postgresql.conf" ''
+    pgConf = pkgs.writeText "postgresql.conf" ''
     listen_addresses = 'localhost'
     port = ${pgPort}
     unix_socket_directories = '${pgSocket}'
@@ -54,25 +50,25 @@
     shared_preload_libraries = 'vector'
     lc_messages = 'C'
   '';
-  pgHba = ./configs/postgresql/pg_hba.conf;
+    pgHba = ./configs/postgresql/pg_hba.conf;
 
-  postgresServerWrapper = btm.mkWrapper {
-    name = "PostgresServer";
-    runtimeInputs = [pg];
-    text = ''
+    postgresServerWrapper = btm.mkWrapper {
+        name = "PostgresServer";
+        runtimeInputs = [ pg ];
+        text = ''
       exec postgres \
         -D "${pgDataDir}" \
         -c "config_file=${pgConf}" \
         -c "hba_file=${pgHba}" \
         -k "${pgSocket}"
     '';
-  };
+    };
 
-  postgresBackupWrapper = btm.mkWrapper {
-    name = "PostgresBackup";
-    runtimeInputs = [pg];
-    excludeShellChecks = ["SC2043"];
-    text = ''
+    postgresBackupWrapper = btm.mkWrapper {
+        name = "PostgresBackup";
+        runtimeInputs = [ pg ];
+        excludeShellChecks = [ "SC2043" ];
+        text = ''
       set -euo pipefail
       TIMESTAMP=$(date +%Y%m%d_%H%M%S)
       LOG="${pgLogDir}/backup.log"
@@ -125,14 +121,14 @@
       done
       log "Backup run complete"
     '';
-  };
+    };
 
-  # ── Polymarket Wrapper ──
-  polymarketWorkDir = "${homeDir}/Documents/dev/polymarket-trading-bot";
-  polymarketWrapper = btm.mkWrapper {
-    name = "PolymarketMonitor";
-    runtimeInputs = [pkgs.nodejs_22 pkgs.pnpm];
-    text = ''
+    # ── Polymarket Wrapper ──
+    polymarketWorkDir = "${homeDir}/Documents/dev/polymarket-trading-bot";
+    polymarketWrapper = btm.mkWrapper {
+        name = "PolymarketMonitor";
+        runtimeInputs = [ pkgs.nodejs_22 pkgs.pnpm ];
+        text = ''
       cd "${polymarketWorkDir}"
       if [ -f .env ]; then
         set -a
@@ -142,22 +138,22 @@
       fi
       exec pnpm tsx src/scripts/data-monitor.ts
     '';
-  };
+    };
 
-  # ── Nix Daemon Wrappers ──
-  nixDaemonWrapper = btm.mkWrapper {
-    name = "NixDaemonStart";
-    text = ''
+    # ── Nix Daemon Wrappers ──
+    nixDaemonWrapper = btm.mkWrapper {
+        name = "NixDaemonStart";
+        text = ''
       /bin/wait4path /nix/var/nix/profiles/default/bin/nix-daemon
       exec /nix/var/nix/profiles/default/bin/nix-daemon
     '';
-  };
+    };
 
-  # useSystemBash = true because this runs BEFORE /nix is mounted
-  nixStoreMountWrapper = btm.mkWrapper {
-    name = "NixStoreMount";
-    useSystemBash = true;
-    text = ''
+    # useSystemBash = true because this runs BEFORE /nix is mounted
+    nixStoreMountWrapper = btm.mkWrapper {
+        name = "NixStoreMount";
+        useSystemBash = true;
+        text = ''
       nixVolumeDev=$(/usr/sbin/diskutil apfs list | \
         /usr/bin/awk '/Nix Store/ {print prev} {prev=$0}' | \
         /usr/bin/grep -o 'disk[0-9]*s[0-9]*')
@@ -174,55 +170,38 @@
       /usr/bin/security find-generic-password -s "$nixCryptoUUID" -w | \
         /usr/sbin/diskutil apfs unlockVolume "$nixVolumeDev" -stdinpassphrase -user "$nixCryptoUUID"
     '';
-  };
+    };
 
-  # ── BTM Stub Configuration ──
-  btmStubs = {
-    Postgres = {
-      src = ./modules/services/postgresql/Postgres.app;
-      wrappers = [
-        {
-          drv = postgresServerWrapper;
-          bin = "PostgresServer";
-        }
-        {
-          drv = postgresBackupWrapper;
-          bin = "PostgresBackup";
-        }
-      ];
+    # ── BTM Stub Configuration ──
+    btmStubs = {
+        Postgres = {
+            src = ./modules/services/postgresql/Postgres.app;
+            wrappers = [
+                { drv = postgresServerWrapper; bin = "PostgresServer"; }
+                { drv = postgresBackupWrapper; bin = "PostgresBackup"; }
+            ];
+        };
+        Polymarket = {
+            src = ./modules/services/polymarket/Polymarket.app;
+            wrappers = [ { drv = polymarketWrapper; bin = "PolymarketMonitor"; } ];
+        };
+        Nix = {
+            src = ./modules/services/nix-daemon/Nix.app;
+            wrappers = [
+                { drv = nixDaemonWrapper; bin = "NixDaemonStart"; }
+                { drv = nixStoreMountWrapper; bin = "NixStoreMount"; }
+            ];
+        };
     };
-    Polymarket = {
-      src = ./modules/services/polymarket/Polymarket.app;
-      wrappers = [
-        {
-          drv = polymarketWrapper;
-          bin = "PolymarketMonitor";
-        }
-      ];
-    };
-    Nix = {
-      src = ./modules/services/nix-daemon/Nix.app;
-      wrappers = [
-        {
-          drv = nixDaemonWrapper;
-          bin = "NixDaemonStart";
-        }
-        {
-          drv = nixStoreMountWrapper;
-          bin = "NixStoreMount";
-        }
-      ];
-    };
-  };
 
-  # Generate BTM stub installation commands
-  # Note: runs as root via sudo, so we use SUDO_USER to codesign with user's keychain
-  btmStubCommands = lib.concatStringsSep "\n\n" (lib.mapAttrsToList (name: stubCfg: let
-      manifestLines =
-        ["src=${stubCfg.src}"]
-        ++ map (w: "wrapper=${w.bin}:${w.drv}") stubCfg.wrappers;
-      expectedManifest = lib.concatStringsSep "\\n" manifestLines;
-    in ''
+    # Generate BTM stub installation commands
+    # Note: runs as root via sudo, so we use SUDO_USER to codesign with user's keychain
+    btmStubCommands = lib.concatStringsSep "\n\n" ( lib.mapAttrsToList ( name: stubCfg: let
+                manifestLines = [ "src=${stubCfg.src}" ] ++
+                map ( w: "wrapper=${w.bin}:${w.drv}" ) stubCfg.wrappers;
+                expectedManifest = lib.concatStringsSep "\\n" manifestLines;
+            in
+            ''
       _stub_dst="${btmStubDir}/${name}.app"
       _manifest="${btmStubDir}/.stub-manifest-${name}"
       _expected="$(printf '${expectedManifest}\n')"
@@ -238,11 +217,10 @@
         chmod -R u+w "$_stub_dst"
         mkdir -p "$_stub_dst/Contents/MacOS"
 
-        ${lib.concatMapStringsSep "\n" (w: ''
+        ${lib.concatMapStringsSep "\n" ( w: ''
           cp "${w.drv}/bin/${w.bin}" "$_stub_dst/Contents/MacOS/${w.bin}"
           chmod u+wx "$_stub_dst/Contents/MacOS/${w.bin}"
-        '')
-        stubCfg.wrappers}
+        '' ) stubCfg.wrappers}
 
         printf '#!/bin/sh\nexit 0\n' > "$_stub_dst/Contents/MacOS/Stub"
         chmod u+x "$_stub_dst/Contents/MacOS/Stub"
@@ -252,19 +230,18 @@
         printf '%s\n' "$_expected" > "$_manifest"
         chown "$_real_user:staff" "$_manifest"
       fi
-    '')
-    btmStubs);
+    '' ) btmStubs );
 
-  # Map labels to app stubs for BTM grouping
-  # Format: { "label" = "AppName"; } where stub is at ${btmStubDir}/AppName.app
-  btmAgentMapping = {
-    "org.postgresql.server" = "Postgres";
-    "org.postgresql.backup" = "Postgres";
-    "com.polymarket.data-monitor" = "Polymarket";
-  };
+    # Map labels to app stubs for BTM grouping
+    # Format: { "label" = "AppName"; } where stub is at ${btmStubDir}/AppName.app
+    btmAgentMapping = {
+        "org.postgresql.server" = "Postgres";
+        "org.postgresql.backup" = "Postgres";
+        "com.polymarket.data-monitor" = "Polymarket";
+    };
 
-  # Generate patching commands for user agents
-  patchAgentCommands = lib.concatStringsSep "\n" (lib.mapAttrsToList (label: appName: ''
+    # Generate patching commands for user agents
+    patchAgentCommands = lib.concatStringsSep "\n" ( lib.mapAttrsToList ( label: appName: ''
       _plist="${agentDir}/${label}.plist"
       _stub="${btmStubDir}/${appName}.app"
       if [[ -f "$_plist" ]] && [[ -d "$_stub" ]]; then
@@ -281,131 +258,107 @@
           fi
         fi
       fi
-    '')
-    btmAgentMapping);
-in {
-  # Nix settings
-  nix.settings.experimental-features = ["nix-command" "flakes"];
+    '' ) btmAgentMapping );
+in
+{
+    # Nix settings
+    nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
-  # ── Homebrew ──
-  homebrew = {
-    enable = true;
-    onActivation = {
-      cleanup = "zap"; # Remove unlisted packages
-      autoUpdate = false; # Don't `brew update` on rebuild (use `brew update` explicitly)
-      upgrade = true; # Upgrade existing packages to latest version
-    };
-    brews = [
-      {
-        name = "tmux";
-        args = ["HEAD"];
-      } # HEAD fixes Claude Code rendering
-    ];
-    casks = [
-      "alfred"
-      "anki"
-      {
-        name = "brave-browser";
-        greedy = true;
-      }
-      "calibre"
-      {
-        name = "claude";
-        greedy = true;
-      }
-      {
-        name = "claude-code";
-        greedy = true;
-      }
-      "dropbox"
-      "font-carlito"
-      {
-        name = "ghostty";
-        greedy = true;
-      }
-      {
-        name = "notion";
-        greedy = true;
-      }
-      {
-        name = "obsidian";
-        greedy = true;
-      }
-      "pearcleaner"
-      "sf-symbols"
-      "steam"
-      {
-        name = "visual-studio-code";
-        greedy = true;
-      }
-    ];
-    masApps = {
-      "CleanMyMac" = 1339170533;
-      "Developer" = 640199958;
-      "Final Cut Pro" = 424389933;
-      "iA Writer" = 775737590;
-      "Mirror Magnet" = 1563698880;
-      "Xcode" = 497799835;
-      "Yoink" = 457622435;
-    };
-  };
-
-  # macOS system defaults (declarative)
-  system.defaults = {
-    # ── NSGlobalDomain ──
-    NSGlobalDomain = {
-      AppleInterfaceStyle = "Dark";
-      ApplePressAndHoldEnabled = false; # Key repeat instead of accent popup
-      InitialKeyRepeat = 15; # Default 25
-      KeyRepeat = 2; # Default 6
-      "com.apple.trackpad.scaling" = 3.0;
-      NSAutomaticPeriodSubstitutionEnabled = false;
+    # ── Homebrew ──
+    homebrew = {
+        enable = true;
+        onActivation = {
+            cleanup = "zap"; # Remove unlisted packages
+            autoUpdate = false; # Don't `brew update` on rebuild (use `brew update` explicitly)
+            upgrade = true; # Upgrade existing packages to latest version
+        };
+        brews = [
+            { name = "tmux"; args = [ "HEAD" ]; } # HEAD fixes Claude Code rendering
+        ];
+        casks = [
+            "alfred"
+            "anki"
+            { name = "brave-browser"; greedy = true; }
+            "calibre"
+            { name = "claude"; greedy = true; }
+            { name = "claude-code"; greedy = true; }
+            "dropbox"
+            "font-carlito"
+            { name = "ghostty"; greedy = true; }
+            { name = "notion"; greedy = true; }
+            { name = "obsidian"; greedy = true; }
+            "pearcleaner"
+            "sf-symbols"
+            "steam"
+            { name = "visual-studio-code"; greedy = true; }
+        ];
+        masApps = {
+            "CleanMyMac" = 1339170533;
+            "Developer" = 640199958;
+            "Final Cut Pro" = 424389933;
+            "iA Writer" = 775737590;
+            "Mirror Magnet" = 1563698880;
+            "Xcode" = 497799835;
+            "Yoink" = 457622435;
+        };
     };
 
-    # ── Dock ──
-    dock = {
-      autohide = true;
-      show-recents = false;
-      tilesize = 61;
-      show-process-indicators = true;
-      wvous-br-corner = 1; # Disabled hot corner
-      persistent-apps = [
-        "/System/Applications/Mail.app"
-        "/System/Applications/Calendar.app"
-        "/System/Cryptexes/App/System/Applications/Safari.app"
-        "/Applications/Brave Browser.app"
-        "/Applications/Obsidian.app"
-        "/Applications/Ghostty.app"
-        "/Applications/Visual Studio Code.app"
-        "/System/Applications/Utilities/Activity Monitor.app"
-        "/System/Applications/System Settings.app"
-      ];
+    # macOS system defaults (declarative)
+    system.defaults = {
+        # ── NSGlobalDomain ──
+        NSGlobalDomain = {
+            AppleInterfaceStyle = "Dark";
+            ApplePressAndHoldEnabled = false; # Key repeat instead of accent popup
+            InitialKeyRepeat = 15; # Default 25
+            KeyRepeat = 2; # Default 6
+            "com.apple.trackpad.scaling" = 3.0;
+            NSAutomaticPeriodSubstitutionEnabled = false;
+        };
+
+        # ── Dock ──
+        dock = {
+            autohide = true;
+            show-recents = false;
+            tilesize = 61;
+            show-process-indicators = true;
+            wvous-br-corner = 1; # Disabled hot corner
+            persistent-apps = [
+                "/System/Applications/Mail.app"
+                "/System/Applications/Calendar.app"
+                "/System/Cryptexes/App/System/Applications/Safari.app"
+                "/Applications/Brave Browser.app"
+                "/Applications/Obsidian.app"
+                "/Applications/Ghostty.app"
+                "/Applications/Visual Studio Code.app"
+                "/System/Applications/Utilities/Activity Monitor.app"
+                "/System/Applications/System Settings.app"
+            ];
+        };
+
+        # ── Finder ──
+        finder = {
+            FXPreferredViewStyle = "clmv"; # Column view
+            ShowPathbar = true;
+            ShowStatusBar = false;
+        };
+
+        # ── Trackpad ──
+        trackpad = {
+            Clicking = true; # Tap to click
+            TrackpadThreeFingerDrag = false;
+        };
+
+        # ── Menu Bar Clock ──
+        menuExtraClock = {
+            ShowAMPM = true;
+            ShowDayOfWeek = true;
+            ShowSeconds = true;
+            IsAnalog = false;
+        };
     };
 
-    # ── Finder ──
-    finder = {
-      FXPreferredViewStyle = "clmv"; # Column view
-      ShowPathbar = true;
-      ShowStatusBar = false;
-    };
-
-    # ── Trackpad ──
-    trackpad = {
-      Clicking = true; # Tap to click
-      TrackpadThreeFingerDrag = false;
-    };
-
-    # ── Menu Bar Clock ──
-    menuExtraClock = {
-      ShowAMPM = true;
-      ShowDayOfWeek = true;
-      ShowSeconds = true;
-      IsAnalog = false;
-    };
-  };
-
-  # Post-activation: settings not in nix-darwin + BTM agent patching
-  system.activationScripts.postActivation.text = ''
+    # Post-activation: settings not in nix-darwin + BTM agent patching
+    system.activationScripts.postActivation.text = ''
     # ── macOS defaults not in nix-darwin ──
     /usr/bin/defaults write -g NSRecentDocumentsLimit 0
     /usr/bin/defaults write -g AppleMeasurementUnits -string "Centimeters"
@@ -443,129 +396,115 @@ in {
     echo "BTM: done"
   '';
 
-  # User (needed for home-manager integration to infer home.homeDirectory)
-  users.users.darrenlu = {
-    name = "darrenlu";
-    home = "/Users/darrenlu";
-  };
+    # User (needed for home-manager integration to infer home.homeDirectory)
+    users.users.darrenlu = { name = "darrenlu"; home = "/Users/darrenlu"; };
 
-  # Required for user-level options (launchd.user.agents, system.defaults.dock, etc.)
-  system.primaryUser = "darrenlu";
+    # Required for user-level options (launchd.user.agents, system.defaults.dock, etc.)
+    system.primaryUser = "darrenlu";
 
-  # GUI env vars — replaces env-setter service after reboot verification
-  # These are the vars from home.sessionVariables minus shell-only ones (denyList)
-  launchd.user.envVariables = {
-    # XDG Base Directories
-    XDG_CONFIG_HOME = "/Users/darrenlu/.config";
-    XDG_CACHE_HOME = "/Users/darrenlu/.cache";
-    XDG_DATA_HOME = "/Users/darrenlu/.local/share";
-    XDG_STATE_HOME = "/Users/darrenlu/.local/state";
-    # XDG Overrides (keep $HOME clean)
-    WAKATIME_HOME = "/Users/darrenlu/.local/state/wakatime";
-    CLAUDE_CONFIG_DIR = "/Users/darrenlu/.config/claude";
-    NPM_CONFIG_USERCONFIG = "/Users/darrenlu/.config/npm/npmrc";
-    NPM_CONFIG_CACHE = "/Users/darrenlu/.cache/npm";
-    CARGO_HOME = "/Users/darrenlu/.local/share/cargo";
-    DOCKER_CONFIG = "/Users/darrenlu/.config/docker";
-    ANDROID_USER_HOME = "/Users/darrenlu/.local/share/android";
-    BUNDLE_USER_HOME = "/Users/darrenlu/.local/share/bundle";
-    GEM_HOME = "/Users/darrenlu/.local/share/gem";
-    RBENV_ROOT = "/Users/darrenlu/.local/share/rbenv";
-    DOTNET_CLI_HOME = "/Users/darrenlu/.local/share";
-    NUGET_PACKAGES = "/Users/darrenlu/.local/share/NuGet/packages";
-    DOTNET_CLI_TELEMETRY_OPTOUT = "1";
-    MPLCONFIGDIR = "/Users/darrenlu/.config/matplotlib";
-    # Tools
-    PNPM_HOME = "/Users/darrenlu/Library/pnpm";
-  };
-
-  # Take over Nix daemon management from installer for BTM integration
-  # This replaces /Library/LaunchDaemons/org.nixos.nix-daemon.plist
-  launchd.daemons.nix-daemon = {
-    serviceConfig = {
-      Label = "org.nixos.nix-daemon";
-      ProgramArguments = lib.mkForce [
-        "${btmStubDir}/Nix.app/Contents/MacOS/NixDaemonStart"
-      ];
-      KeepAlive = true;
-      RunAtLoad = true;
-      LowPriorityIO = false;
-      ProcessType = "Standard";
-      SoftResourceLimits.NumberOfFiles = 1048576;
-      EnvironmentVariables = {
-        NIX_SSL_CERT_FILE = "/etc/ssl/certs/ca-certificates.crt";
-        OBJC_DISABLE_INITIALIZE_FORK_SAFETY = "YES";
-      };
+    # GUI env vars — replaces env-setter service after reboot verification
+    # These are the vars from home.sessionVariables minus shell-only ones (denyList)
+    launchd.user.envVariables = {
+        # XDG Base Directories
+        XDG_CONFIG_HOME = "/Users/darrenlu/.config";
+        XDG_CACHE_HOME = "/Users/darrenlu/.cache";
+        XDG_DATA_HOME = "/Users/darrenlu/.local/share";
+        XDG_STATE_HOME = "/Users/darrenlu/.local/state";
+        # XDG Overrides (keep $HOME clean)
+        WAKATIME_HOME = "/Users/darrenlu/.local/state/wakatime";
+        CLAUDE_CONFIG_DIR = "/Users/darrenlu/.config/claude";
+        NPM_CONFIG_USERCONFIG = "/Users/darrenlu/.config/npm/npmrc";
+        NPM_CONFIG_CACHE = "/Users/darrenlu/.cache/npm";
+        CARGO_HOME = "/Users/darrenlu/.local/share/cargo";
+        DOCKER_CONFIG = "/Users/darrenlu/.config/docker";
+        ANDROID_USER_HOME = "/Users/darrenlu/.local/share/android";
+        BUNDLE_USER_HOME = "/Users/darrenlu/.local/share/bundle";
+        GEM_HOME = "/Users/darrenlu/.local/share/gem";
+        RBENV_ROOT = "/Users/darrenlu/.local/share/rbenv";
+        DOTNET_CLI_HOME = "/Users/darrenlu/.local/share";
+        NUGET_PACKAGES = "/Users/darrenlu/.local/share/NuGet/packages";
+        DOTNET_CLI_TELEMETRY_OPTOUT = "1";
+        MPLCONFIGDIR = "/Users/darrenlu/.config/matplotlib";
+        # Tools
+        PNPM_HOME = "/Users/darrenlu/Library/pnpm";
     };
-  };
 
-  # This replaces /Library/LaunchDaemons/org.nixos.darwin-store.plist
-  launchd.daemons.darwin-store = {
-    serviceConfig = {
-      Label = "org.nixos.darwin-store";
-      ProgramArguments = [
-        "${btmStubDir}/Nix.app/Contents/MacOS/NixStoreMount"
-      ];
-      RunAtLoad = true;
+    # Take over Nix daemon management from installer for BTM integration
+    # This replaces /Library/LaunchDaemons/org.nixos.nix-daemon.plist
+    launchd.daemons.nix-daemon = {
+        serviceConfig = {
+            Label = "org.nixos.nix-daemon";
+            ProgramArguments = lib.mkForce [
+                "${btmStubDir}/Nix.app/Contents/MacOS/NixDaemonStart"
+            ];
+            KeepAlive = true;
+            RunAtLoad = true;
+            LowPriorityIO = false;
+            ProcessType = "Standard";
+            SoftResourceLimits.NumberOfFiles = 1048576;
+            EnvironmentVariables = {
+                NIX_SSL_CERT_FILE = "/etc/ssl/certs/ca-certificates.crt";
+                OBJC_DISABLE_INITIALIZE_FORK_SAFETY = "YES";
+            };
+        };
     };
-  };
 
-  # ═══════════════════════════════════════════════════════════════════════════
-  # LaunchAgents via nix-darwin
-  # Agents use wrapper binaries inside BTM-managed .app stubs for icon grouping.
-  # Post-activation script patches plists with AssociatedBundleIdentifiers.
-  # ═══════════════════════════════════════════════════════════════════════════
-
-  launchd.user.agents.postgresql-server = {
-    serviceConfig = {
-      Label = "org.postgresql.server";
-      ProgramArguments = ["${btmStubDir}/Postgres.app/Contents/MacOS/PostgresServer"];
-      RunAtLoad = true;
-      KeepAlive = true;
-      ThrottleInterval = 10;
-      StandardOutPath = "/Users/darrenlu/.local/state/postgresql/launchd-stdout.log";
-      StandardErrorPath = "/Users/darrenlu/.local/state/postgresql/launchd-stderr.log";
-      EnvironmentVariables = {
-        HOME = "/Users/darrenlu";
-        PGDATA = "/Users/darrenlu/.local/share/postgresql/data";
-      };
+    # This replaces /Library/LaunchDaemons/org.nixos.darwin-store.plist
+    launchd.daemons.darwin-store = {
+        serviceConfig = {
+            Label = "org.nixos.darwin-store";
+            ProgramArguments = [ "${btmStubDir}/Nix.app/Contents/MacOS/NixStoreMount" ];
+            RunAtLoad = true;
+        };
     };
-  };
 
-  launchd.user.agents.postgresql-backup = {
-    serviceConfig = {
-      Label = "org.postgresql.backup";
-      ProgramArguments = ["${btmStubDir}/Postgres.app/Contents/MacOS/PostgresBackup"];
-      StartCalendarInterval = [
-        {
-          Hour = 3;
-          Minute = 0;
-        }
-      ];
-      StandardOutPath = "/Users/darrenlu/.local/state/postgresql/backup-stdout.log";
-      StandardErrorPath = "/Users/darrenlu/.local/state/postgresql/backup-stderr.log";
-      EnvironmentVariables = {
-        HOME = "/Users/darrenlu";
-      };
+    # ═══════════════════════════════════════════════════════════════════════════
+    # LaunchAgents via nix-darwin
+    # Agents use wrapper binaries inside BTM-managed .app stubs for icon grouping.
+    # Post-activation script patches plists with AssociatedBundleIdentifiers.
+    # ═══════════════════════════════════════════════════════════════════════════
+
+    launchd.user.agents.postgresql-server = {
+        serviceConfig = {
+            Label = "org.postgresql.server";
+            ProgramArguments = [ "${btmStubDir}/Postgres.app/Contents/MacOS/PostgresServer" ];
+            RunAtLoad = true;
+            KeepAlive = true;
+            ThrottleInterval = 10;
+            StandardOutPath = "/Users/darrenlu/.local/state/postgresql/launchd-stdout.log";
+            StandardErrorPath = "/Users/darrenlu/.local/state/postgresql/launchd-stderr.log";
+            EnvironmentVariables = {
+                HOME = "/Users/darrenlu";
+                PGDATA = "/Users/darrenlu/.local/share/postgresql/data";
+            };
+        };
     };
-  };
 
-  launchd.user.agents.polymarket-monitor = {
-    serviceConfig = {
-      Label = "com.polymarket.data-monitor";
-      ProgramArguments = ["${btmStubDir}/Polymarket.app/Contents/MacOS/PolymarketMonitor"];
-      WorkingDirectory = "/Users/darrenlu/Documents/dev/polymarket-trading-bot";
-      RunAtLoad = true;
-      KeepAlive = true;
-      ThrottleInterval = 10;
-      StandardOutPath = "/tmp/polymarket/monitor.log";
-      StandardErrorPath = "/tmp/polymarket/monitor.err";
-      EnvironmentVariables = {
-        HOME = "/Users/darrenlu";
-      };
+    launchd.user.agents.postgresql-backup = {
+        serviceConfig = {
+            Label = "org.postgresql.backup";
+            ProgramArguments = [ "${btmStubDir}/Postgres.app/Contents/MacOS/PostgresBackup" ];
+            StartCalendarInterval = [ { Hour = 3; Minute = 0; } ];
+            StandardOutPath = "/Users/darrenlu/.local/state/postgresql/backup-stdout.log";
+            StandardErrorPath = "/Users/darrenlu/.local/state/postgresql/backup-stderr.log";
+            EnvironmentVariables = { HOME = "/Users/darrenlu"; };
+        };
     };
-  };
 
-  # nix-darwin state version
-  system.stateVersion = 5;
+    launchd.user.agents.polymarket-monitor = {
+        serviceConfig = {
+            Label = "com.polymarket.data-monitor";
+            ProgramArguments = [ "${btmStubDir}/Polymarket.app/Contents/MacOS/PolymarketMonitor" ];
+            WorkingDirectory = "/Users/darrenlu/Documents/dev/polymarket-trading-bot";
+            RunAtLoad = true;
+            KeepAlive = true;
+            ThrottleInterval = 10;
+            StandardOutPath = "/tmp/polymarket/monitor.log";
+            StandardErrorPath = "/tmp/polymarket/monitor.err";
+            EnvironmentVariables = { HOME = "/Users/darrenlu"; };
+        };
+    };
+
+    # nix-darwin state version
+    system.stateVersion = 5;
 }
