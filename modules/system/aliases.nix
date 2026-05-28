@@ -49,6 +49,7 @@
       rm = "echo \"☠️$YELLOW DANGEROUS CMD: using trash instread!$RESET\" && trash";
       ytd = "yt-dlp -t mp4 --cookies-from-browser brave";
       netusage = "$DEV/netusage/netusage.py";
+      nu = "$DEV/netusage/netusage.py"; # short form of `netusage`
       kotr = "nix-shell -p whisper-cpp --run 'whisper-stream -m $HOME/.local/share/whisper-cpp/ggml-large-v3-turbo.bin -l ko -tr'";
       remoteon = "sudo systemsetup -setremotelogin on";
       remoteoff = "sudo systemsetup -setremotelogin off";
