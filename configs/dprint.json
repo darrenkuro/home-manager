@@ -10,44 +10,25 @@
     "markdown": {},
     "toml": {},
     "exec": {
-        "commands": [
-            {
-                "command": "clang-format -style={BasedOnStyle: LLVM, IndentWidth: {{indent_width}}, ColumnLimit: {{line_width}}, BreakTemplateDeclarations: Yes, AllowShortFunctionsOnASingleLine: Inline, AllowShortIfStatementsOnASingleLine: Always, AlignConsecutiveAssignments: true}",
-                "exts": [
-                    "c",
-                    "h",
-                    "cpp",
-                    "hpp"
-                ]
-            },
-            {
-                "command": "shfmt -i {{indent_width}} -ci -sr",
-                "exts": [
-                    "sh"
-                ]
-            },
-            {
-                "command": "rustfmt",
-                "exts": [
-                    "rs"
-                ]
-            },
-            {
-                "command": "swift format",
-                "exts": [
-                    "swift"
-                ]
-            }
-        ]
+        "commands": [{
+            "command": "clang-format -style={BasedOnStyle: LLVM, IndentWidth: {{indent_width}}, ColumnLimit: {{line_width}}, BreakTemplateDeclarations: Yes, AllowShortFunctionsOnASingleLine: Inline, AllowShortIfStatementsOnASingleLine: Always, AlignConsecutiveAssignments: true}",
+            "exts": ["c", "h", "cpp", "hpp"]
+        }, {
+            "command": "shfmt -i {{indent_width}} -ci -sr",
+            "exts": ["sh"]
+        }, {
+            "command": "rustfmt",
+            "exts": ["rs"]
+        }, {
+            "command": "swift format",
+            "exts": ["swift"]
+        }, {
+            "command": "asmfmt",
+            "exts": ["s", "S"]
+        }]
     },
-    "includes": [
-        "**/*.{nix,ts,tsx,js,jsx,json,md,toml,py,c,h,cpp,hpp,sh,rs,swift}"
-    ],
-    "excludes": [
-        "**/node_modules",
-        "**/result",
-        "**/target"
-    ],
+    "includes": ["**/*.{nix,ts,tsx,js,jsx,json,md,toml,py,c,h,cpp,hpp,sh,rs,swift,s,S}"],
+    "excludes": ["**/node_modules", "**/result", "**/target"],
     "plugins": [
         "https://github.com/darrenkuro/dprint-plugin-nix/releases/download/v0.1.0/dprint_plugin_nix.wasm",
         "https://plugins.dprint.dev/typescript-0.95.15.wasm",
