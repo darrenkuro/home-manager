@@ -201,5 +201,6 @@ in
         ./modules/apps/helix.nix
         ./modules/apps/claude.nix
         ./modules/apps/ssh.nix
-    ] ++ lib.optionals ( tag == "ft" ) [ ./modules/system/linux-ft.nix ];
+    ] ++ lib.optionals ( tag == "mac" ) [ ./modules/apps/netusage.nix ]
+      ++ lib.optionals ( tag == "ft" )  [ ./modules/system/linux-ft.nix ];
 }

@@ -19,6 +19,10 @@
       url = "git+ssh://git@github.com/darrenkuro/claude-config";
       flake = false;
     };
+    netusage = {
+      url = "github:darrenkuro/netusage";
+      flake = false;
+    };
   };
 
   outputs = {
@@ -28,10 +32,11 @@
     claude-plugins-official,
     obsidian-skills,
     claude-config,
+    netusage,
     ...
   }: let
     hmExtraArgs = {
-      inherit claude-plugins-official obsidian-skills claude-config;
+      inherit claude-plugins-official obsidian-skills claude-config netusage;
     };
     mkHome = {
       system,
