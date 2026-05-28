@@ -7,8 +7,14 @@
 
 set -euo pipefail
 
+# Get real user info (not root when running via sudo)
+real_user="${SUDO_USER:-$(whoami)}"
+real_home=$(eval echo "~$real_user")
+
 BUNDLE_ID="com.local.nix.stub"
-NIX_APP="$HOME/.local/share/app-stubs/Nix.app"
+STUBS_DIR="$real_home/.local/share/app-stubs"
+NIX_APP="$STUBS_DIR/Nix.app"
+CODESIGN_ID="Apple Development: odon5ht@gmail.com (497TM5HK44)"
 ACTIVATE_PLIST="/Library/LaunchDaemons/org.nixos.activate-system.plist"
 
 # Plists that need AssociatedBundleIdentifiers
@@ -68,9 +74,6 @@ if [[ -f "$ACTIVATE_PLIST" ]] && ! uses_wrapper "$ACTIVATE_PLIST"; then
 
   wrapper="$NIX_APP/Contents/MacOS/NixActivateSystem"
 
-  # Get the real user (not root when running via sudo)
-  real_user="${SUDO_USER:-$(whoami)}"
-
   # Create wrapper script
   cat > "$wrapper" << 'WRAPPER_EOF'
 #!/bin/bash
@@ -88,14 +91,30 @@ WRAPPER_EOF
     -c "Add :ProgramArguments:0 string $wrapper" \
     "$ACTIVATE_PLIST" && echo "  updated ProgramArguments: $(basename "$ACTIVATE_PLIST")"
 
-  # Re-sign the app bundle as user (needs keychain access)
-  sudo -u "$real_user" codesign -fs "Apple Development: odon5ht@gmail.com (497TM5HK44)" --deep "$NIX_APP" && \
-    echo "  re-signed: Nix.app"
-
   # Refresh LaunchServices registration
   /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f "$NIX_APP" 2>/dev/null
 else
   echo "  activate-system already uses wrapper"
+fi
+
+# Sign all app stubs with real Apple Development identity
+# This must run as the real user to access keychain
+echo "BTM: signing app stubs..."
+if [[ -d "$STUBS_DIR" ]]; then
+  # Fix ownership (wrapper binaries are copied as root during darwin-rebuild)
+  chown -R "$real_user:staff" "$STUBS_DIR"
+
+  for app in "$STUBS_DIR"/*.app; do
+    [[ -d "$app" ]] || continue
+    app_name=$(basename "$app")
+    if sudo -u "$real_user" codesign -fs "$CODESIGN_ID" --deep "$app"; then
+      echo "  signed: $app_name"
+    else
+      echo "  error: codesign failed for $app_name (exit code: $?)" >&2
+    fi
+  done
+else
+  echo "  no stubs directory found: $STUBS_DIR"
 fi
 
 echo "BTM: done"

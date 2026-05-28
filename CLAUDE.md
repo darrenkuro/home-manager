@@ -12,23 +12,24 @@ The `tag` parameter (`"mac"` or `"ft"`) flows through the entire config to condi
 
 ## Commands
 
-```bash
-# Apply config (re-evaluates flake, rebuilds env, restarts shell)
-# On mac (runs both nix-darwin + home-manager):
-sudo darwin-rebuild switch --flake ~/.config/home-manager#mac && exec zsh
-# On ft (home-manager only):
-home-manager switch --flake ~/.config/home-manager#ft && exec zsh
-# Or use the alias:
-re
+> **Always `git commit` before `re`/`sure`.** Nix flakes evaluate from the git tree — uncommitted or untracked files cause "path does not exist" errors. Stage only your files (`git add <specific files>`), never `git add -A`.
 
-# First-time install (mac only, also runs btm-patch-nix.sh):
+```bash
+# On mac — two rebuild modes:
+re      # home-manager only (no sudo, no brew/system changes)
+sure    # full darwin-rebuild + BTM patching (with sudo)
+
+# On ft (home-manager only):
+re      # runs home-manager switch
+
+# First-time install (mac only):
 sudo -v && sudo nix --extra-experimental-features "nix-command flakes" run nix-darwin -- switch --flake ~/.config/home-manager#mac && sudo ~/.config/home-manager/scripts/btm-patch-nix.sh && exec zsh
 
 # Update flake inputs (nixpkgs, home-manager, nix-darwin)
 nix flake update
 
-# Format Nix files
-alejandra .
+# Format all supported files (Nix, JS/TS, JSON, Markdown, TOML, Python)
+dprint fmt
 
 # Lint shell scripts
 shellcheck functions/*.sh scripts/*.sh
@@ -40,34 +41,31 @@ nix-collect-garbage -d
 ## Architecture
 
 ### Entry Points
-- `flake.nix` — defines two configurations:
-  - `darwinConfigurations.mac` — nix-darwin system config with embedded home-manager for macOS
+- `flake.nix` — defines configurations:
+  - `darwinConfigurations.mac` — nix-darwin system config with embedded home-manager (`sure`)
+  - `homeConfigurations.mac` — standalone home-manager for fast rebuilds (`re`)
   - `homeConfigurations.ft` — standalone home-manager config for Linux
-  - Legacy `homeConfigurations.mac` exists during transition but should not be used
-- `darwin.nix` — nix-darwin system-level config for macOS (LaunchDaemons, system settings)
-- `home.nix` — main module: packages, shell config, zsh init chain, XDG config files, conditional imports
+- `darwin.nix` — nix-darwin system-level config (LaunchDaemons, system settings, BTM, Homebrew)
+- `home.nix` — main module: packages, shell config, zsh init chain, XDG config files
 
 ### Module Organization
-- `modules/system/` — aliases (`aliases.nix` shared, `aliases-cp.nix` clipboard badges, `aliases-man.nix`), env vars (`env.nix`), platform-specific (`macos.nix`, `linux-ft.nix`)
+- `modules/system/` — aliases, env vars, platform-specific (`linux-ft.nix`)
 - `modules/apps/` — per-app config: `git.nix`, `helix.nix`, `starship.nix`, `claude.nix`, `ssh.nix`
-- `modules/services/` — launchd services (macOS only):
-  - `btm.nix` — user-level Launch Agents via BTM module (Postgres, Polymarket, env-setter)
-  - `nix-daemon/service.nix` — system-level Launch Daemons managed by nix-darwin (nix-daemon, darwin-store)
+- `modules/services/*/` — BTM app stubs only (`.app` bundles, no `.nix` files)
 
 ### BTM (Background Task Management) — macOS Launch Agents
-Bypasses home-manager's default `launchd.agents` which wraps `ProgramArguments` in `/bin/sh -c "wait4path..."`, causing macOS BTM to show "sh" for all agents.
 
-**Architecture:**
-- `lib/launchd-btm.nix` — pure builders: `mkWrapper` (named shell binary with wait4path baked in), `mkPlist` (launchd plist from attrset)
-- `app-stubs/` — static .app bundles (Info.plist, icon, dummy executable) for BTM icon resolution
-- `modules/services/btm.nix` — shared activation: copies stubs, embeds wrapper binaries, codesigns, lsregister, bootout/bootstrap lifecycle
-- `modules/services/*.nix` — each service registers via `btm.agents.<label>` and `btm.stubs.<Name> = { src, wrappers }`
+All BTM logic is in `darwin.nix`:
+- **Wrappers** — named shell scripts via `lib/launchd-btm.nix`
+- **App stubs** — `.app` bundles in `modules/services/*/` (embedded with wrappers at activation)
+- **LaunchAgents/Daemons** — defined via `launchd.user.agents` and `launchd.daemons`
+- **Activation** — postActivation installs stubs, codesigns, patches `AssociatedBundleIdentifiers`
 
-**How icons work:** ProgramArguments points to a wrapper binary inside the .app stub. BTM resolves icons by path containment (executable is inside a .app → use that app's icon). Stubs are ad-hoc codesigned at activation time so the wrapper + bundle share one identity. After icon changes, reboot to refresh BTM. Do NOT use `sfltool resetbtm` — it wipes ALL login items system-wide.
+**How icons work:** ProgramArguments points to a wrapper binary inside the .app stub. BTM resolves icons by path containment. After icon changes, reboot to refresh BTM.
 
-**User-level agents (BTM):** `postgresql.nix` (server + backup), `polymarket-monitor.nix`, `env-setter.nix` (propagates env vars to GUI domain via launchctl setenv)
-
-**System-level daemons (nix-darwin):** `nix-daemon/service.nix` creates a Nix.app stub with wrappers for nix-daemon and darwin-store. The `darwin.nix` config references these wrappers. The `scripts/btm-patch-nix.sh` script patches the `activate-system` plist post-activation to also use the Nix.app bundle ID for BTM grouping. The script is idempotent and dynamically extracts store paths from plists, so it can be run multiple times safely.
+**Rebuild aliases:**
+- `re` — home-manager only (no BTM, no sudo, no brew)
+- `sure` — full darwin-rebuild + `btm-patch-nix.sh` (with sudo)
 
 ### Nix Store Volume UUID Handling
 The darwin-store wrapper dynamically looks up the Nix Store volume UUID by name at runtime instead of hardcoding it. This prevents issues after Nix reinstalls when the volume UUID changes. The wrapper uses `diskutil apfs list` to find the UUID of the volume named "Nix Store".
@@ -87,7 +85,7 @@ Sourced at shell init via `scripts/source.sh` which iterates `$HM/functions/*.sh
 `copy-files.sh` runs during `home.activation` after `writeBoundary`. It uses `envsubst` for templating and `jq` for merging JSON keys.
 
 ### App Stubs
-`app-stubs/` — Static `.app` bundles for BTM icons. Each contains `Info.plist`, `PkgInfo`, dummy executable, and `icon.icns`. Wrapper binaries are embedded at activation time by `btm.nix`.
+`modules/services/*/` — Static `.app` bundles for BTM icons (Postgres.app, Polymarket.app, Nix.app). Each contains `Info.plist`, `PkgInfo`, and `icon.icns`. Wrapper binaries are embedded at activation time by `darwin.nix` postActivation. No `.nix` files in these directories — service logic is inlined in `home.nix` (activation, env vars, aliases) and `darwin.nix` (wrappers, launchd agents).
 
 ### Claude Code Config
 Managed via `modules/apps/claude.nix`:
@@ -106,4 +104,8 @@ Defined in `modules/system/env.nix`:
 - Use `lib.mkMerge` + `lib.mkIf (tag == "...")` for conditional attribute sets within a single file
 - Use `lib.optionals (tag == "...")` for conditional list items (packages, imports)
 - Same attribute defined across different files merges automatically (home-manager behavior)
-- Format with `alejandra` (not `nixfmt`)
+- Format with `dprint fmt` (not `alejandra` or `nixfmt`)
+
+## Workflow
+- Always `git commit` before running `re` or `sure` — flakes only see committed files, and new files need `git add` first
+- Stage only files you changed (`git add <file> ...`), not `git add -A` — the working tree may have unrelated dirty files

@@ -2,7 +2,11 @@
 # system one — but nix's man can't find Apple SDK manpages that macOS
 # appends at runtime. The system /usr/bin/man can find manuals in both
 # nix and system paths, so we alias it back on macOS.
-{tag, lib, ...}:
+{
+  tag,
+  lib,
+  ...
+}:
 lib.mkIf (tag == "mac") {
   programs.zsh.shellAliases = {
     "man" = "/usr/bin/man";

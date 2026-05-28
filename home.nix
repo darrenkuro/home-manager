@@ -1,177 +1,206 @@
+{ pkgs, config, tag, lib, ... }: let
+    # ── PostgreSQL (mac only) ──
+    pg = pkgs.postgresql_17.withPackages ( ps: [ ps.pgvector ] );
+    pgDataDir = "${config.home.homeDirectory}/.local/share/postgresql/data";
+    pgLogDir = "${config.home.homeDirectory}/.local/state/postgresql";
+    pgBackupDir = "${config.home.homeDirectory}/.local/share/postgresql/backups";
+    pgSocket = "/tmp";
+    pgPort = "5432";
+    pgMajor = "17";
+in
 {
-  pkgs,
-  config,
-  tag,
-  lib,
-  ...
-}:
-{
-  # ----------- Base Settings
-  home.username =
-    if tag == "mac"
-    then "darrenlu"
+    # ----------- Base Settings
+    home.username = if tag == "mac"
+    then
+        "darrenlu"
     else if tag == "ft"
-    then "dlu"
-    else throw "Unknown tag: ${tag}";
-  home.homeDirectory =
-    if tag == "mac"
-    then "/Users/darrenlu"
+    then
+        "dlu"
+    else
+        throw "Unknown tag: ${tag}";
+    home.homeDirectory = if tag == "mac"
+    then
+        "/Users/darrenlu"
     else if tag == "ft"
-    then "/home/dlu"
-    else throw "Unknown tag: ${tag}";
-  home.stateVersion = "25.11"; # Version when started using
+    then
+        "/home/dlu"
+    else
+        throw "Unknown tag: ${tag}";
+    home.stateVersion = "25.11"; # Version when started using
 
-  home.packages = with pkgs;
+    home.packages = with pkgs;
     [
-      tokei
-      eza
-      fd
-      jq
-      fzf
-      rename
-      bat
-      gettext # envsubst
-      wakatime-cli
-      clang-tools # C, CPP
-      alejandra # Nix formatter
-      nil # Nix LSP
-      shfmt
-      shellcheck
-      cargo
-      rust-analyzer
-      rustfmt
-      clippy
-      asm-lsp
-      asmfmt
-      nodePackages.prettier
+        tokei
+        eza
+        fd
+        jq
+        fzf
+        rename
+        bat
+        gettext # envsubst
+        wakatime-cli
+        clang-tools # C, CPP
+        dprint # Unified formatter (nix, ts, json, md, toml, python, c/cpp, shell, rust, swift)
+        nil # Nix LSP
+        shfmt
+        shellcheck
+        cargo
+        rust-analyzer
+        rustfmt
+        clippy
+        asm-lsp
+        asmfmt
 
-      # Ensure Consistency
-      openssl # Apple ships LibreSSL
-      gnused  # Apple ships BSD-sed
-      cmake
-      # nerd-fonts.hack — not cached for aarch64-darwin
-      # cachix — not currently needed
-    ]
-    ++ lib.optionals (tag == "mac") [
-      rustc
-      nodejs_22 # LTS; nodejs_latest (v25) fails to build, nodejs_24 not cached for aarch64-darwin
-      typescript
-      nodePackages.typescript-language-server
+        # Ensure Consistency
+        openssl # Apple ships LibreSSL
+        gnused # Apple ships BSD-sed
+        cmake
+        # nerd-fonts.hack — not cached for aarch64-darwin
+        # cachix — not currently needed
+    ] ++
+    lib.optionals ( tag == "mac" ) [
+        rustc
+        nodejs_22 # LTS; nodejs_latest (v25) fails to build, nodejs_24 not cached for aarch64-darwin
+        typescript
+        nodePackages.typescript-language-server
 
-      python313Packages.black
-      python313Packages.flake8
-      prettierd
+        python313Packages.flake8
 
-      python313
-      python313Packages.pip
-      python313Packages.virtualenv
+        python313
+        python313Packages.pip
+        python313Packages.virtualenv
 
-      darwin.trash # Replace rm (safer)
-      ghostty-bin
-      ffmpeg
-      tmux
-      poppler-utils # PDF tools
-      yt-dlp # Youtube download
+        darwin.trash # Replace rm (safer)
+        ffmpeg
+        poppler-utils # PDF tools
+        yt-dlp # Youtube download
 
-      (postgresql_17.withPackages (ps: [ ps.pgvector ]))
+        ( postgresql_17.withPackages ( ps: [ ps.pgvector ] ) )
 
-      pnpm
-      bun
+        pnpm
+        bun
 
-      # Docker (via Colima)
-      colima # Docker replacement
-      docker-client
-      docker-compose
-      docker-buildx
+        # Docker (via Colima)
+        colima # Docker replacement
+        docker-client
+        docker-compose
+        docker-buildx
 
-      pandoc
-      # typst — not currently needed
+        pandoc
+        # typst — not currently needed
     ];
 
-  # Ensure directories used exist
-  home.activation.createStateDirs = lib.hm.dag.entryAfter ["writeBoundary"] ''
-    mkdir -p \
-      "$HOME/.local/state/zsh" \
-      "$HOME/.local/state/bash" \
-      "$HOME/.local/state/less" \
-      "$HOME/.local/state/sessions" \
-      "$HOME/.local/state/wakatime" \
-      "$HOME/.cache/zsh" \
-      "$HOME/.local/state/postgresql"
-  '';
+    # ── Activation Scripts ──
+    home.activation = lib.mkMerge [
+        {
+            # Create XDG state/cache directories for shell history, sessions, etc.
+            xdgStateDirs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        run mkdir -p \
+          "$HOME/.local/state/zsh" \
+          "$HOME/.local/state/bash" \
+          "$HOME/.local/state/less" \
+          "$HOME/.local/state/sessions" \
+          "$HOME/.local/state/wakatime" \
+          "$HOME/.cache/zsh"
+      '';
 
-  programs.home-manager.enable = true;
-  programs.bash = {
-    enable = true;
-    historyFile = "${config.home.homeDirectory}/.local/state/bash/history";
-    historySize = 100000;
-    historyFileSize = 100000;
-  };
-  programs.zsh = {
-    enable = true;
-    dotDir = "${config.home.homeDirectory}/.config";
-    history = {
-      path = "${config.home.homeDirectory}/.local/state/zsh/history";
-      size = 100000;
-      save = 100000;
-      ignoreDups = true; # Ignore when same cmd twice in a row
-      share = true; # Share across terminal
-      extended = true;
+            # Copy writable configs (VSCode, taskrc, tmux, Claude settings.json hooks)
+            writableConfigs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        HM="${config.home.homeDirectory}/.config/home-manager"
+        XDG_CONFIG_HOME="${config.xdg.configHome}"
+        HM_TAG="${lib.toUpper tag}"
+
+        ${builtins.readFile ./scripts/copy-files.sh}
+      '';
+        }
+
+        # Mac-only services
+        (
+            lib.mkIf ( tag == "mac" ) {
+                # Initialize PostgreSQL data directory and check version compatibility
+                postgresql = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        run mkdir -p "${pgLogDir}" "${pgBackupDir}"
+
+        if [ -d "${pgDataDir}" ]; then
+          if [ -f "${pgDataDir}/PG_VERSION" ]; then
+            CURRENT=$(cat "${pgDataDir}/PG_VERSION")
+            if [ "$CURRENT" != "${pgMajor}" ]; then
+              echo "WARNING: PostgreSQL version mismatch: data=$CURRENT, package=${pgMajor}"
+              echo "  Manual pg_upgrade required. Data dir: ${pgDataDir}"
+            fi
+          fi
+        else
+          echo "Initializing PostgreSQL ${pgMajor} database..."
+          ${pg}/bin/initdb \
+            -D "${pgDataDir}" \
+            --locale=C \
+            --encoding=UTF8 \
+            --auth=trust \
+            --username="$(whoami)"
+        fi
+      '';
+
+                # Create temp directories for services
+                serviceTmpDirs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        run mkdir -p /tmp/polymarket
+      '';
+            } )
+    ];
+
+    # ── Session Variables (mac: PostgreSQL) ──
+    home.sessionVariables = lib.mkIf ( tag == "mac" ) { PGDATA = pgDataDir; PGHOST = pgSocket; };
+
+    programs.home-manager.enable = true;
+    programs.bash = {
+        enable = true;
+        historyFile = "${config.home.homeDirectory}/.local/state/bash/history";
+        historySize = 100000;
+        historyFileSize = 100000;
     };
-    envExtra = builtins.readFile ./scripts/load-nix.sh;
-    profileExtra = builtins.readFile ./scripts/nix-prepend-path.sh;
-    initContent = lib.concatStringsSep "\n" ([
-        (builtins.readFile ./scripts/source.sh)
-        (builtins.readFile ./scripts/hygiene.sh)
-      ]
-      ++ lib.optionals (tag == "mac") [
-        (builtins.readFile ./scripts/ssh-keychain.sh)
-      ]
-      ++ lib.optionals (tag == "ft") [
-        (builtins.readFile ./scripts/repeat-rate.sh)
-      ]);
-  };
-  programs.direnv = {
-    enable = true;
-    nix-direnv.enable = true;
-  };
+    programs.zsh = {
+        enable = true;
+        dotDir = "${config.home.homeDirectory}/.config";
+        history = {
+            path = "${config.home.homeDirectory}/.local/state/zsh/history";
+            size = 100000;
+            save = 100000;
+            ignoreDups = true; # Ignore when same cmd twice in a row
+            share = true; # Share across terminal
+            extended = true;
+        };
+        envExtra = builtins.readFile ./scripts/load-nix.sh;
+        profileExtra = builtins.readFile ./scripts/nix-prepend-path.sh;
+        initContent = lib.concatStringsSep "\n"
+        (
+            [
+                ( builtins.readFile ./scripts/source.sh )
+                ( builtins.readFile ./scripts/hygiene.sh )
+            ] ++
+            lib.optionals ( tag == "mac" ) [ ( builtins.readFile ./scripts/ssh-keychain.sh ) ] ++
+            lib.optionals ( tag == "ft" ) [ ( builtins.readFile ./scripts/repeat-rate.sh ) ] );
 
-  fonts.fontconfig.enable = true;
+        # Mac: PostgreSQL aliases
+        shellAliases = lib.mkIf ( tag == "mac" ) {
+            pglog = "tail -f ${pgLogDir}/postgresql-$(date +%a).log";
+            pgbackuplog = "tail -f ${pgLogDir}/backup.log";
+            pgstatus = "pg_isready -h ${pgSocket} -p ${pgPort}";
+        };
+    };
+    programs.direnv = { enable = true; nix-direnv.enable = true; };
 
-  xdg.configFile."clang-format".source = ./configs/clang-format.yml;
-  xdg.configFile."prettier.json".source = ./configs/prettier-config.json;
+    fonts.fontconfig.enable = true;
 
-  # Variables injected from Nix - ensures activation scripts work
-  # regardless of shell environment (standalone HM or nix-darwin)
-  home.activation.configCopy =
-    lib.hm.dag.entryAfter ["writeBoundary"]
-    ''
-      HM="${config.home.homeDirectory}/.config/home-manager"
-      XDG_CONFIG_HOME="${config.xdg.configHome}"
-      HM_TAG="${lib.toUpper tag}"
+    xdg.configFile."dprint/dprint.json".source = ./configs/dprint.json;
 
-      ${builtins.readFile ./scripts/copy-files.sh}
-    '';
+    imports = [
+        ./modules/system/aliases.nix
+        ./modules/system/env.nix
 
-  imports =
-    [
-      ./modules/system/aliases.nix
-      ./modules/system/env.nix
-
-      ./modules/apps/starship.nix
-      ./modules/apps/git.nix
-      ./modules/apps/helix.nix
-      ./modules/apps/claude.nix
-      ./modules/apps/ssh.nix
-    ]
-    ++ lib.optionals (tag == "mac") [
-      ./modules/services/btm.nix
-      ./modules/services/nix-daemon/service.nix
-      ./modules/services/env-setter/service.nix
-      ./modules/services/polymarket/service.nix
-      ./modules/services/postgresql/service.nix
-    ]
-    ++ lib.optionals (tag == "ft") [
-      ./modules/system/linux-ft.nix
-    ];
+        ./modules/apps/starship.nix
+        ./modules/apps/git.nix
+        ./modules/apps/helix.nix
+        ./modules/apps/claude.nix
+        ./modules/apps/ssh.nix
+    ] ++ lib.optionals ( tag == "mac" ) [ ./modules/apps/netusage.nix ]
+      ++ lib.optionals ( tag == "ft" )  [ ./modules/system/linux-ft.nix ];
 }

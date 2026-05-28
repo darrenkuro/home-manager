@@ -1,4 +1,8 @@
-{tag, lib, ...}: {
+{
+  tag,
+  lib,
+  ...
+}: {
   home.sessionVariables = {
     # ── System ──
     HM_TAG =

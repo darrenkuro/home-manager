@@ -9,11 +9,11 @@
     "editor.insertSpaces": true,
     "editor.acceptSuggestionOnCommitCharacter": false,
     "editor.detectIndentation": false,
-    "editor.formatOnSave": false,
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "dprint.dprint",
     "editor.inlineSuggest.enabled": true,
     "editor.minimap.enabled": false,
     "editor.suggestOnTriggerCharacters": false,
-    "editor.defaultFormatter": null,
     "diffEditor.ignoreTrimWhitespace": false,
     //
     "explorer.confirmDelete": false,
@@ -33,10 +33,7 @@
     "nix.enableLanguageServer": true,
     "nix.serverPath": "nil",
     //
-    "[python]": {
-        "editor.defaultFormatter": "ms-python.python"
-    },
-    "python.formatting.provider": "black",
+    "[python]": {},
     //   "python.formatting.blackPath": "$HOME/.nix-profile/bin/black",
     "python.linting.enabled": true,
     "python.linting.flake8Enabled": true,
@@ -63,34 +60,12 @@
     //
     "security.workspace.trust.enabled": true,
     "security.workspace.trust.startupPrompt": "never",
+    "json.schemaDownload.trustedDomains": {
+        "https://plugins.dprint.dev": true
+    },
     //
     "42header.username": "dlu",
     "42header.email": "dlu@student.42berlin.de",
-    "emeraldwalk.runonsave": {
-        "commands": [
-            {
-                // "match": ".*",
-                "match": "\\.(js|ts|jsx|tsx|json|jsonc|css|md)$",
-                "cmd": "prettier -w --config ~/.config/prettier.json '${${q}file}'"
-            },
-            {
-                "match": "\\.(c|h|cpp|hpp)$",
-                "cmd": "clang-format -style=file:$HOME/.config/clang-format -i '${${q}file}'"
-            },
-            {
-                "match": "\\.(sh)$",
-                "cmd": "shfmt -i 2 -ci -sr -w '${${q}file}'"
-            },
-            {
-                "match": "\\.(rs)$",
-                "cmd": "rustfmt '${${q}file}'"
-            }
-            // {
-            //     "match": "\\.(nix)$",
-            //     "cmd": "alejandra '${${q}file}'"
-            // }
-        ]
-    },
     "[shellscript]": {
         "editor.bracketPairColorization.enabled": false // For case syntax token )
     }

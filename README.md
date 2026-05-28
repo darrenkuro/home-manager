@@ -64,6 +64,25 @@ nix flake update
 
 **Note:** On macOS, nix-darwin includes home-manager as a module, so `darwin-rebuild switch` activates both system and user config together.
 
+### Updating an external flake input
+
+Tools/configs installed via `flake = false` inputs (`netusage`, `claude-config`, `obsidian-skills`, etc.) are pinned to a specific commit in `flake.lock`. To bump just one to its latest:
+
+```bash
+# 1. Push the upstream change first (e.g., in ~/Documents/dev/netusage)
+git push
+
+# 2. In this repo, refresh just that input
+nix flake lock --update-input netusage
+
+# 3. Commit the new flake.lock and rebuild
+git add flake.lock
+git commit -m "Bump netusage to latest"
+re   # or sure, depending on what changed
+```
+
+Use `nix flake update` only when you want to refresh **all** inputs (nixpkgs, home-manager, plus every `flake = false` source tree). For routine tool updates, `--update-input <name>` is faster and produces a smaller diff.
+
 ### Linux (rootless, 42 school)
 
 ```bash

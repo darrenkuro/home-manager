@@ -52,6 +52,22 @@
         "type": "github"
       }
     },
+    "netusage": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1779963477,
+        "narHash": "sha256-DmIK1z1FEaxiFV6dIBBPJ5wMFGA+V3UFbUmkfMe8CxM=",
+        "owner": "darrenkuro",
+        "repo": "netusage",
+        "rev": "64588c5c1e9836c7dc56cb1062c7f7a9e9c7bd8d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "darrenkuro",
+        "repo": "netusage",
+        "type": "github"
+      }
+    },
     "nix-darwin": {
       "inputs": {
         "nixpkgs": [
@@ -109,6 +125,7 @@
         "claude-config": "claude-config",
         "claude-plugins-official": "claude-plugins-official",
         "home-manager": "home-manager",
+        "netusage": "netusage",
         "nix-darwin": "nix-darwin",
         "nixpkgs": "nixpkgs",
         "obsidian-skills": "obsidian-skills"

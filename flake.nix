@@ -19,6 +19,10 @@
       url = "git+ssh://git@github.com/darrenkuro/claude-config";
       flake = false;
     };
+    netusage = {
+      url = "github:darrenkuro/netusage";
+      flake = false;
+    };
   };
 
   outputs = {
@@ -28,10 +32,11 @@
     claude-plugins-official,
     obsidian-skills,
     claude-config,
+    netusage,
     ...
   }: let
     hmExtraArgs = {
-      inherit claude-plugins-official obsidian-skills claude-config;
+      inherit claude-plugins-official obsidian-skills claude-config netusage;
     };
     mkHome = {
       system,
@@ -42,9 +47,11 @@
           inherit system;
           config.allowUnfree = true;
         };
-        extraSpecialArgs = hmExtraArgs // {
-          inherit tag system;
-        };
+        extraSpecialArgs =
+          hmExtraArgs
+          // {
+            inherit tag system;
+          };
         modules = [./home.nix];
       };
   in {
@@ -58,10 +65,12 @@
           nixpkgs.config.allowUnfree = true;
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
-          home-manager.extraSpecialArgs = hmExtraArgs // {
-            tag = "mac";
-            system = "aarch64-darwin";
-          };
+          home-manager.extraSpecialArgs =
+            hmExtraArgs
+            // {
+              tag = "mac";
+              system = "aarch64-darwin";
+            };
           home-manager.users.darrenlu = import ./home.nix;
         }
       ];

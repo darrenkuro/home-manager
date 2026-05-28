@@ -59,3 +59,12 @@ pkgs.writeTextFile {
   text = "...";
 }
 ```
+
+## nix-darwin Migration (Complete)
+
+- LaunchAgents migrated to darwin.nix (`launchd.user.agents`)
+- BTM patching moved to darwin.nix post-activation script
+- Removed env-setter (replaced by `launchd.user.envVariables`)
+- Simplified btm.nix (removed agent logic, ~120 lines deleted)
+- Added system.defaults from audit (NSGlobalDomain, dock, finder, trackpad, menuExtraClock)
+
