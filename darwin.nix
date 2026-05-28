@@ -279,7 +279,6 @@ in
             "alfred"
             "anki"
             { name = "brave-browser"; greedy = true; }
-            "calibre"
             { name = "claude"; greedy = true; }
             { name = "claude-code"; greedy = true; }
             "dropbox"
