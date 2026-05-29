@@ -29,24 +29,19 @@
 
     btm = import ./lib/launchd-btm.nix { inherit lib pkgs; };
 
-    # ── PostgreSQL Wrappers ──
-    pg = pkgs.postgresql_17.withPackages ( ps: [ ps.pgvector ] );
-    pgDataDir = "${homeDir}/.local/share/postgresql/data";
-    pgLogDir = "${homeDir}/.local/state/postgresql";
-    pgSocket = "/tmp";
-    pgPort = "5432";
-    pgBackupDir = "${homeDir}/.local/share/postgresql/backups";
+    # ── PostgreSQL Wrappers ── shared spec
+    pg = import ./modules/services/postgresql/spec.nix { inherit pkgs; home = homeDir; };
 
     pgConf = pkgs.writeText "postgresql.conf" ''
     listen_addresses = 'localhost'
-    port = ${pgPort}
-    unix_socket_directories = '${pgSocket}'
+    port = ${pg.port}
+    unix_socket_directories = '${pg.socket}'
     max_connections = 50
     shared_buffers = 256MB
     work_mem = 16MB
     effective_cache_size = 1GB
     logging_collector = on
-    log_directory = '${pgLogDir}'
+    log_directory = '${pg.logDir}'
     log_filename = 'postgresql-%a.log'
     log_rotation_age = 1d
     log_rotation_size = 0
@@ -55,36 +50,36 @@
     shared_preload_libraries = 'vector'
     lc_messages = 'C'
   '';
-    pgHba = ./configs/postgresql/pg_hba.conf;
+    pgHba = ./modules/services/postgresql/pg_hba.conf;
 
     postgresServerWrapper = btm.mkWrapper {
         name = "PostgresServer";
-        runtimeInputs = [ pg ];
+        runtimeInputs = [ pg.pkg ];
         text = ''
       exec postgres \
-        -D "${pgDataDir}" \
+        -D "${pg.dataDir}" \
         -c "config_file=${pgConf}" \
         -c "hba_file=${pgHba}" \
-        -k "${pgSocket}"
+        -k "${pg.socket}"
     '';
     };
 
     postgresBackupWrapper = btm.mkWrapper {
         name = "PostgresBackup";
-        runtimeInputs = [ pg ];
+        runtimeInputs = [ pg.pkg ];
         excludeShellChecks = [ "SC2043" ];
         text = ''
       set -euo pipefail
       TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-      LOG="${pgLogDir}/backup.log"
+      LOG="${pg.logDir}/backup.log"
       log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" >> "$LOG"; }
 
-      if ! pg_isready -h ${pgSocket} -p ${pgPort} -q 2>/dev/null; then
+      if ! pg_isready -h ${pg.socket} -p ${pg.port} -q 2>/dev/null; then
         log "ERROR: PostgreSQL not running, skipping backup"
         exit 1
       fi
 
-      DBS=$(psql -h ${pgSocket} -p ${pgPort} -At -c \
+      DBS=$(psql -h ${pg.socket} -p ${pg.port} -At -c \
         "SELECT datname FROM pg_database WHERE datistemplate = false AND datname != 'postgres';" postgres)
 
       if [ -z "$DBS" ]; then
@@ -93,9 +88,9 @@
       fi
 
       for db in $DBS; do
-        mkdir -p "${pgBackupDir}"
-        DUMPFILE="${pgBackupDir}/''${db}_''${TIMESTAMP}.dump"
-        if pg_dump -h ${pgSocket} -p ${pgPort} --format=custom "$db" > "$DUMPFILE" 2>>"$LOG"; then
+        mkdir -p "${pg.backupDir}"
+        DUMPFILE="${pg.backupDir}/''${db}_''${TIMESTAMP}.dump"
+        if pg_dump -h ${pg.socket} -p ${pg.port} --format=custom "$db" > "$DUMPFILE" 2>>"$LOG"; then
           log "OK: $db -> $DUMPFILE ($(du -h "$DUMPFILE" | cut -f1))"
         else
           log "FAIL: $db -> $DUMPFILE"
@@ -105,7 +100,7 @@
 
       # Retention: 7 daily, 4 weekly (Mon), 12 monthly (1st)
       NOW=$(date +%s)
-      for f in "${pgBackupDir}"/*.dump; do
+      for f in "${pg.backupDir}"/*.dump; do
         [ -f "$f" ] || continue
         BASENAME=$(basename "$f")
         DATE_STR=$(echo "$BASENAME" | grep -oE '[0-9]{8}_[0-9]{6}' | head -1)
@@ -193,7 +188,8 @@
                 { drv = nixStoreMountWrapper; bin = "NixStoreMount"; }
             ];
         };
-    } // lib.optionalAttrs enableDataCollector {
+    } //
+    lib.optionalAttrs enableDataCollector {
         Polymarket = {
             src = ./modules/services/polymarket/Polymarket.app;
             wrappers = [ { drv = polymarketWrapper; bin = "PolymarketMonitor"; } ];
@@ -243,9 +239,7 @@
     btmAgentMapping = {
         "org.postgresql.server" = "Postgres";
         "org.postgresql.backup" = "Postgres";
-    } // lib.optionalAttrs enableDataCollector {
-        "com.polymarket.data-monitor" = "Polymarket";
-    };
+    } // lib.optionalAttrs enableDataCollector { "com.polymarket.data-monitor" = "Polymarket"; };
 
     # Generate patching commands for user agents
     patchAgentCommands = lib.concatStringsSep "\n" ( lib.mapAttrsToList ( label: appName: ''
@@ -408,32 +402,11 @@ in
     # Required for user-level options (launchd.user.agents, system.defaults.dock, etc.)
     system.primaryUser = "darrenlu";
 
-    # GUI env vars — replaces env-setter service after reboot verification
-    # These are the vars from home.sessionVariables minus shell-only ones (denyList)
-    launchd.user.envVariables = {
-        # XDG Base Directories
-        XDG_CONFIG_HOME = "/Users/darrenlu/.config";
-        XDG_CACHE_HOME = "/Users/darrenlu/.cache";
-        XDG_DATA_HOME = "/Users/darrenlu/.local/share";
-        XDG_STATE_HOME = "/Users/darrenlu/.local/state";
-        # XDG Overrides (keep $HOME clean)
-        WAKATIME_HOME = "/Users/darrenlu/.local/state/wakatime";
-        CLAUDE_CONFIG_DIR = "/Users/darrenlu/.config/claude";
-        NPM_CONFIG_USERCONFIG = "/Users/darrenlu/.config/npm/npmrc";
-        NPM_CONFIG_CACHE = "/Users/darrenlu/.cache/npm";
-        CARGO_HOME = "/Users/darrenlu/.local/share/cargo";
-        DOCKER_CONFIG = "/Users/darrenlu/.config/docker";
-        ANDROID_USER_HOME = "/Users/darrenlu/.local/share/android";
-        BUNDLE_USER_HOME = "/Users/darrenlu/.local/share/bundle";
-        GEM_HOME = "/Users/darrenlu/.local/share/gem";
-        RBENV_ROOT = "/Users/darrenlu/.local/share/rbenv";
-        DOTNET_CLI_HOME = "/Users/darrenlu/.local/share";
-        NUGET_PACKAGES = "/Users/darrenlu/.local/share/NuGet/packages";
-        DOTNET_CLI_TELEMETRY_OPTOUT = "1";
-        MPLCONFIGDIR = "/Users/darrenlu/.config/matplotlib";
-        # Tools
-        PNPM_HOME = "/Users/darrenlu/Library/pnpm";
-    };
+    # GUI env vars — single source of truth lives in lib/xdg-paths.nix.
+    # Shell-only vars (HISTFILE, ZSH_SESSION_DIR, color codes, DBOX/DEV/HM,
+    # NODE_REPL_HISTORY, PYTHON_HISTORY, HOMEBREW_NO_ENV_HINTS) stay in
+    # modules/system/env.nix since GUI apps don't need them.
+    launchd.user.envVariables = import ./lib/xdg-paths.nix { home = homeDir; };
 
     # Take over Nix daemon management from installer for BTM integration
     # This replaces /Library/LaunchDaemons/org.nixos.nix-daemon.plist
@@ -477,12 +450,9 @@ in
             RunAtLoad = true;
             KeepAlive = true;
             ThrottleInterval = 10;
-            StandardOutPath = "/Users/darrenlu/.local/state/postgresql/launchd-stdout.log";
-            StandardErrorPath = "/Users/darrenlu/.local/state/postgresql/launchd-stderr.log";
-            EnvironmentVariables = {
-                HOME = "/Users/darrenlu";
-                PGDATA = "/Users/darrenlu/.local/share/postgresql/data";
-            };
+            StandardOutPath = "${pg.logDir}/launchd-stdout.log";
+            StandardErrorPath = "${pg.logDir}/launchd-stderr.log";
+            EnvironmentVariables = { HOME = homeDir; PGDATA = pg.dataDir; };
         };
     };
 
@@ -491,9 +461,9 @@ in
             Label = "org.postgresql.backup";
             ProgramArguments = [ "${btmStubDir}/Postgres.app/Contents/MacOS/PostgresBackup" ];
             StartCalendarInterval = [ { Hour = 3; Minute = 0; } ];
-            StandardOutPath = "/Users/darrenlu/.local/state/postgresql/backup-stdout.log";
-            StandardErrorPath = "/Users/darrenlu/.local/state/postgresql/backup-stderr.log";
-            EnvironmentVariables = { HOME = "/Users/darrenlu"; };
+            StandardOutPath = "${pg.logDir}/backup-stdout.log";
+            StandardErrorPath = "${pg.logDir}/backup-stderr.log";
+            EnvironmentVariables = { HOME = homeDir; };
         };
     };
 

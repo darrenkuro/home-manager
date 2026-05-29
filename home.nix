@@ -1,12 +1,9 @@
 { pkgs, config, tag, lib, ... }: let
-    # ── PostgreSQL (mac only) ──
-    pg = pkgs.postgresql_17.withPackages ( ps: [ ps.pgvector ] );
-    pgDataDir = "${config.home.homeDirectory}/.local/share/postgresql/data";
-    pgLogDir = "${config.home.homeDirectory}/.local/state/postgresql";
-    pgBackupDir = "${config.home.homeDirectory}/.local/share/postgresql/backups";
-    pgSocket = "/tmp";
-    pgPort = "5432";
-    pgMajor = "17";
+    # ── PostgreSQL (mac only) ── shared spec consumed by both HM and darwin
+    pg = import ./modules/services/postgresql/spec.nix {
+        inherit pkgs;
+        home = config.home.homeDirectory;
+    };
 in
 {
     # ----------- Base Settings
@@ -119,20 +116,20 @@ in
             lib.mkIf ( tag == "mac" ) {
                 # Initialize PostgreSQL data directory and check version compatibility
                 postgresql = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-        run mkdir -p "${pgLogDir}" "${pgBackupDir}"
+        run mkdir -p "${pg.logDir}" "${pg.backupDir}"
 
-        if [ -d "${pgDataDir}" ]; then
-          if [ -f "${pgDataDir}/PG_VERSION" ]; then
-            CURRENT=$(cat "${pgDataDir}/PG_VERSION")
-            if [ "$CURRENT" != "${pgMajor}" ]; then
-              echo "WARNING: PostgreSQL version mismatch: data=$CURRENT, package=${pgMajor}"
-              echo "  Manual pg_upgrade required. Data dir: ${pgDataDir}"
+        if [ -d "${pg.dataDir}" ]; then
+          if [ -f "${pg.dataDir}/PG_VERSION" ]; then
+            CURRENT=$(cat "${pg.dataDir}/PG_VERSION")
+            if [ "$CURRENT" != "${pg.major}" ]; then
+              echo "WARNING: PostgreSQL version mismatch: data=$CURRENT, package=${pg.major}"
+              echo "  Manual pg_upgrade required. Data dir: ${pg.dataDir}"
             fi
           fi
         else
-          echo "Initializing PostgreSQL ${pgMajor} database..."
-          ${pg}/bin/initdb \
-            -D "${pgDataDir}" \
+          echo "Initializing PostgreSQL ${pg.major} database..."
+          ${pg.pkg}/bin/initdb \
+            -D "${pg.dataDir}" \
             --locale=C \
             --encoding=UTF8 \
             --auth=trust \
@@ -148,7 +145,7 @@ in
     ];
 
     # ── Session Variables (mac: PostgreSQL) ──
-    home.sessionVariables = lib.mkIf ( tag == "mac" ) { PGDATA = pgDataDir; PGHOST = pgSocket; };
+    home.sessionVariables = lib.mkIf ( tag == "mac" ) { PGDATA = pg.dataDir; PGHOST = pg.socket; };
 
     programs.home-manager.enable = true;
     programs.bash = {
@@ -181,9 +178,9 @@ in
 
         # Mac: PostgreSQL aliases
         shellAliases = lib.mkIf ( tag == "mac" ) {
-            pglog = "tail -f ${pgLogDir}/postgresql-$(date +%a).log";
-            pgbackuplog = "tail -f ${pgLogDir}/backup.log";
-            pgstatus = "pg_isready -h ${pgSocket} -p ${pgPort}";
+            pglog = "tail -f ${pg.logDir}/postgresql-$(date +%a).log";
+            pgbackuplog = "tail -f ${pg.logDir}/backup.log";
+            pgstatus = "pg_isready -h ${pg.socket} -p ${pg.port}";
         };
     };
     programs.direnv = { enable = true; nix-direnv.enable = true; };
@@ -201,6 +198,7 @@ in
         ./modules/apps/helix.nix
         ./modules/apps/claude.nix
         ./modules/apps/ssh.nix
-    ] ++ lib.optionals ( tag == "mac" ) [ ./modules/apps/netusage.nix ]
-      ++ lib.optionals ( tag == "ft" )  [ ./modules/system/linux-ft.nix ];
+    ] ++
+    lib.optionals ( tag == "mac" ) [ ./modules/apps/netusage.nix ] ++
+    lib.optionals ( tag == "ft" ) [ ./modules/system/linux-ft.nix ];
 }

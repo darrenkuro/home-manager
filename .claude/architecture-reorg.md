@@ -1,193 +1,208 @@
 # Home Manager Architecture Reorganization Plan
 
+Last revised: 2026-05-29 (supersedes the earlier `default.nix`-per-service draft).
+
 ## Problem Summary
 
-The current architecture has:
-- **darwin.nix is a 540-line monolith** containing all BTM, services, Homebrew, system defaults
-- **Service definitions scattered** across 4-5 files (darwin.nix, home.nix, modules/services/, scripts/)
-- **Tag conditionals repeated** 20+ times across files (`lib.mkIf (tag == "mac")`)
-- **Module namespaces confusing**: `modules/services/` contains only .app bundles, not actual Nix modules
-- **Env vars duplicated**: defined in env.nix AND hardcoded in darwin.nix for launchd
+- `darwin.nix` is a 516-line junk drawer (Homebrew, defaults, BTM, services, launchd, env).
+- `modules/services/<name>/` directories contain only `.app` bundles — the name lies.
+- PostgreSQL constants (paths, port, pg pkg) are duplicated in `home.nix` and `darwin.nix`.
+- `launchd.user.envVariables` duplicates ~24 entries from `home.sessionVariables`.
+- BTM logic is scattered across `lib/launchd-btm.nix`, `darwin.nix`, and `scripts/btm-patch-nix.sh`.
+- `scripts/copy-files.sh` is a 5-app junk drawer (VSCode, tmux, alacritty, tmux-nix, Claude jq merge).
+- `enableDataCollector = false` is the only feature toggle and lives buried in a let-binding.
+- `modules/system/aliases.nix` mixes real aliases with hidden mini-features (sync-local, kotr, ytd, clean, rm→trash, tmux→brew).
+- Hardcoded `/Users/darrenlu` paths even where `homeDir` is in scope.
 
-## Proposed Architecture
+## Target Architecture
 
 ```
 home-manager/
-├── flake.nix                    # Entry point (unchanged)
-├── darwin.nix                   # Slimmed: Homebrew, system.defaults, imports services
-├── home.nix                     # Slimmed: base config, imports modules
+├── flake.nix
+├── features.nix                            # NEW — single feature-toggle file
+├── darwin.nix                              # slimmed: nix settings + imports
+├── home.nix                                # slimmed: base + imports
 ├── lib/
-│   ├── launchd-btm.nix         # mkWrapper (unchanged)
-│   └── paths.nix               # Centralized path definitions (NEW)
+│   ├── btm.nix                             # NEW — replaces launchd-btm.nix
+│   │                                       #   exports: mkWrapper, mkStub,
+│   │                                       #   installCmd, patchAgentCmd,
+│   │                                       #   patchDaemonCmd, services registry
+│   └── xdg-paths.nix                       # NEW — { home } -> attrset of XDG paths
 ├── modules/
-│   ├── shell/                  # Shell configuration
-│   │   ├── aliases.nix         # From modules/system/aliases.nix
-│   │   ├── env.nix             # From modules/system/env.nix (single source of truth)
-│   │   └── functions.nix       # References functions/*.sh
-│   ├── programs/               # Per-app config (renamed from apps/)
-│   │   ├── git.nix
-│   │   ├── helix.nix
-│   │   ├── starship.nix
-│   │   ├── claude.nix
-│   │   └── ssh.nix
-│   ├── services/               # Self-contained service modules (NEW)
-│   │   ├── postgresql/
-│   │   │   ├── default.nix     # HM + darwin config combined
-│   │   │   └── Postgres.app/   # Bundle (existing)
-│   │   ├── polymarket/
-│   │   │   ├── default.nix
-│   │   │   └── Polymarket.app/
-│   │   └── nix-daemon/
-│   │       ├── default.nix
-│   │       └── Nix.app/
-│   └── platform/               # Platform-specific overrides (NEW)
-│       ├── darwin.nix          # Mac-only: homebrew, system.defaults
-│       └── linux-ft.nix        # 42-specific config
-└── scripts/                    # (unchanged)
+│   ├── system/
+│   │   ├── env.nix                         # imports xdg-paths.nix(home="$HOME")
+│   │   ├── launchd-env.nix                 # NEW — imports xdg-paths.nix(home=hardcoded)
+│   │   ├── aliases.nix                     # base only; junk extracted to apps/macos-extras
+│   │   ├── aliases-cp.nix                  # badge generators (kept)
+│   │   ├── aliases-man.nix                 # /usr/bin/man overrides (kept)
+│   │   └── linux-ft.nix
+│   ├── apps/
+│   │   ├── git.nix, helix.nix, starship.nix, claude.nix, ssh.nix, netusage.nix
+│   │   ├── dprint.nix                      # NEW — extracted from home.nix
+│   │   ├── vscode.nix                      # NEW — owns settings copy (was copy-files.sh)
+│   │   ├── tmux.nix                        # NEW — owns conf copy
+│   │   ├── alacritty.nix                   # NEW — ft-only
+│   │   ├── colima.nix                      # NEW — docker/colima group
+│   │   └── macos-extras.nix                # NEW — sync-local/cloud, kotr, ytd, clean,
+│   │                                       #   trash, remoteon/off, tmux brew override
+│   └── services/
+│       ├── postgresql/
+│       │   ├── spec.nix                    # { home } -> { dataDir, logDir, port, pg, ... }
+│       │   ├── user.nix                    # HM scope: initdb, env, aliases
+│       │   ├── system.nix                  # nix-darwin scope: launchd agents, BTM registration
+│       │   ├── Postgres.app/               # BTM stub (existing)
+│       │   └── pg_hba.conf                 # moved from configs/postgresql/
+│       ├── polymarket/
+│       │   ├── spec.nix, user.nix, system.nix
+│       │   └── Polymarket.app/
+│       └── nix-daemon/
+│           ├── spec.nix, system.nix        # no user.nix needed
+│           └── Nix.app/
+└── scripts/                                # shell-init chain; copy-files.sh deleted
+    ├── source.sh, hygiene.sh, load-nix.sh, nix-prepend-path.sh,
+    ├── ssh-keychain.sh, repeat-rate.sh
+    └── btm-patch-nix.sh                    # still used by `sure` (or merged into lib/btm.nix later)
 ```
 
-## Key Changes
+## Patterns
 
-### 1. Self-Contained Service Modules
+### 1. Service triplet
 
-Each service becomes a single module with all its config:
+Each service is one directory with three nix files:
 
-**modules/services/postgresql/default.nix**:
-```nix
-{ config, lib, pkgs, tag, ... }:
-let
-  cfg = config.services.postgresql;
-  pg = pkgs.postgresql_17.withPackages (ps: [ps.pgvector]);
-  paths = import ../../lib/paths.nix { inherit config; };
-in {
-  options.services.postgresql.enable = lib.mkEnableOption "PostgreSQL";
+- `spec.nix` — pure facts (paths, ports, package derivations). Takes only `{ home, pkgs }`. No options, no config. Both halves import it.
+- `user.nix` — home-manager module. Owns initdb activation, `home.sessionVariables`, `programs.zsh.shellAliases`, packages.
+- `system.nix` — nix-darwin module. Owns the wrapper derivations, `launchd.user.agents`/`launchd.daemons`, and `btm.services.<name>` registration.
 
-  config = lib.mkIf (cfg.enable && tag == "mac") {
-    # Packages
-    home.packages = [ pg ];
-
-    # Session variables
-    home.sessionVariables = {
-      PGDATA = paths.postgresql.data;
-      PGHOST = paths.postgresql.socket;
-    };
-
-    # Aliases
-    programs.zsh.shellAliases = { ... };
-
-    # Activation
-    home.activation.postgresqlInit = ...;
-
-    # Darwin-specific (conditionally merged)
-    # Wrappers, LaunchAgents, BTM stubs defined here
-  };
-}
-```
-
-**Usage in home.nix**:
-```nix
-imports = [ ./modules/services/postgresql ];
-services.postgresql.enable = true;
-```
-
-### 2. Centralized Paths
-
-**lib/paths.nix**:
-```nix
-{ config }: {
-  btmStubs = "${config.home.homeDirectory}/.local/share/app-stubs";
-  postgresql = {
-    data = "${config.xdg.dataHome}/postgresql/data";
-    logs = "${config.xdg.stateHome}/postgresql";
-    backups = "${config.xdg.dataHome}/postgresql/backups";
-    socket = "/tmp";
-    port = "5432";
-  };
-  polymarket = {
-    workDir = "${config.home.homeDirectory}/Documents/dev/polymarket-trading-bot";
-    logs = "/tmp/polymarket";
-  };
-}
-```
-
-### 3. Env Vars Single Source
-
-Remove hardcoded env vars from darwin.nix. Instead, generate `launchd.user.envVariables` from `home.sessionVariables`:
+Top-level imports (after refactor):
 
 ```nix
+# home.nix
+imports = [ ... ] ++ lib.optionals features.postgresql [
+  ./modules/services/postgresql/user.nix
+];
+
 # darwin.nix
-launchd.user.envVariables = lib.filterAttrs
-  (k: v: !(lib.hasPrefix "$" v))  # Filter out shell-only vars
-  config.home-manager.users.darrenlu.home.sessionVariables;
+imports = [ ... ] ++ lib.optionals features.postgresql [
+  ./modules/services/postgresql/system.nix
+];
 ```
 
-### 4. Slim darwin.nix
+### 2. BTM registry
 
-After extracting services, darwin.nix becomes ~150 lines:
-- Nix settings
-- Homebrew config
-- system.defaults
-- Import service modules
-- BTM postActivation (shared)
+`lib/btm.nix` exposes a declarative `btm.services` attrset, processed once at the top level. Each service registers itself:
 
-### 5. Module Rename
+```nix
+# services/postgresql/system.nix
+{ ... }: {
+  btm.services.postgresql = {
+    app = ./Postgres.app;
+    wrappers = {
+      PostgresServer = postgresServerWrapper;
+      PostgresBackup = postgresBackupWrapper;
+    };
+    agents = [ "org.postgresql.server" "org.postgresql.backup" ];
+  };
+  launchd.user.agents.postgresql-server = { ... };
+  launchd.user.agents.postgresql-backup = { ... };
+}
+```
 
-- `modules/apps/` → `modules/programs/` (matches home-manager naming)
-- `modules/system/` → `modules/shell/` (more accurate)
-- `modules/services/` → actual Nix modules (not just .app bundles)
+`lib/btm.nix` consumers (in `darwin.nix`):
 
-## Implementation Phases
+- expand `btm.services` into the `btmStubCommands` activation block
+- expand into `patchAgentCommands` for `AssociatedBundleIdentifiers`
+- system daemons still need `btm-patch-nix.sh` until we move daemon patching into the lib too
 
-### Phase 1: Extract Services (Low Risk)
-1. Create `lib/paths.nix`
-2. Create `modules/services/postgresql/default.nix` with all PostgreSQL config
-3. Create `modules/services/polymarket/default.nix`
-4. Create `modules/services/nix-daemon/default.nix`
-5. Import from home.nix/darwin.nix, remove duplicated code
-6. Test with `re` and `sure`
+### 3. Single-source XDG env
 
-### Phase 2: Consolidate Shell Config (Low Risk)
-1. Rename `modules/system/` → `modules/shell/`
-2. Rename `modules/apps/` → `modules/programs/`
-3. Update imports in home.nix
+`lib/xdg-paths.nix`:
 
-### Phase 3: Single-Source Env Vars (Medium Risk)
-1. Remove hardcoded env vars from darwin.nix
-2. Generate launchd.user.envVariables from home.sessionVariables
-3. Test GUI apps receive env vars after reboot
+```nix
+{ home }: {
+  XDG_CONFIG_HOME = "${home}/.config";
+  XDG_CACHE_HOME = "${home}/.cache";
+  # ... all path-shaped vars (16 entries)
+  DOTNET_CLI_TELEMETRY_OPTOUT = "1";  # constants live here too
+}
+```
 
-### Phase 4: Platform Modules (Optional)
-1. Create `modules/platform/darwin.nix` for Homebrew/system.defaults
-2. Create `modules/platform/linux-ft.nix` for 42-specific config
-3. Slim darwin.nix further
+- `modules/system/env.nix` imports with `home = "$HOME"` — produces shell-expandable strings for `home.sessionVariables`.
+- `modules/system/launchd-env.nix` imports with `home = "/Users/darrenlu"` — produces literal paths for `launchd.user.envVariables`.
 
-## Files to Modify
+Shell-only vars (`HISTFILE`, `ZSH_SESSION_DIR`, color codes, `DBOX`, `DEV`, `HM`, `HM_TAG`) stay in `env.nix` only.
 
-| File | Action | Size Change |
-|------|--------|-------------|
-| darwin.nix | Extract services → ~150 lines | -400 lines |
-| home.nix | Extract services, update imports | -50 lines |
-| lib/paths.nix | New | +30 lines |
-| modules/services/postgresql/default.nix | New (consolidated) | +150 lines |
-| modules/services/polymarket/default.nix | New (consolidated) | +40 lines |
-| modules/services/nix-daemon/default.nix | New (consolidated) | +60 lines |
-| modules/shell/ | Rename from system/ | 0 |
-| modules/programs/ | Rename from apps/ | 0 |
+### 4. Feature toggles
 
-**Net effect**: Similar total LOC but much better organization. Each service is self-contained.
+`features.nix`:
 
-## Verification
+```nix
+{ tag }: {
+  postgresql = tag == "mac";
+  polymarket = false;          # replaces enableDataCollector
+  nix-daemon = tag == "mac";
+  colima = tag == "mac";
+}
+```
+
+Passed via `extraSpecialArgs` from `flake.nix`. `enableDataCollector` deleted.
+
+### 5. Retire `copy-files.sh`
+
+Each app's writable-config activation moves into its own module:
+
+- VSCode → `modules/apps/vscode.nix` (owns `envsubst < vscode-settings.jsonc > ...`)
+- Tmux → `modules/apps/tmux.nix`
+- Alacritty → `modules/apps/alacritty.nix` (ft-only)
+- tmux-nix bin → `modules/apps/tmux.nix` (ft branch)
+- Claude `settings.json` jq merge → `modules/apps/claude.nix`
+
+`scripts/copy-files.sh` deleted; the activation block in `home.nix` that sourced it deleted.
+
+## Phased Plan
+
+### Phase 0 — Quick wins (this session)
+
+1. `lib/xdg-paths.nix` + `modules/system/launchd-env.nix`; cut the duplicated block from `darwin.nix`.
+2. `modules/services/postgresql/spec.nix`; both `home.nix` and `darwin.nix` import it. No structural move yet.
+
+Goal: prove the spec.nix pattern and the xdg-paths pattern with the smallest possible diff.
+
+### Phase 1 — Service triplets
+
+3. `services/postgresql/user.nix` + `system.nix`. `home.nix` and `darwin.nix` import them. Delete inlined PG sections.
+4. Same for `services/polymarket/{user,system}.nix` (currently disabled — still validate it builds).
+5. Same for `services/nix-daemon/system.nix` (system-only).
+
+### Phase 2 — BTM registry
+
+6. `lib/btm.nix` exports declarative `btm.services` registry; `darwin.nix` consumes once.
+7. Per-service `system.nix` registers via `btm.services.<name> = { ... }`.
+
+### Phase 3 — Retire copy-files.sh + new app modules
+
+8. `modules/apps/vscode.nix`, `tmux.nix`, `alacritty.nix`, `dprint.nix`, `colima.nix`, `macos-extras.nix`.
+9. Delete `scripts/copy-files.sh` and the `writableConfigs` activation in `home.nix`.
+
+### Phase 4 — Feature toggles + slim darwin.nix
+
+10. `features.nix` + plumb through `extraSpecialArgs`. Replace `enableDataCollector`.
+11. Verify `darwin.nix` is down to ~150 lines (nix settings, homebrew, system.defaults, imports, BTM postActivation glue).
+
+## Verification per phase
 
 After each phase:
-1. `dprint fmt` — format
-2. `re` — fast home-manager rebuild
-3. Check shell aliases work
-4. `sure` — full darwin-rebuild
-5. `launchctl list | grep postgresql` — services running
-6. Reboot, verify BTM icons appear correctly
-7. Open Claude Desktop, verify it reads env vars
 
-## Decisions
+1. `dprint fmt`
+2. `git add <files> && git commit -m "..."` (flakes only see committed)
+3. `re` — fast HM rebuild. Verify shell still loads, aliases work.
+4. `sure` — full rebuild. Verify `launchctl list | grep postgresql` shows running agents.
+5. Reboot for BTM icon changes (Phase 2 only).
+6. Open Claude Desktop — verify GUI env vars are present (Phase 0).
 
-1. **Keep both standalone and embedded HM** — preserves fast `re` workflow
-2. **Simple enable flags** — `services.postgresql.enable = true` with hardcoded defaults
+## Decisions (locked)
+
+- Service split: **triplet** (`user.nix` + `system.nix` + `spec.nix` per service).
+- BTM: **full registry** in `lib/btm.nix`.
+- `copy-files.sh`: **retire entirely**.
+- Start with: **quick wins** (Phase 0).
