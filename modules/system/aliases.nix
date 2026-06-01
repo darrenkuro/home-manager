@@ -15,6 +15,9 @@
       devg = "cd $DEV"; # dev go
       hmg = "cd $HM"; # hm go
 
+      # DSA practice drill (open template in editor, run tests, diff vs canonical)
+      practice = "$DEV/dsa-collection/practice/practice";
+
       ncg = "nix-collect-garbage -d";
       clean = builtins.concatStringsSep " && " [
         # Caches (safe, all regenerate)
