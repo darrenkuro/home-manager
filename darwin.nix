@@ -271,7 +271,7 @@ in
         onActivation = {
             cleanup = "zap"; # Remove unlisted packages
             autoUpdate = false; # Don't `brew update` on rebuild (use `brew update` explicitly)
-            upgrade = true; # Upgrade existing packages to latest version
+            upgrade = false; # Don't auto-upgrade — apps self-update or `brew upgrade` manually
         };
         brews = [
             { name = "tmux"; args = [ "HEAD" ]; } # HEAD fixes Claude Code rendering
@@ -279,18 +279,18 @@ in
         casks = [
             "alfred"
             "anki"
-            { name = "brave-browser"; greedy = true; }
-            { name = "claude"; greedy = true; }
-            { name = "claude-code"; greedy = true; }
+            "brave-browser"
+            "claude"
+            "claude-code"
             "dropbox"
             "font-carlito"
-            { name = "ghostty"; greedy = true; }
-            { name = "notion"; greedy = true; }
-            { name = "obsidian"; greedy = true; }
+            "ghostty"
+            "notion"
+            "obsidian"
             "pearcleaner"
             "sf-symbols"
             "steam"
-            { name = "visual-studio-code"; greedy = true; }
+            "visual-studio-code"
         ];
         masApps = {
             "CleanMyMac" = 1339170533;
