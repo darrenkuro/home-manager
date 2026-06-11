@@ -1,65 +1,28 @@
 # nix-darwin system-level macOS config.
 #
-# Handles (requires sudo via darwin-rebuild):
+# Handles (requires sudo via darwin-rebuild, alias `sure`):
 #   - Homebrew packages (brews, casks, masApps)
 #   - macOS system defaults (Dock, Finder, Trackpad, etc.)
-#   - LaunchDaemons (nix-daemon, darwin-store) and LaunchAgents (postgres, polymarket)
-#   - BTM app stubs and wrapper binaries
 #   - GUI environment variables (launchd.user.envVariables)
+#   - Service imports — launchd daemons/agents + BTM stubs live in
+#     modules/services/<name>/darwin.nix (see imports list below)
 #
-# home-manager handles (no sudo via home-manager switch):
+# home-manager handles (no sudo, alias `re`):
 #   - Nix packages in ~/
 #   - Shell config, aliases, env vars
 #   - XDG dotfiles and app configs
-#   - Directory creation (activation scripts)
+#   - Services' user halves (modules/services/<name>/home.nix)
 #
-{ lib, pkgs, ... }: let
-    # Feature flag: gate the polymarket data-monitor LaunchAgent without
-    # removing the wrapper, BTM stub, or agent-mapping code. Flip to true
-    # and run `sure` to re-enable.
-    enableDataCollector = false;
-
+{ ... }: let
     homeDir = "/Users/darrenlu";
-
-    # ═══════════════════════════════════════════════════════════════════════════
-    # BTM (Background Task Management) — app stubs for icon grouping
-    # ═══════════════════════════════════════════════════════════════════════════
-
-    btm = import ./lib/launchd-btm.nix { inherit lib pkgs; };
-
-    # ── Polymarket Wrapper ──
-    polymarketWorkDir = "${homeDir}/Documents/dev/polymarket-trading-bot";
-    polymarketWrapper = btm.mkWrapper {
-        name = "PolymarketMonitor";
-        runtimeInputs = [ pkgs.nodejs_22 pkgs.pnpm ];
-        text = ''
-      cd "${polymarketWorkDir}"
-      if [ -f .env ]; then
-        set -a
-        # shellcheck disable=SC1091
-        source .env
-        set +a
-      fi
-      exec pnpm tsx src/scripts/data-monitor.ts
-    '';
-    };
-
-    # ── BTM stub install + agent patching — logic lives in lib/launchd-btm.nix ──
-    btmInstallCommands = lib.concatStringsSep "\n"
-    (
-        lib.optionals enableDataCollector [
-            (
-                btm.mkStubInstall {
-                    name = "Polymarket";
-                    app = ./modules/services/polymarket/Polymarket.app;
-                    wrappers = [ { drv = polymarketWrapper; bin = "PolymarketMonitor"; } ];
-                    agents = [ "com.polymarket.data-monitor" ];
-                } )
-        ] );
 in
 {
-    # ── Services (system half; each also has a home.nix imported from home.nix) ──
-    imports = [ ./modules/services/postgresql/darwin.nix ./modules/services/nix-daemon/darwin.nix ];
+    # ── Services — comment out to disable ──
+    imports = [
+        ./modules/services/postgresql/darwin.nix
+        ./modules/services/nix-daemon/darwin.nix
+        # ./modules/services/polymarket/darwin.nix
+    ];
 
     # Nix settings
     nix.settings.experimental-features = [ "nix-command" "flakes" ];
@@ -180,11 +143,6 @@ in
     /usr/bin/defaults write com.apple.AppleMultitouchTrackpad ActuationStrength -int 0
     /usr/bin/defaults write com.apple.AppleMultitouchTrackpad FirstClickThreshold -int 0
     /usr/bin/defaults write com.apple.AppleMultitouchTrackpad SecondClickThreshold -int 0
-
-    # ── BTM: install app stubs + patch agent plists ──
-    # System daemons (Nix) are patched by scripts/btm-patch-nix.sh (run via `sure`)
-    ${btmInstallCommands}
-    echo "BTM: done"
   '';
 
     # User (needed for home-manager integration to infer home.homeDirectory)
@@ -198,20 +156,6 @@ in
     # NODE_REPL_HISTORY, PYTHON_HISTORY, HOMEBREW_NO_ENV_HINTS) stay in
     # modules/system/env.nix since GUI apps don't need them.
     launchd.user.envVariables = import ./lib/xdg-paths.nix { home = homeDir; };
-
-    launchd.user.agents.polymarket-monitor = lib.mkIf enableDataCollector {
-        serviceConfig = {
-            Label = "com.polymarket.data-monitor";
-            ProgramArguments = [ "${btm.stubDir}/Polymarket.app/Contents/MacOS/PolymarketMonitor" ];
-            WorkingDirectory = "/Users/darrenlu/Documents/dev/polymarket-trading-bot";
-            RunAtLoad = true;
-            KeepAlive = true;
-            ThrottleInterval = 10;
-            StandardOutPath = "/tmp/polymarket/monitor.log";
-            StandardErrorPath = "/tmp/polymarket/monitor.err";
-            EnvironmentVariables = { HOME = "/Users/darrenlu"; };
-        };
-    };
 
     # nix-darwin state version
     system.stateVersion = 5;
