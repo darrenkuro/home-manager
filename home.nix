@@ -72,7 +72,7 @@ in
         poppler-utils # PDF tools
         yt-dlp # Youtube download
 
-        ( postgresql_17.withPackages ( ps: [ ps.pgvector ] ) )
+        pg.pkg # postgresql_17 + pgvector — defined once in services/postgresql/spec.nix
 
         pnpm
         bun
@@ -198,7 +198,5 @@ in
         ./modules/apps/helix.nix
         ./modules/apps/claude.nix
         ./modules/apps/ssh.nix
-    ] ++
-    lib.optionals ( tag == "mac" ) [ ./modules/apps/netusage.nix ] ++
-    lib.optionals ( tag == "ft" ) [ ./modules/system/linux-ft.nix ];
+    ] ++ lib.optionals ( tag == "mac" ) [ ./modules/apps/netusage.nix ];
 }
