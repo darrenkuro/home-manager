@@ -4,7 +4,9 @@ Guidelines for working with nix-darwin configuration in this repo.
 
 ## Key Files
 
-- `darwin.nix` — nix-darwin system config (launchd daemons, system.defaults, homebrew)
+- `darwin.nix` — thin root: homebrew, system.defaults, GUI env, service imports (comment out to disable)
+- `modules/services/<name>/darwin.nix` — per-service launchd daemons/agents + BTM stubs
+- `lib/launchd-btm.nix` — shared BTM helpers (`mkWrapper`, `mkStubInstall`)
 - `flake.nix` — `darwinConfigurations.mac` entry point
 - `home.nix` — home-manager config (embedded in darwin via `home-manager.darwinModules`)
 
@@ -46,6 +48,7 @@ launchd.user.agents.my-service = {
 ### BTM Icon Grouping
 
 For agents to show grouped under an app icon in Login Items:
+
 1. Executable must be inside `.app` bundle
 2. Plist needs `AssociatedBundleIdentifiers` key (nix-darwin doesn't add this automatically)
 
@@ -57,7 +60,7 @@ homebrew = {
   onActivation = {
     cleanup = "zap";      # Remove unlisted packages
     autoUpdate = false;   # Keep false for idempotent rebuilds
-    upgrade = true;
+    upgrade = false;      # Apps self-update or `brew upgrade` manually (deliberate, see dc0a34a)
   };
   brews = [
     "tmux"
@@ -72,10 +75,12 @@ homebrew = {
 ```
 
 **Guideline:** Prefer nixpkgs when available. Use Homebrew mainly for:
+
 - GUI apps (casks) not in nixpkgs
 - Formulae needing specific versions (HEAD, etc.)
 
 **PATH Order:** Nix comes before Homebrew:
+
 ```
 ~/.nix-profile/bin           # 1. Nix user packages
 /nix/var/nix/profiles/...    # 2. Nix system packages
@@ -83,6 +88,7 @@ homebrew = {
 ```
 
 To use a Homebrew version instead of Nix, use an alias:
+
 ```nix
 programs.zsh.shellAliases.tmux = "/opt/homebrew/bin/tmux";
 ```

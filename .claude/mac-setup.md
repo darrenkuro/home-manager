@@ -27,12 +27,12 @@ After this, `re` (fast) and `sure` (full) aliases are available.
 
 ### Homebrew Casks (darwin.nix)
 
-- alfred, anki, brave-browser, claude, claude-code, dropbox, ghostty, notion, obsidian, pearcleaner, sf-symbols, steam, visual-studio-code
-- Greedy (auto-update sync): brave-browser, claude, claude-code, ghostty, notion, obsidian, visual-studio-code
+- alfred, anki, brave-browser, claude, claude-code, dropbox, font-carlito, ghostty, notion, obsidian, pearcleaner, sf-symbols, steam, visual-studio-code
+- No greedy flags, no auto-upgrade on rebuild — apps self-update or `brew upgrade` manually (dc0a34a)
 
 ### Homebrew Brews
 
-- tmux (HEAD)
+- tmux (HEAD — fixes Claude Code rendering; drop once 3.7 releases)
 
 ### App Store (masApps)
 
@@ -41,10 +41,11 @@ After this, `re` (fast) and `sure` (full) aliases are available.
 ### Nix Packages (home.nix)
 
 - Core: tokei, eza, fd, jq, fzf, rename, bat, gettext, wakatime-cli
-- Dev: clang-tools, alejandra, nil, shfmt, shellcheck, cargo, rust-analyzer, rustfmt, clippy
+- Dev: clang-tools, dprint, nil, shfmt, shellcheck, cargo/rustc + rust tools, asm-lsp, asmfmt, openssl, gnused, cmake
 - Node: nodejs_22, typescript, typescript-language-server, pnpm, bun
-- Python: python313, pip, virtualenv, black, flake8
-- Mac: trash, ffmpeg, poppler-utils, yt-dlp, colima, docker-\*
+- Python: python313, pip, virtualenv, flake8
+- Mac: trash, ffmpeg, poppler-utils, yt-dlp, pandoc, colima, docker-\*
+- Services: postgresql_17 + pgvector (via `modules/services/postgresql/home.nix`)
 
 ### System Defaults (darwin.nix)
 
@@ -165,7 +166,7 @@ Install NordVPN from App Store, sign in
 # Verify nix-darwin
 sure
 
-# Check services
+# Check services (polymarket only appears if its import is uncommented)
 launchctl list | grep -E "postgresql|polymarket|nix"
 
 # Verify env vars in GUI apps
@@ -173,7 +174,7 @@ launchctl list | grep -E "postgresql|polymarket|nix"
 
 # After reboot, check BTM
 # System Settings > General > Login Items > Background Task Management
-# Should show Postgres, Polymarket, Nix with correct icons
+# Should show Postgres and Nix (+ Polymarket if enabled) with correct icons
 ```
 
 ---
