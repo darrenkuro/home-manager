@@ -15,19 +15,7 @@
             practice = "$DEV/dsa-collection/practice/practice";
 
             ncg = "nix-collect-garbage -d";
-            clean = builtins.concatStringsSep " && " [
-                # Caches (safe, all regenerate)
-                "rm -rf $HOME/.cache $HOME/.npm $HOME/.matplotlib"
-                # Shell artifacts
-                "rm -rf $HOME/.zcompdump $HOME/.lesshst"
-                # .NET (not in use, regenerates on dotnet run)
-                "rm -rf $HOME/.aspnet $HOME/.dotnet $HOME/.nuget $HOME/.templateengine"
-                # Docker (redundant, DOCKER_CONFIG already points to $XDG_CONFIG_HOME/docker)
-                "rm -rf $HOME/.docker"
-                # macOS junk
-                "rm -f $HOME/.DS_Store"
-                ''echo "clean: done"''
-            ];
+            # `clean` moved to functions/clean.sh
 
             hmpsh = "git -C $HM add . && git -C $HM commit -m 'Auto-push' && git -C $HM push";
             hmpll = "git -C $HM pull";
@@ -44,8 +32,7 @@
                 dbox = "cd $DBOX";
                 hide = "chflags hidden";
                 unhide = "chflags nohidden";
-                sync-local = "swift -e 'import Foundation; let p = CommandLine.arguments[1]; let u = URL(fileURLWithPath: p); var d: ObjCBool = false; FileManager.default.fileExists(atPath: p, isDirectory: &d); if d.boolValue { if let e = FileManager.default.enumerator(at: u, includingPropertiesForKeys: nil) { for case let f as URL in e { try FileManager.default.startDownloadingUbiquitousItem(at: f) } } } else { try FileManager.default.startDownloadingUbiquitousItem(at: u) }'";
-                sync-cloud = "swift -e 'import Foundation; try FileManager.default.evictUbiquitousItem(at: URL(fileURLWithPath: CommandLine.arguments[1]))'";
+                # `sync-local`/`sync-cloud` (iCloud) moved to functions/icloud-sync.sh
                 rm = "echo \"☠️$YELLOW DANGEROUS CMD: using trash instread!$RESET\" && trash";
                 ytd = "yt-dlp -t mp4 --cookies-from-browser brave";
                 # `netusage` is installed as a real binary via modules/apps/netusage.nix
