@@ -48,7 +48,7 @@
         # ---- ft-only aliases
         (
             lib.mkIf ( tag == "ft" ) {
-                p = "hx $HM/home.nix";
+                p = "hx $HM/modules/system/linux-ft.nix"; # ft platform file (placeholder)
                 hm = "code --no-sandbox $HM";
                 re = "home-manager switch --flake $HM#ft && exec zsh";
 
