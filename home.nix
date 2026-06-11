@@ -160,5 +160,5 @@
 
         # ── Services (user half; each also has a darwin.nix imported from darwin.nix) ──
         ./modules/services/postgresql/home.nix
-    ];
+    ] ++ lib.optionals ( tag == "ft" ) [ ./modules/system/linux-ft.nix ];
 }
