@@ -1,11 +1,4 @@
-{ pkgs, config, tag, lib, ... }: let
-    # ── PostgreSQL (mac only) ── shared spec consumed by both HM and darwin
-    pg = import ./modules/services/postgresql/spec.nix {
-        inherit pkgs;
-        home = config.home.homeDirectory;
-    };
-in
-{
+{ pkgs, config, tag, lib, ... }: {
     # ----------- Base Settings
     home.username = if tag == "mac"
     then
@@ -72,8 +65,6 @@ in
         poppler-utils # PDF tools
         yt-dlp # Youtube download
 
-        pg.pkg # postgresql_17 + pgvector — defined once in services/postgresql/spec.nix
-
         pnpm
         bun
 
@@ -112,40 +103,13 @@ in
         }
 
         # Mac-only services
-        (
-            lib.mkIf ( tag == "mac" ) {
-                # Initialize PostgreSQL data directory and check version compatibility
-                postgresql = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-        run mkdir -p "${pg.logDir}" "${pg.backupDir}"
-
-        if [ -d "${pg.dataDir}" ]; then
-          if [ -f "${pg.dataDir}/PG_VERSION" ]; then
-            CURRENT=$(cat "${pg.dataDir}/PG_VERSION")
-            if [ "$CURRENT" != "${pg.major}" ]; then
-              echo "WARNING: PostgreSQL version mismatch: data=$CURRENT, package=${pg.major}"
-              echo "  Manual pg_upgrade required. Data dir: ${pg.dataDir}"
-            fi
-          fi
-        else
-          echo "Initializing PostgreSQL ${pg.major} database..."
-          ${pg.pkg}/bin/initdb \
-            -D "${pg.dataDir}" \
-            --locale=C \
-            --encoding=UTF8 \
-            --auth=trust \
-            --username="$(whoami)"
-        fi
-      '';
-
+        ( lib.mkIf ( tag == "mac" ) {
                 # Create temp directories for services
                 serviceTmpDirs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
         run mkdir -p /tmp/polymarket
       '';
             } )
     ];
-
-    # ── Session Variables (mac: PostgreSQL) ──
-    home.sessionVariables = lib.mkIf ( tag == "mac" ) { PGDATA = pg.dataDir; PGHOST = pg.socket; };
 
     programs.home-manager.enable = true;
     programs.bash = {
@@ -175,13 +139,6 @@ in
             ] ++
             lib.optionals ( tag == "mac" ) [ ( builtins.readFile ./scripts/ssh-keychain.sh ) ] ++
             lib.optionals ( tag == "ft" ) [ ( builtins.readFile ./scripts/repeat-rate.sh ) ] );
-
-        # Mac: PostgreSQL aliases
-        shellAliases = lib.mkIf ( tag == "mac" ) {
-            pglog = "tail -f ${pg.logDir}/postgresql-$(date +%a).log";
-            pgbackuplog = "tail -f ${pg.logDir}/backup.log";
-            pgstatus = "pg_isready -h ${pg.socket} -p ${pg.port}";
-        };
     };
     programs.direnv = { enable = true; nix-direnv.enable = true; };
 
@@ -198,5 +155,10 @@ in
         ./modules/apps/helix.nix
         ./modules/apps/claude.nix
         ./modules/apps/ssh.nix
-    ] ++ lib.optionals ( tag == "mac" ) [ ./modules/apps/netusage.nix ];
+    ] ++ lib.optionals ( tag == "mac" ) [
+        ./modules/apps/netusage.nix
+
+        # ── Services (user half; each also has a darwin.nix imported from darwin.nix) ──
+        ./modules/services/postgresql/home.nix
+    ];
 }
