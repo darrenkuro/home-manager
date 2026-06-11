@@ -20,8 +20,6 @@
     enableDataCollector = false;
 
     homeDir = "/Users/darrenlu";
-    agentDir = "${homeDir}/Library/LaunchAgents";
-    btmStubDir = "${homeDir}/.local/share/app-stubs";
 
     # ═══════════════════════════════════════════════════════════════════════════
     # BTM (Background Task Management) — app stubs for icon grouping
@@ -172,94 +170,39 @@
     '';
     };
 
-    # ── BTM Stub Configuration ──
-    btmStubs = {
-        Postgres = {
-            src = ./modules/services/postgresql/Postgres.app;
-            wrappers = [
-                { drv = postgresServerWrapper; bin = "PostgresServer"; }
-                { drv = postgresBackupWrapper; bin = "PostgresBackup"; }
-            ];
-        };
-        Nix = {
-            src = ./modules/services/nix-daemon/Nix.app;
-            wrappers = [
-                { drv = nixDaemonWrapper; bin = "NixDaemonStart"; }
-                { drv = nixStoreMountWrapper; bin = "NixStoreMount"; }
-            ];
-        };
-    } //
-    lib.optionalAttrs enableDataCollector {
-        Polymarket = {
-            src = ./modules/services/polymarket/Polymarket.app;
-            wrappers = [ { drv = polymarketWrapper; bin = "PolymarketMonitor"; } ];
-        };
-    };
-
-    # Generate BTM stub installation commands
-    # Note: runs as root via sudo, so we use SUDO_USER to codesign with user's keychain
-    btmStubCommands = lib.concatStringsSep "\n\n" ( lib.mapAttrsToList ( name: stubCfg: let
-                manifestLines = [ "src=${stubCfg.src}" ] ++
-                map ( w: "wrapper=${w.bin}:${w.drv}" ) stubCfg.wrappers;
-                expectedManifest = lib.concatStringsSep "\\n" manifestLines;
-            in
-            ''
-      _stub_dst="${btmStubDir}/${name}.app"
-      _manifest="${btmStubDir}/.stub-manifest-${name}"
-      _expected="$(printf '${expectedManifest}\n')"
-      _real_user="''${SUDO_USER:-$(whoami)}"
-
-      if [ -f "$_manifest" ] && [ "$(cat "$_manifest")" = "$_expected" ] && [ -d "$_stub_dst" ]; then
-        echo "  stub unchanged: ${name}.app"
-      else
-        echo "  installing stub: ${name}.app"
-        [ -d "$_stub_dst" ] && chmod -R u+w "$_stub_dst"
-        rm -rf "$_stub_dst"
-        cp -R "${stubCfg.src}" "$_stub_dst"
-        chmod -R u+w "$_stub_dst"
-        mkdir -p "$_stub_dst/Contents/MacOS"
-
-        ${lib.concatMapStringsSep "\n" ( w: ''
-          cp "${w.drv}/bin/${w.bin}" "$_stub_dst/Contents/MacOS/${w.bin}"
-          chmod u+wx "$_stub_dst/Contents/MacOS/${w.bin}"
-        '' ) stubCfg.wrappers}
-
-        printf '#!/bin/sh\nexit 0\n' > "$_stub_dst/Contents/MacOS/Stub"
-        chmod u+x "$_stub_dst/Contents/MacOS/Stub"
-
-        # Fix ownership (codesigning done by btm-patch-nix.sh post-activation)
-        chown -R "$_real_user:staff" "$_stub_dst"
-        printf '%s\n' "$_expected" > "$_manifest"
-        chown "$_real_user:staff" "$_manifest"
-      fi
-    '' ) btmStubs );
-
-    # Map labels to app stubs for BTM grouping
-    # Format: { "label" = "AppName"; } where stub is at ${btmStubDir}/AppName.app
-    btmAgentMapping = {
-        "org.postgresql.server" = "Postgres";
-        "org.postgresql.backup" = "Postgres";
-    } // lib.optionalAttrs enableDataCollector { "com.polymarket.data-monitor" = "Polymarket"; };
-
-    # Generate patching commands for user agents
-    patchAgentCommands = lib.concatStringsSep "\n" ( lib.mapAttrsToList ( label: appName: ''
-      _plist="${agentDir}/${label}.plist"
-      _stub="${btmStubDir}/${appName}.app"
-      if [[ -f "$_plist" ]] && [[ -d "$_stub" ]]; then
-        _bid=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$_stub/Contents/Info.plist" 2>/dev/null)
-        if [[ -n "$_bid" ]]; then
-          _existing=$(/usr/libexec/PlistBuddy -c "Print :AssociatedBundleIdentifiers:0" "$_plist" 2>/dev/null || true)
-          if [[ "$_existing" != "$_bid" ]]; then
-            /usr/libexec/PlistBuddy \
-              -c "Delete :AssociatedBundleIdentifiers" "$_plist" 2>/dev/null || true
-            /usr/libexec/PlistBuddy \
-              -c "Add :AssociatedBundleIdentifiers array" \
-              -c "Add :AssociatedBundleIdentifiers:0 string $_bid" \
-              "$_plist" 2>/dev/null && echo "  BTM: patched ${label} -> ${appName}"
-          fi
-        fi
-      fi
-    '' ) btmAgentMapping );
+    # ── BTM stub install + agent patching — logic lives in lib/launchd-btm.nix ──
+    btmInstallCommands = lib.concatStringsSep "\n"
+    (
+        [
+            (
+                btm.mkStubInstall {
+                    name = "Postgres";
+                    app = ./modules/services/postgresql/Postgres.app;
+                    wrappers = [
+                        { drv = postgresServerWrapper; bin = "PostgresServer"; }
+                        { drv = postgresBackupWrapper; bin = "PostgresBackup"; }
+                    ];
+                    agents = [ "org.postgresql.server" "org.postgresql.backup" ];
+                } )
+            (
+                btm.mkStubInstall {
+                    name = "Nix";
+                    app = ./modules/services/nix-daemon/Nix.app;
+                    wrappers = [
+                        { drv = nixDaemonWrapper; bin = "NixDaemonStart"; }
+                        { drv = nixStoreMountWrapper; bin = "NixStoreMount"; }
+                    ];
+                } )
+        ] ++
+        lib.optionals enableDataCollector [
+            (
+                btm.mkStubInstall {
+                    name = "Polymarket";
+                    app = ./modules/services/polymarket/Polymarket.app;
+                    wrappers = [ { drv = polymarketWrapper; bin = "PolymarketMonitor"; } ];
+                    agents = [ "com.polymarket.data-monitor" ];
+                } )
+        ] );
 in
 {
     # Nix settings
@@ -382,17 +325,9 @@ in
     /usr/bin/defaults write com.apple.AppleMultitouchTrackpad FirstClickThreshold -int 0
     /usr/bin/defaults write com.apple.AppleMultitouchTrackpad SecondClickThreshold -int 0
 
-    # ── BTM: Install app stubs with embedded wrappers ──
-    echo "BTM: syncing stubs..."
-    _btm_user="''${SUDO_USER:-$(whoami)}"
-    mkdir -p "${btmStubDir}"
-    chown "$_btm_user:staff" "${btmStubDir}"
-    ${btmStubCommands}
-
-    # ── BTM: Patch user agents with AssociatedBundleIdentifiers ──
-    # System daemons (Nix) are patched by scripts/btm-patch-nix.sh (run via sure alias)
-    echo "BTM: patching LaunchAgents..."
-    ${patchAgentCommands}
+    # ── BTM: install app stubs + patch agent plists ──
+    # System daemons (Nix) are patched by scripts/btm-patch-nix.sh (run via `sure`)
+    ${btmInstallCommands}
     echo "BTM: done"
   '';
 
@@ -414,7 +349,7 @@ in
         serviceConfig = {
             Label = "org.nixos.nix-daemon";
             ProgramArguments = lib.mkForce [
-                "${btmStubDir}/Nix.app/Contents/MacOS/NixDaemonStart"
+                "${btm.stubDir}/Nix.app/Contents/MacOS/NixDaemonStart"
             ];
             KeepAlive = true;
             RunAtLoad = true;
@@ -432,7 +367,7 @@ in
     launchd.daemons.darwin-store = {
         serviceConfig = {
             Label = "org.nixos.darwin-store";
-            ProgramArguments = [ "${btmStubDir}/Nix.app/Contents/MacOS/NixStoreMount" ];
+            ProgramArguments = [ "${btm.stubDir}/Nix.app/Contents/MacOS/NixStoreMount" ];
             RunAtLoad = true;
         };
     };
@@ -446,7 +381,7 @@ in
     launchd.user.agents.postgresql-server = {
         serviceConfig = {
             Label = "org.postgresql.server";
-            ProgramArguments = [ "${btmStubDir}/Postgres.app/Contents/MacOS/PostgresServer" ];
+            ProgramArguments = [ "${btm.stubDir}/Postgres.app/Contents/MacOS/PostgresServer" ];
             RunAtLoad = true;
             KeepAlive = true;
             ThrottleInterval = 10;
@@ -459,7 +394,7 @@ in
     launchd.user.agents.postgresql-backup = {
         serviceConfig = {
             Label = "org.postgresql.backup";
-            ProgramArguments = [ "${btmStubDir}/Postgres.app/Contents/MacOS/PostgresBackup" ];
+            ProgramArguments = [ "${btm.stubDir}/Postgres.app/Contents/MacOS/PostgresBackup" ];
             StartCalendarInterval = [ { Hour = 3; Minute = 0; } ];
             StandardOutPath = "${pg.logDir}/backup-stdout.log";
             StandardErrorPath = "${pg.logDir}/backup-stderr.log";
@@ -470,7 +405,7 @@ in
     launchd.user.agents.polymarket-monitor = lib.mkIf enableDataCollector {
         serviceConfig = {
             Label = "com.polymarket.data-monitor";
-            ProgramArguments = [ "${btmStubDir}/Polymarket.app/Contents/MacOS/PolymarketMonitor" ];
+            ProgramArguments = [ "${btm.stubDir}/Polymarket.app/Contents/MacOS/PolymarketMonitor" ];
             WorkingDirectory = "/Users/darrenlu/Documents/dev/polymarket-trading-bot";
             RunAtLoad = true;
             KeepAlive = true;
