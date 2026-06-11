@@ -1,6 +1,7 @@
 # Simplify & Reorganize home-manager
 
-> Status: executed 2026-06-11 — PRs #6–#13. All phases landed; see git log for the per-phase commits.
+> Status: executed 2026-06-11 — PRs #6–#15. All phases landed; see git log for the per-phase commits.
+> Post-plan amendments: #14 delivered commits stranded by stacked-PR bases (#12/#13 had merged into a feature branch); #15 restored `modules/system/linux-ft.nix` as an intentional placeholder, reversing part of Phase 1.
 
 ## Context
 
@@ -39,7 +40,7 @@ modules/
     postgresql/            # spec.nix · darwin.nix · home.nix · backup.sh · pg_hba.conf · Postgres.app/
     nix-daemon/            # darwin.nix · Nix.app/
     polymarket/            # darwin.nix (import commented out) · Polymarket.app/
-functions/                 # + clean.sh, icloud-sync.sh; − icon.sh
+functions/                 # + clean.sh, icloud-sync.sh (icon.sh kept, toggled off)
 scripts/                   # copy-files.sh loses claude block; btm-patch-nix.sh unchanged
 ```
 
