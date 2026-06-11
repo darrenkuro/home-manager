@@ -59,7 +59,7 @@ in
         rustc
         nodejs_22 # LTS; nodejs_latest (v25) fails to build, nodejs_24 not cached for aarch64-darwin
         typescript
-        nodePackages.typescript-language-server
+        typescript-language-server
 
         python313Packages.flake8
 
