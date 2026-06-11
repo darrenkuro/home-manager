@@ -68,3 +68,27 @@ pkgs.writeTextFile {
 - Simplified btm.nix (removed agent logic, ~120 lines deleted)
 - Added system.defaults from audit (NSGlobalDomain, dock, finder, trackpad, menuExtraClock)
 
+## dprint Nix Plugin Instability
+
+`dprint fmt` errors on `flake.nix` and `lib/launchd-btm.nix` with
+"Formatting succeeded initially, but failed when ensuring a stable format"
+— a dprint-plugin-nix bug triggered by certain constructs (it leaves the
+file untouched, so it's safe but noisy). Hand-format those two files in
+repo style; everything else formats normally. Also: from the repo root,
+plain `dprint fmt` needs `--config-discovery=global` (config lives at
+~/.config/dprint/dprint.json, not in-repo).
+
+## zsh Alias-in-Alias Expansion (why functions use /bin/rm)
+
+zsh re-expands aliases in an alias's expansion text, AND expands aliases
+inside function bodies at definition (source) time. With `rm` aliased to
+trash on mac, any `rm` in an alias string or sourced function silently
+becomes `trash`. That's why `functions/*.sh` call `/bin/rm` explicitly —
+follow that convention in new functions.
+
+## git checkout -- <file> Reverts ALL Uncommitted Edits
+
+When testing a temporary tweak (e.g. uncommenting a toggle with sed),
+don't restore with `git checkout -- <file>` unless the file's real
+changes are already committed/staged — it reverts to HEAD and eats them.
+Stage first, or undo the tweak with a second sed.
