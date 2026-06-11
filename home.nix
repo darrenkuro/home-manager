@@ -101,7 +101,7 @@ in
           "$HOME/.cache/zsh"
       '';
 
-            # Copy writable configs (VSCode, taskrc, tmux, Claude settings.json hooks)
+            # Copy writable configs (VSCode, tmux; alacritty + tmux-nix on ft)
             writableConfigs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
         HM="${config.home.homeDirectory}/.config/home-manager"
         XDG_CONFIG_HOME="${config.xdg.configHome}"
