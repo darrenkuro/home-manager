@@ -32,19 +32,3 @@ if [[ ${HM_TAG-} == "FT" ]]; then
   cat "$HM/configs/tmux-nix.sh" > "/home/dlu/bin/tmux-nix"
   chmod +x "/home/dlu/bin/tmux-nix"
 fi
-
-# Claude Code settings.json — owned by Claude, hm only injects hooks key
-CLAUDE_SETTINGS="$XDG_CONFIG_HOME/claude/settings.json"
-# Remove old hm symlink if present
-if [[ -L "$CLAUDE_SETTINGS" ]]; then
-  rm "$CLAUDE_SETTINGS"
-fi
-# Seed with empty object if missing
-if [[ ! -f "$CLAUDE_SETTINGS" ]]; then
-  echo '{}' > "$CLAUDE_SETTINGS"
-fi
-# Idempotently merge hooks config (preserves all other keys)
-jq '. * {"hooks":{"PreToolUse":[{"matcher":"Read|Edit|Write|MultiEdit|Bash","hooks":[{"type":"command","command":"~/.config/claude/hooks/protect-env.sh"}]}]}}' \
-  "$CLAUDE_SETTINGS" > "$CLAUDE_SETTINGS.tmp" \
-  && mv "$CLAUDE_SETTINGS.tmp" "$CLAUDE_SETTINGS"
-chmod u+w "$CLAUDE_SETTINGS"

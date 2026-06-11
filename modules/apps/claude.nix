@@ -1,82 +1,86 @@
 # Claude Code configuration — skills, hooks, CLAUDE.md
 #
 # Cross-platform: imported on both macOS and Linux.
-{
-  config,
-  lib,
-  pkgs,
-  claude-plugins-official,
-  obsidian-skills,
-  claude-config,
-  ...
-}: let
-  claudeConfigDir = ../../configs/claude;
+{ config, lib, pkgs, claude-plugins-official, obsidian-skills, claude-config, ... }: let
+    claudeConfigDir = ../../configs/claude;
 
-  # Plugins extracted as hm-managed skills (disable these in Claude Code)
-  hmManagedPlugins = [
-    "frontend-design"
-    "claude-code-setup"
-    "claude-md-management"
-    "commit-commands"
-    "skill-creator"
-  ];
+    # Plugins extracted as hm-managed skills (disable these in Claude Code)
+    hmManagedPlugins = [
+        "frontend-design"
+        "claude-code-setup"
+        "claude-md-management"
+        "commit-commands"
+        "skill-creator"
+    ];
 
-  # Plugins with skills/ dirs to copy directly
-  skillPlugins = ["frontend-design" "claude-code-setup" "claude-md-management" "skill-creator"];
+    # Plugins with skills/ dirs to copy directly
+    skillPlugins = [ "frontend-design" "claude-code-setup" "claude-md-management" "skill-creator" ];
 
-  # Plugins with commands/ dirs to convert to skills format
-  commandPlugins = ["claude-md-management" "commit-commands"];
+    # Plugins with commands/ dirs to convert to skills format
+    commandPlugins = [ "claude-md-management" "commit-commands" ];
 
-  # Required plugins that must remain installed via Claude Code
-  requiredPlugins = [
-    "typescript-lsp"
-    "swift-lsp"
-    "rust-analyzer-lsp"
-    "clangd-lsp"
-    "pyright-lsp"
-    "context7"
-    "explanatory-output-style"
-    "learning-output-style"
-  ];
+    # Required plugins that must remain installed via Claude Code
+    requiredPlugins = [
+        "typescript-lsp"
+        "swift-lsp"
+        "rust-analyzer-lsp"
+        "clangd-lsp"
+        "pyright-lsp"
+        "context7"
+        "explanatory-output-style"
+        "learning-output-style"
+    ];
 
-  # Extract skill-only plugins from the official repo into a flat skills directory
-  officialSkills = pkgs.runCommand "claude-official-skills" {} ''
+    # Extract skill-only plugins from the official repo into a flat skills directory
+    officialSkills = pkgs.runCommand "claude-official-skills" { } ''
     mkdir -p $out
 
     # Copy skills/ directories
-    ${lib.concatMapStringsSep "\n" (
-        p: "cp -r ${claude-plugins-official}/plugins/${p}/skills/* $out/"
-      )
-      skillPlugins}
+    ${lib.concatMapStringsSep "\n"
+    ( p: "cp -r ${claude-plugins-official}/plugins/${p}/skills/* $out/" ) skillPlugins}
 
     # Convert commands to skills format (commands/*.md → <name>/SKILL.md)
-    ${lib.concatMapStringsSep "\n" (p: ''
+    ${lib.concatMapStringsSep "\n" ( p: ''
         for cmd in ${claude-plugins-official}/plugins/${p}/commands/*.md; do
           name=$(basename "$cmd" .md)
           mkdir -p "$out/$name"
           cp "$cmd" "$out/$name/SKILL.md"
         done
-      '')
-      commandPlugins}
+      '' ) commandPlugins}
   '';
 
-  mergedSkills = pkgs.symlinkJoin {
-    name = "claude-config-skills-merged";
-    paths = [
-      (claude-config + "/skills")
-      officialSkills
-      (obsidian-skills + "/skills")
-    ];
-  };
-in {
-  xdg.configFile = {
-    "claude/CLAUDE.md".source = claudeConfigDir + "/CLAUDE.md";
-    "claude/skills".source = mergedSkills;
-    "claude/hooks".source = claude-config + "/hooks";
-  };
+    mergedSkills = pkgs.symlinkJoin {
+        name = "claude-config-skills-merged";
+        paths = [ ( claude-config + "/skills" ) officialSkills ( obsidian-skills + "/skills" ) ];
+    };
+in
+{
+    xdg.configFile = {
+        "claude/CLAUDE.md".source = claudeConfigDir + "/CLAUDE.md";
+        "claude/skills".source = mergedSkills;
+        "claude/hooks".source = claude-config + "/hooks";
+    };
 
-  # Validate Claude Code plugin configuration
-  home.activation.claudePlugins = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    # settings.json — owned by Claude Code (writable, never symlinked); hm only
+    # injects the hooks key via an idempotent jq merge that preserves all other keys.
+    home.activation.claudeSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    settings="${config.xdg.configHome}/claude/settings.json"
+    # Remove old hm symlink if present
+    if [[ -L "$settings" ]]; then
+      rm "$settings"
+    fi
+    # Seed with empty object if missing
+    if [[ ! -f "$settings" ]]; then
+      echo '{}' > "$settings"
+    fi
+    ${pkgs.jq}/bin/jq '. * {"hooks":{"PreToolUse":[{"matcher":"Read|Edit|Write|MultiEdit|Bash","hooks":[{"type":"command","command":"~/.config/claude/hooks/protect-env.sh"}]}]}}' \
+      "$settings" > "$settings.tmp" \
+      && mv "$settings.tmp" "$settings"
+    chmod u+w "$settings"
+  '';
+
+    # Validate Claude Code plugin configuration
+    home.activation.claudePlugins = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     settings="$HOME/.config/claude/settings.json"
     if [ -f "$settings" ]; then
       # Plugins now managed as hm skills — warn if still enabled
@@ -111,10 +115,10 @@ in {
     fi
   '';
 
-  # cc = claude code
-  programs.zsh.shellAliases = {
-    ccd = "claude --dangerously-skip-permissions";
-    clauded = "claude --dangerously-skip-permissions";
-    ccu = "claude-usage";
-  };
+    # cc = claude code
+    programs.zsh.shellAliases = {
+        ccd = "claude --dangerously-skip-permissions";
+        clauded = "claude --dangerously-skip-permissions";
+        ccu = "claude-usage";
+    };
 }
