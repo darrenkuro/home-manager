@@ -44,52 +44,9 @@
     '';
     };
 
-    # ── Nix Daemon Wrappers ──
-    nixDaemonWrapper = btm.mkWrapper {
-        name = "NixDaemonStart";
-        text = ''
-      /bin/wait4path /nix/var/nix/profiles/default/bin/nix-daemon
-      exec /nix/var/nix/profiles/default/bin/nix-daemon
-    '';
-    };
-
-    # useSystemBash = true because this runs BEFORE /nix is mounted
-    nixStoreMountWrapper = btm.mkWrapper {
-        name = "NixStoreMount";
-        useSystemBash = true;
-        text = ''
-      nixVolumeDev=$(/usr/sbin/diskutil apfs list | \
-        /usr/bin/awk '/Nix Store/ {print prev} {prev=$0}' | \
-        /usr/bin/grep -o 'disk[0-9]*s[0-9]*')
-      if [ -z "$nixVolumeDev" ]; then
-        echo "Error: Could not find Nix Store volume device" >&2
-        exit 1
-      fi
-      nixCryptoUUID=$(/usr/sbin/diskutil apfs listCryptoUsers "$nixVolumeDev" -plist | \
-        /usr/bin/plutil -extract Users.0.APFSCryptoUserUUID raw -)
-      if [ -z "$nixCryptoUUID" ]; then
-        echo "Error: Could not find Nix Store crypto user UUID" >&2
-        exit 1
-      fi
-      /usr/bin/security find-generic-password -s "$nixCryptoUUID" -w | \
-        /usr/sbin/diskutil apfs unlockVolume "$nixVolumeDev" -stdinpassphrase -user "$nixCryptoUUID"
-    '';
-    };
-
     # ── BTM stub install + agent patching — logic lives in lib/launchd-btm.nix ──
     btmInstallCommands = lib.concatStringsSep "\n"
     (
-        [
-            (
-                btm.mkStubInstall {
-                    name = "Nix";
-                    app = ./modules/services/nix-daemon/Nix.app;
-                    wrappers = [
-                        { drv = nixDaemonWrapper; bin = "NixDaemonStart"; }
-                        { drv = nixStoreMountWrapper; bin = "NixStoreMount"; }
-                    ];
-                } )
-        ] ++
         lib.optionals enableDataCollector [
             (
                 btm.mkStubInstall {
@@ -102,7 +59,7 @@
 in
 {
     # ── Services (system half; each also has a home.nix imported from home.nix) ──
-    imports = [ ./modules/services/postgresql/darwin.nix ];
+    imports = [ ./modules/services/postgresql/darwin.nix ./modules/services/nix-daemon/darwin.nix ];
 
     # Nix settings
     nix.settings.experimental-features = [ "nix-command" "flakes" ];
@@ -241,35 +198,6 @@ in
     # NODE_REPL_HISTORY, PYTHON_HISTORY, HOMEBREW_NO_ENV_HINTS) stay in
     # modules/system/env.nix since GUI apps don't need them.
     launchd.user.envVariables = import ./lib/xdg-paths.nix { home = homeDir; };
-
-    # Take over Nix daemon management from installer for BTM integration
-    # This replaces /Library/LaunchDaemons/org.nixos.nix-daemon.plist
-    launchd.daemons.nix-daemon = {
-        serviceConfig = {
-            Label = "org.nixos.nix-daemon";
-            ProgramArguments = lib.mkForce [
-                "${btm.stubDir}/Nix.app/Contents/MacOS/NixDaemonStart"
-            ];
-            KeepAlive = true;
-            RunAtLoad = true;
-            LowPriorityIO = false;
-            ProcessType = "Standard";
-            SoftResourceLimits.NumberOfFiles = 1048576;
-            EnvironmentVariables = {
-                NIX_SSL_CERT_FILE = "/etc/ssl/certs/ca-certificates.crt";
-                OBJC_DISABLE_INITIALIZE_FORK_SAFETY = "YES";
-            };
-        };
-    };
-
-    # This replaces /Library/LaunchDaemons/org.nixos.darwin-store.plist
-    launchd.daemons.darwin-store = {
-        serviceConfig = {
-            Label = "org.nixos.darwin-store";
-            ProgramArguments = [ "${btm.stubDir}/Nix.app/Contents/MacOS/NixStoreMount" ];
-            RunAtLoad = true;
-        };
-    };
 
     launchd.user.agents.polymarket-monitor = lib.mkIf enableDataCollector {
         serviceConfig = {
