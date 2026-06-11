@@ -76,7 +76,8 @@
       ];
     };
 
-    # Standalone HM (keep existing outputs during transition)
+    # Standalone HM — used by `re` for fast user-only rebuilds (no sudo,
+    # no brew/system changes). `sure` uses darwinConfigurations.mac above.
     homeConfigurations = {
       mac = mkHome {
         system = "aarch64-darwin";
