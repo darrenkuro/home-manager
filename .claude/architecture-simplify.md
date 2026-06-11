@@ -1,8 +1,10 @@
 # Simplify & Reorganize home-manager
 
+> Status: executed 2026-06-11 — PRs #6–#13. All phases landed; see git log for the per-phase commits.
+
 ## Context
 
-Audit (2026-06-11) of `~/.config/home-manager` against the goal: *simple, organized, maintainable by the owner without help*. Findings:
+Audit (2026-06-11) of `~/.config/home-manager` against the goal: _simple, organized, maintainable by the owner without help_. Findings:
 
 1. **The old refactor plan is itself the overengineering source.** `.claude/architecture-reorg.md` prescribes a `btm.services` options registry (started as untracked `lib/btm-options.nix` — module submodule types for 2 services) and a `features.nix` bool file (contradicts the comment-out-imports preference). It is superseded by this plan.
 2. **Git sprawl.** Daily work lives on `refactor/phase-1-triplets` (7 commits, local-only); `main` is stale; 5 other branches + 1 leftover worktree exist — all verified fully merged into HEAD (`git merge-base --is-ancestor` checked for each).
@@ -53,46 +55,55 @@ imports = [
 
 ## Phases — one PR per phase, smallest comprehensible steps
 
-**Git workflow (locked):** Phase 0 happens directly on `main` (it *is* the branch cleanup). Each later phase: short-lived branch off `main` → one commit → verify → show full PR title/body/diff → push + PR only with approval → merge to `main` → delete branch → next phase. No long-lived refactor branch.
+**Git workflow (locked):** Phase 0 happens directly on `main` (it _is_ the branch cleanup). Each later phase: short-lived branch off `main` → one commit → verify → show full PR title/body/diff → push + PR only with approval → merge to `main` → delete branch → next phase. No long-lived refactor branch.
 
 > Every phase: `dprint fmt` → `shellcheck` touched scripts → `git add <files> && git commit` **before** `re`/`sure` (flakes only see committed files).
 
 ### Phase 0 — Git hygiene (no code change)
+
 1. `git checkout main && git merge --ff-only refactor/phase-1-triplets`, push main (with approval).
 2. Delete merged branches — local: `nix-darwin`, `nix-darwin-migration`, `refactor/phase-0-dedup`, `refactor/remove-templates-simplify-init`, `refactor/phase-1-triplets`, `claude/sleepy-aryabhata`; remote: same four that exist on origin. `git worktree remove .claude/worktrees/sleepy-aryabhata` first (prunable).
 3. `rm lib/btm-options.nix` (untracked, abandoned registry).
 4. Save this plan as `.claude/architecture-simplify.md`; delete `.claude/architecture-reorg.md`.
 
 ### Phase 1 — Dead code & drift
+
 - Delete `modules/system/linux-ft.nix` + its import (`home.nix:203`); retarget ft alias `p` → `$HM/home.nix` (`aliases.nix:66`).
 - `home.nix:75`: replace literal `postgresql_17.withPackages …` with `pg.pkg`.
 - Fix stale `flake.nix:79` comment ("during transition" → describe the intentional `re`/`sure` split).
 
 ### Phase 2 — BTM helper consolidation (darwin.nix only shrinks; behavior identical)
+
 - `lib/launchd-btm.nix` gains `mkStubInstall { name, app, wrappers, agents ? [] }` → returns the bash for: idempotent manifest-checked stub install (keep the manifest — it prevents BTM re-prompt churn), ownership fix, and `AssociatedBundleIdentifiers` patching for the listed agent labels. Single definition of the tricky logic; plain function, no option types.
 - Root `darwin.nix`: replace `btmStubCommands` + `btmAgentMapping` + `patchAgentCommands` codegen (lines 199–262) with one `mkStubInstall` call per stub.
 
 ### Phase 3a — PostgreSQL module
+
 - `modules/services/postgresql/darwin.nix`: pgConf, both wrappers, both launchd agents, its `postActivation` snippet via `mkStubInstall` (incl. its 2 agent labels). `homeDir = "/Users/darrenlu";` one-liner in its `let` (honest, greppable).
 - Extract backup script → `modules/services/postgresql/backup.sh`; wrapper text becomes `export PG_PORT=… PG_SOCKET=… PG_LOG_DIR=… PG_BACKUP_DIR=…` prelude + `builtins.readFile ./backup.sh` (script reads env vars; shellcheck still enforced by `writeShellApplication`).
 - `modules/services/postgresql/home.nix`: initdb activation block, `PGDATA`/`PGHOST` sessionVariables, `pglog`/`pgbackuplog`/`pgstatus` aliases, `pg.pkg` package — all moved from root `home.nix`.
 - Root `home.nix` imports it inside the existing `lib.optionals (tag == "mac")` list; root `darwin.nix` imports the darwin half. Delete the moved sections + the `pg` let-binding from both roots.
 
 ### Phase 3b — nix-daemon module
+
 - `modules/services/nix-daemon/darwin.nix`: `NixDaemonStart` + `NixStoreMount` wrappers, both `launchd.daemons`, stub install snippet. (System-daemon plist patching stays in `scripts/btm-patch-nix.sh` — unchanged, it works.)
 
 ### Phase 3c — Polymarket module (the toggle exemplar)
+
 - `modules/services/polymarket/darwin.nix`: wrapper, agent, stub install, `mkdir -p /tmp/polymarket` (moves from `home.nix:141-143` — delete `serviceTmpDirs` block).
 - Import line added **commented out** in root `darwin.nix`; delete `enableDataCollector` and all `lib.optionalAttrs`/`mkIf` gating.
 - Drift guard: when `mkStubInstall`'s signature ever changes, temporarily uncomment and run the dry-run build to confirm it still evaluates.
 
 ### Phase 4 — Claude config single-owner
+
 - Move the settings.json jq hooks merge (last ~15 lines of `scripts/copy-files.sh`) into `modules/apps/claude.nix`'s existing activation block (use `${pkgs.jq}/bin/jq`). `copy-files.sh` becomes purely envsubst file copies (VSCode/tmux/alacritty/tmux-nix).
 
 ### Phase 5 — Aliases → functions
+
 - `functions/clean.sh` (`INSTALL_TAG=(MAC FT)`) replacing the `clean` concat-chain; `functions/icloud-sync.sh` (`INSTALL_TAG=(MAC)`, `REQUIRED_TOOLS=(swift)`) with readable multi-line `sync-local`/`sync-cloud`. Remove both from `aliases.nix`.
 
 ### Phase 6 — Docs catch up to reality
+
 - README: structure tree (add `darwin.nix`, `lib/`, services layout + toggle convention), config-strategies section (drop taskrc/ghostty; Claude settings → claude.nix), keep troubleshooting as-is.
 - CLAUDE.md: Module Organization → per-service modules + toggle convention; copy-files.sh description; add "live on main" workflow note.
 - Document BOTH toggle conventions side by side: services → comment out the import line; shell functions → `INSTALL_TAG=()` (e.g. `functions/icon.sh` is the existing exemplar, kept as-is).
@@ -108,12 +119,12 @@ imports = [
 
 ## Size targets
 
-| File | Before | After |
-|---|---|---|
-| darwin.nix | 486 | ~160 |
-| home.nix | 204 | ~170 |
-| aliases.nix | 78 | ~45 |
-| copy-files.sh | 50 | ~35 |
+| File                | Before         | After   |
+| ------------------- | -------------- | ------- |
+| darwin.nix          | 486            | ~160    |
+| home.nix            | 204            | ~170    |
+| aliases.nix         | 78             | ~45     |
+| copy-files.sh       | 50             | ~35     |
 | lib/btm-options.nix | 39 (untracked) | deleted |
 
 ## Verification

@@ -15,10 +15,10 @@ Personal [Home Manager](https://github.com/nix-community/home-manager) configura
 
 ## Targets
 
-| Tag   | System             | Description                  |
-|-------|--------------------|------------------------------|
-| `mac` | `aarch64-darwin`   | Personal macOS (Apple Silicon) |
-| `ft`  | `x86_64-linux`     | 42 school Linux (rootless)   |
+| Tag   | System           | Description                    |
+| ----- | ---------------- | ------------------------------ |
+| `mac` | `aarch64-darwin` | Personal macOS (Apple Silicon) |
+| `ft`  | `x86_64-linux`   | 42 school Linux (rootless)     |
 
 The `tag` parameter flows through the entire config, conditionally including modules, packages, and aliases per target.
 
@@ -26,23 +26,33 @@ The `tag` parameter flows through the entire config, conditionally including mod
 
 Configs are managed two ways depending on whether the target app needs write access:
 
-- **Nix symlinks** (`xdg.configFile`) — for read-only configs (starship, helix, clang-format, Claude hooks/skills)
-- **Copy-in-place** (`scripts/copy-files.sh`) — for configs that apps modify at runtime (VSCode settings, taskrc, tmux, Claude `settings.json`)
+- **Nix symlinks** (`xdg.configFile`) — for read-only configs (starship, dprint, Claude hooks/skills)
+- **Copy-in-place** (`scripts/copy-files.sh`) — for configs that apps modify at runtime (VSCode settings, tmux; Claude `settings.json` gets a `jq` key-merge in `modules/apps/claude.nix`)
 
 ## Project Structure
 
 ```
 .
-├── flake.nix              # Entry point — defines mac/ft homeConfigurations
-├── home.nix               # Main module — packages, shell, imports
+├── flake.nix              # Entry point — darwinConfigurations.mac (`sure`),
+│                          #   homeConfigurations.{mac,ft} (`re`)
+├── darwin.nix             # macOS system: homebrew, defaults, GUI env, service imports
+├── home.nix               # User env: packages, shell, activation, service imports
+├── lib/
+│   ├── launchd-btm.nix    # BTM helpers: mkWrapper, mkStubInstall, stub paths
+│   └── xdg-paths.nix      # XDG env vars (shared by shell + GUI scopes)
 ├── modules/
-│   ├── apps/              # Per-app config (git, helix, starship, claude, ssh)
-│   ├── system/            # Aliases, env vars, platform-specific settings
-│   └── services/          # launchd/systemd services
+│   ├── apps/              # Per-app config (git, helix, starship, claude, ssh, …)
+│   ├── system/            # Aliases, env vars
+│   └── services/<name>/   # Self-contained services: spec.nix + darwin.nix
+│                          #   (+ home.nix if user-scoped) + <Name>.app BTM stub
 ├── functions/             # Shell functions sourced at init (each has tag/dep guard)
-├── scripts/               # Shell init chain + activation scripts
-└── configs/               # Raw config files (starship, ghostty, claude, etc.)
+├── scripts/               # Shell init chain + activation scripts + btm-patch-nix.sh
+└── configs/               # Raw config files (starship, tmux, vscode, claude, …)
 ```
+
+**Toggling a service** (e.g. polymarket): comment/uncomment its import line in
+`darwin.nix` (and `home.nix` if it has a user half), then run `sure` — same UX
+as the Homebrew cask list. Shell functions toggle via `INSTALL_TAG=()`.
 
 ## Installation
 

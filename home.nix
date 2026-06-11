@@ -79,10 +79,9 @@
     ];
 
     # ── Activation Scripts ──
-    home.activation = lib.mkMerge [
-        {
-            # Create XDG state/cache directories for shell history, sessions, etc.
-            xdgStateDirs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    home.activation = {
+        # Create XDG state/cache directories for shell history, sessions, etc.
+        xdgStateDirs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
         run mkdir -p \
           "$HOME/.local/state/zsh" \
           "$HOME/.local/state/bash" \
@@ -92,24 +91,15 @@
           "$HOME/.cache/zsh"
       '';
 
-            # Copy writable configs (VSCode, tmux; alacritty + tmux-nix on ft)
-            writableConfigs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        # Copy writable configs (VSCode, tmux; alacritty + tmux-nix on ft)
+        writableConfigs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
         HM="${config.home.homeDirectory}/.config/home-manager"
         XDG_CONFIG_HOME="${config.xdg.configHome}"
         HM_TAG="${lib.toUpper tag}"
 
         ${builtins.readFile ./scripts/copy-files.sh}
       '';
-        }
-
-        # Mac-only services
-        ( lib.mkIf ( tag == "mac" ) {
-                # Create temp directories for services
-                serviceTmpDirs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-        run mkdir -p /tmp/polymarket
-      '';
-            } )
-    ];
+    };
 
     programs.home-manager.enable = true;
     programs.bash = {
