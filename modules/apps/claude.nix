@@ -55,6 +55,18 @@
     };
 in
 {
+    # Claude Code binary — native install, self-updating, deliberately outside Nix
+    # (~/.local/bin/claude + ~/.local/share/claude). Bootstraps once if missing;
+    # the binary handles its own updates afterwards.
+    home.activation.claudeInstall = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    if [[ ! -x "$HOME/.local/bin/claude" ]]; then
+      echo "Installing Claude Code (native installer)..."
+      PATH="${lib.makeBinPath [ pkgs.curl pkgs.bash ]}:$PATH" ${pkgs.bash}/bin/bash -c \
+        'curl -fsSL https://claude.ai/install.sh | bash' \
+        || echo "⚠ Claude Code install failed — run manually: curl -fsSL https://claude.ai/install.sh | bash"
+    fi
+  '';
+
     xdg.configFile = {
         "claude/CLAUDE.md".source = claudeConfigDir + "/CLAUDE.md";
         "claude/skills".source = mergedSkills;

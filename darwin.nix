@@ -43,7 +43,6 @@ in
             "anki"
             "brave-browser"
             "claude"
-            "claude-code"
             "dropbox"
             "font-carlito"
             "ghostty"

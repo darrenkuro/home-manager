@@ -55,6 +55,7 @@
         typescript-language-server
 
         python313Packages.flake8
+        pyright # Python LSP (Claude pyright-lsp plugin needs pyright-langserver)
 
         python313
         python313Packages.pip
