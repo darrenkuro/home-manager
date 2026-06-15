@@ -5,10 +5,10 @@
     includes = [
       "~/.config/colima/ssh_config"
     ];
-    matchBlocks = {
+    settings = {
       "hetzner" = {
-        hostname = "77.42.93.119";
-        user = "deploy";
+        HostName = "77.42.93.119";
+        User = "deploy";
       };
     };
   };
