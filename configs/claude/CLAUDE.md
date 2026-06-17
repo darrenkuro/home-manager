@@ -45,7 +45,7 @@ Use global `~/.config/claude/` only when not in a project context.
 
 ### Workflow
 - **Plan first**: Enter plan mode for non-trivial tasks (3+ steps)
-- **Use subagents**: Offload research/exploration to keep context clean
+- **Use subagents generously**: Default to offloading substantial or independent work (research, broad search, multi-file implementation) to subagents whenever you see fit — lean toward delegating rather than doing it inline, and run long-running ones in the background so the main thread stays responsive and its context clean. Exception: keep quick, conversational, or decision-heavy/interactive work inline — a subagent runs to completion and can't ask you mid-task.
 - **Subagent limits**: Limit scope to avoid 32k output limit; for PDF-heavy tasks use smaller batches
 - **Never leave agents unresolved**: When done, read results and report — don't claim "still running" without checking
 - **Self-improve**: After corrections, update `.claude/lessons.md`
