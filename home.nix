@@ -148,6 +148,7 @@
         ./modules/apps/ssh.nix
     ] ++ lib.optionals ( tag == "mac" ) [
         ./modules/apps/netusage.nix
+        ./modules/apps/ghostty.nix
 
         # ── Services (user half; each also has a darwin.nix imported from darwin.nix) ──
         ./modules/services/postgresql/home.nix

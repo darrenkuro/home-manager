@@ -1,0 +1,10 @@
+# Ghostty config — managed by home-manager (modules/apps/ghostty.nix).
+# Edit here, then `git commit` + `re`. Reload in Ghostty with cmd+shift+,
+#
+# Full option reference:
+#   /Applications/Ghostty.app/Contents/MacOS/ghostty +show-config --default --docs
+# Preview themes:
+#   /Applications/Ghostty.app/Contents/MacOS/ghostty +list-themes
+
+theme = Gruvbox Material Dark
+working-directory = home
