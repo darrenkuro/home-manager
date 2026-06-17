@@ -8,3 +8,28 @@
 
 theme = Gruvbox Material Dark
 working-directory = ~/Documents/dev
+
+# --- macOS integration ---
+# Left Option sends Alt/Meta (word-nav in zsh, alt-chords in Helix);
+# right Option still types accented chars (option+e e -> é).
+macos-option-as-alt = left
+
+# --- Quality of life ---
+copy-on-select = clipboard      # selecting text auto-copies (tmux-like)
+mouse-hide-while-typing = true  # cursor gets out of the way while typing
+window-save-state = always      # restore windows/tabs after quit/relaunch
+confirm-close-surface = false   # no "are you sure?" prompt on cmd+w
+
+# --- Look ---
+# Disable ligatures: -liga kills classic ligatures, -calt kills the
+# contextual operator glyphs (=> != >= ->) most coding fonts ship.
+font-feature = -liga, -calt
+
+# (uncomment to taste)
+# font-family = "JetBrainsMono Nerd Font"
+# background-opacity = 0.96      # slight transparency
+# background-blur = true         # frosted-glass behind the transparency
+# macos-titlebar-style = hidden  # reclaim vertical space (keeps rounded corners)
+
+# --- Quick terminal (drop-down from any app; needs Accessibility permission) ---
+# keybind = global:cmd+grave=toggle_quick_terminal
