@@ -6,5 +6,5 @@
 # Preview themes:
 #   /Applications/Ghostty.app/Contents/MacOS/ghostty +list-themes
 
-theme = Gruvbox Material Dark
+theme = Darkmatrix
 working-directory = home
