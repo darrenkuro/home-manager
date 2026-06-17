@@ -15,21 +15,30 @@ working-directory = ~/Documents/dev
 macos-option-as-alt = left
 
 # --- Quality of life ---
-copy-on-select = clipboard      # selecting text auto-copies (tmux-like)
-mouse-hide-while-typing = true  # cursor gets out of the way while typing
-window-save-state = always      # restore windows/tabs after quit/relaunch
-confirm-close-surface = false   # no "are you sure?" prompt on cmd+w
+# NOTE: Ghostty has no inline comments — `#` is only valid on its own line.
+# A trailing `# ...` becomes part of the value, so keep comments above keys.
+# selecting text auto-copies (tmux-like)
+copy-on-select = clipboard
+# cursor gets out of the way while typing
+mouse-hide-while-typing = true
+# restore windows/tabs after quit/relaunch
+window-save-state = always
+# no "are you sure?" prompt on cmd+w
+confirm-close-surface = false
 
 # --- Look ---
 # Disable ligatures: -liga kills classic ligatures, -calt kills the
 # contextual operator glyphs (=> != >= ->) most coding fonts ship.
 font-feature = -liga, -calt
 
-# (uncomment to taste)
+# (uncomment to taste — keep any explanatory comment on its own line)
 # font-family = "JetBrainsMono Nerd Font"
-# background-opacity = 0.96      # slight transparency
-# background-blur = true         # frosted-glass behind the transparency
-# macos-titlebar-style = hidden  # reclaim vertical space (keeps rounded corners)
+# slight transparency
+# background-opacity = 0.96
+# frosted-glass behind the transparency
+# background-blur = true
+# reclaim vertical space (keeps rounded corners)
+# macos-titlebar-style = hidden
 
 # --- Quick terminal (drop-down from any app; needs Accessibility permission) ---
 # keybind = global:cmd+grave=toggle_quick_terminal
