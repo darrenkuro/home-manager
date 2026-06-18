@@ -8,9 +8,6 @@ for f in "$HM"/functions/*.sh; do
   [ -r "$f" ] && source "$f"
 done
 
-# Source personal bin
-if [ -d "$HOME/.local/bin" ]; then
-  path=("$HOME/.local/bin" "${path[@]}")
-fi
-
-export PATH
+# Note: ~/.local/bin is on PATH via home.sessionPath (env.nix), which loads in
+# .zshenv — early and for all shell types. It was added here previously, but
+# .zshrc runs too late (interactive-only) for tools needed at source time.

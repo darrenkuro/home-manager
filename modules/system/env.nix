@@ -36,6 +36,6 @@
         HOMEBREW_NO_ENV_HINTS = "1";
     };
 
-    home.sessionPath = [ "$HOME/Library/pnpm" ] ++
+    home.sessionPath = [ "$HOME/.local/bin" "$HOME/Library/pnpm" ] ++
     lib.optionals ( tag == "mac" ) [ "/opt/homebrew/bin" ];
 }
