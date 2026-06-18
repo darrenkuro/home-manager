@@ -1,8 +1,7 @@
 INSTALL_TAG=(MAC)
-# No tool check: claude lives in ~/.local/bin, which source.sh adds to PATH
-# *after* this sourcing loop, so a `claude` check here would always fail.
-# claude is only invoked interactively (PATH complete by then); the rest are
-# always-present coreutils.
+# claude lives in ~/.local/bin, which source.sh adds to PATH *after* this
+# sourcing loop — so a source-time REQUIRED_TOOLS=(claude) check always fails.
+# claude is checked inside the function instead, when PATH is complete.
 REQUIRED_TOOLS=()
 _check_preamble || return 0
 
@@ -17,6 +16,7 @@ _check_preamble || return 0
 #   $1  - full session ID (UUID)
 #   $@  - extra args forwarded verbatim to `claude`
 ccr() {
+  command -v claude > /dev/null 2>&1 || { echo "ccr: claude not found on PATH"; return 1; }
   local id="$1"
   local root="${CLAUDE_CONFIG_DIR:-$HOME/.config/claude}/projects"
   [ -z "$id" ] && { echo "usage: ccr <session-id> [claude args...]"; return 1; }
