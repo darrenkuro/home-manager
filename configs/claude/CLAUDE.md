@@ -16,6 +16,8 @@ This file: `~/.config/home-manager/configs/claude/CLAUDE.md` (edit, then `re` to
 **Apple code signing**: Always use real identity, never ad-hoc.
 - `codesign -fs "Apple Development: odon5ht@gmail.com (497TM5HK44)"`
 
+**Media playback (macOS)**: NEVER `open` audio/video files — it hijacks Music/QuickTime. Play audio with `afplay <file>` (CLI, blocks until playback finishes); pass `-t <seconds>` to cap length. Inspect media with `ffprobe`, never `open`.
+
 **Git**: Global gitignore at `~/.config/git/ignore` covers common patterns. Don't create per-repo `.gitignore` unless project-specific ignores are needed.
 
 **Skills**: Live in `~/Documents/dev/claude-config`. Edit there, commit/push, then `nix flake update claude-config && re` in hm.
