@@ -1,5 +1,9 @@
 INSTALL_TAG=(MAC)
-REQUIRED_TOOLS=(claude)
+# No tool check: claude lives in ~/.local/bin, which source.sh adds to PATH
+# *after* this sourcing loop, so a `claude` check here would always fail.
+# claude is only invoked interactively (PATH complete by then); the rest are
+# always-present coreutils.
+REQUIRED_TOOLS=()
 _check_preamble || return 0
 
 # Resume a Claude Code session from any directory by its full session ID.
