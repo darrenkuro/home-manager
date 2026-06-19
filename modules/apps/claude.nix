@@ -73,8 +73,10 @@ in
         "claude/hooks".source = claude-config + "/hooks";
     };
 
-    # settings.json — owned by Claude Code (writable, never symlinked); hm only
-    # injects the hooks key via an idempotent jq merge that preserves all other keys.
+    # settings.json — owned by Claude Code (writable, never symlinked); hm injects
+    # the hooks key + env.DISABLE_AUTOUPDATER (binary self-updates were flaky over
+    # the 215MB native download; update manually via `claude update`) via an
+    # idempotent jq merge that preserves all other keys.
     home.activation.claudeSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     settings="${config.xdg.configHome}/claude/settings.json"
     # Remove old hm symlink if present
@@ -85,7 +87,7 @@ in
     if [[ ! -f "$settings" ]]; then
       echo '{}' > "$settings"
     fi
-    ${pkgs.jq}/bin/jq '. * {"hooks":{"PreToolUse":[{"matcher":"Read|Edit|Write|MultiEdit|Bash","hooks":[{"type":"command","command":"~/.config/claude/hooks/protect-env.sh"}]}]}}' \
+    ${pkgs.jq}/bin/jq '. * {"env":{"DISABLE_AUTOUPDATER":"1"},"hooks":{"PreToolUse":[{"matcher":"Read|Edit|Write|MultiEdit|Bash","hooks":[{"type":"command","command":"~/.config/claude/hooks/protect-env.sh"}]}]}}' \
       "$settings" > "$settings.tmp" \
       && mv "$settings.tmp" "$settings"
     chmod u+w "$settings"

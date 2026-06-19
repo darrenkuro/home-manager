@@ -110,7 +110,7 @@ All Claude config is owned by `modules/apps/claude.nix`:
 
 - `CLAUDE.md` — symlinked from `configs/claude/` (read-only, Nix-managed)
 - `skills/`, `hooks/` — merged/sourced from flake inputs (`claude-config`, `claude-plugins-official`, `obsidian-skills`) via `symlinkJoin`
-- `settings.json` — owned by Claude Code (writable); hm injects only the `hooks` key via an idempotent `jq` merge in its activation block, and warns about plugin drift
+- `settings.json` — owned by Claude Code (writable); hm injects the `hooks` key and `env.DISABLE_AUTOUPDATER` via an idempotent `jq` merge in its activation block, and warns about plugin drift
 
 ### Key Environment Variables
 
