@@ -74,8 +74,10 @@ in
     };
 
     # settings.json — owned by Claude Code (writable, never symlinked); hm injects
-    # the hooks key + env.DISABLE_AUTOUPDATER (binary self-updates were flaky over
-    # the 215MB native download; update manually via `claude update`) via an
+    # the hooks key, env.DISABLE_AUTOUPDATER (binary self-updates were flaky over
+    # the 215MB native download; update manually via `claude update`), and
+    # cleanupPeriodDays=36500 (~100y — the 30-day default silently deletes session
+    # transcripts under ~/.config/claude/projects at startup; we keep them) via an
     # idempotent jq merge that preserves all other keys.
     home.activation.claudeSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     settings="${config.xdg.configHome}/claude/settings.json"
@@ -87,7 +89,7 @@ in
     if [[ ! -f "$settings" ]]; then
       echo '{}' > "$settings"
     fi
-    ${pkgs.jq}/bin/jq '. * {"env":{"DISABLE_AUTOUPDATER":"1"},"hooks":{"PreToolUse":[{"matcher":"Read|Edit|Write|MultiEdit|Bash","hooks":[{"type":"command","command":"~/.config/claude/hooks/protect-env.sh"}]}]}}' \
+    ${pkgs.jq}/bin/jq '. * {"cleanupPeriodDays":36500,"env":{"DISABLE_AUTOUPDATER":"1"},"hooks":{"PreToolUse":[{"matcher":"Read|Edit|Write|MultiEdit|Bash","hooks":[{"type":"command","command":"~/.config/claude/hooks/protect-env.sh"}]}]}}' \
       "$settings" > "$settings.tmp" \
       && mv "$settings.tmp" "$settings"
     chmod u+w "$settings"
