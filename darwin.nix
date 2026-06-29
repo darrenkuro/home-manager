@@ -36,7 +36,9 @@ in
             upgrade = false; # Don't auto-upgrade — apps self-update or `brew upgrade` manually
         };
         brews = [
-            { name = "tmux"; args = [ "HEAD" ]; } # HEAD fixes Claude Code rendering
+            # tmux 3.7 (released 2026-06-26) ships the Claude Code rendering fix; was on --HEAD until then.
+            # Still brew (not nix) because pinned nixpkgs is on 3.6a — move to nix-managed tmux once it ships >=3.7.
+            "tmux"
         ];
         casks = [
             "alfred"

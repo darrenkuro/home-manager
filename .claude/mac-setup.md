@@ -32,7 +32,7 @@ After this, `re` (fast) and `sure` (full) aliases are available.
 
 ### Homebrew Brews
 
-- tmux (HEAD — fixes Claude Code rendering; drop once 3.7 releases)
+- tmux (stable 3.7 — fixes Claude Code rendering; was --HEAD until 3.7 released 2026-06-26; move to nix-managed once nixpkgs ships >=3.7)
 
 ### App Store (masApps)
 
