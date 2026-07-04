@@ -52,6 +52,7 @@ in
             "obsidian"
             "pearcleaner"
             "sf-symbols"
+            "spotify"
             "steam"
             "visual-studio-code"
         ];
