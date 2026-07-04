@@ -2,18 +2,20 @@ INSTALL_TAG=(MAC FT)
 REQUIRED_TOOLS=()
 _check_preamble || return 0
 
-# Remove regenerable caches and stray dotfiles that tools scatter in $HOME.
-# Uses /bin/rm (not `rm`) — on mac, `rm` is aliased to trash.
+# `clean` was merged into `tidy` (functions/tidy.sh), which now does everything
+# clean used to plus cache/Xcode/pnpm/Nix reclaim. This thin front-end keeps the
+# `clean` muscle-memory working. On the ft box (Linux — `tidy` is MAC-only) it
+# falls back to a minimal, dependency-free $HOME scrub.
 clean() {
-  # Caches (safe, all regenerate)
-  /bin/rm -rf "$HOME/.cache" "$HOME/.npm" "$HOME/.matplotlib"
-  # Shell artifacts
-  /bin/rm -rf "$HOME/.zcompdump" "$HOME/.lesshst"
-  # .NET (not in use, regenerates on dotnet run)
-  /bin/rm -rf "$HOME/.aspnet" "$HOME/.dotnet" "$HOME/.nuget" "$HOME/.templateengine"
-  # Docker (redundant, DOCKER_CONFIG already points to $XDG_CONFIG_HOME/docker)
-  /bin/rm -rf "$HOME/.docker"
-  # macOS junk
-  /bin/rm -f "$HOME/.DS_Store"
-  echo "clean: done"
+    if command -v tidy > /dev/null 2>&1; then
+        tidy "$@"
+        return
+    fi
+    # ── ft fallback: lightweight $HOME scrub (no brew/nix/xcode) ──
+    # Uses /bin/rm because `rm` is aliased to `trash`.
+    /bin/rm -rf "$HOME/.cache" "$HOME/.npm" "$HOME/.matplotlib" \
+        "$HOME/.aspnet" "$HOME/.dotnet" "$HOME/.nuget" "$HOME/.templateengine" \
+        "$HOME/.docker" "$HOME/.lesshst" "$HOME"/.zcompdump*(N)
+    /bin/rm -f "$HOME/.DS_Store"
+    echo "clean: done (minimal scrub)"
 }

@@ -2,16 +2,29 @@ INSTALL_TAG=(MAC)
 REQUIRED_TOOLS=(brew)
 _check_preamble || return 0
 
+# ─────────────────────────────────────────────────────────────────────────────
+# tidy — one-shot macOS maintenance. Reclaims disk from regenerable caches,
+# scrubs dead dotfile scatter from $HOME, prunes package stores, garbage-collects
+# Nix, and keeps Homebrew current. Absorbs the old `clean` function.
+#
+#   tidy            run everything
+#   tidy --dry-run  (or -n) preview every action + size, delete NOTHING
+#
+# Safety invariants:
+#   • Deletes with /bin/rm, never `rm` (which is aliased to `trash`) — so cache
+#     clears actually free space instead of silently refilling the Trash.
+#   • $HOME scrubbing is whitelist-only (see _safe_rm): it refuses any symlink
+#     into /nix/store (home-manager-managed dotfiles) and only removes an explicit
+#     allow-list of regenerable junk. Credential/state dirs (.ssh .gnupg .aws
+#     .config .local …) are never candidates.
+#   • Cache clears remove directory *contents*, keeping the dir itself — apps
+#     expect it to exist and regenerate only what they need.
+# ─────────────────────────────────────────────────────────────────────────────
 tidy() {
-    # Colors and formatting
-    local CYAN='\033[0;36m'
-    local GREEN='\033[0;32m'
-    local YELLOW='\033[0;33m'
-    local DIM='\033[2m'
-    local RESET='\033[0m'
-    local BOLD='\033[1m'
+    # $'…' so these are real ESC bytes — they render whether printf uses %b or %s
+    local CYAN=$'\033[0;36m' GREEN=$'\033[0;32m' YELLOW=$'\033[0;33m' \
+        DIM=$'\033[2m' RESET=$'\033[0m' BOLD=$'\033[1m'
 
-    # Output helpers
     _header() { printf '\n%b━━━%b %b%s%b\n' "$CYAN" "$RESET" "$BOLD" "$1" "$RESET"; }
     _task() { printf '  %b○%b %s' "$DIM" "$RESET" "$1"; }
     _done() { printf '\r  %b●%b %s\n' "$GREEN" "$RESET" "$1"; }
@@ -21,69 +34,143 @@ tidy() {
     local dry_run=false
     [[ "${1:-}" == "--dry-run" || "${1:-}" == "-n" ]] && dry_run=true
 
-    # ─────────────────────────────────────────────────────────────────────────────
-    # 1. Clear caches
-    # ─────────────────────────────────────────────────────────────────────────────
+    local total_freed=0 # kB, accumulated across cache clears
+
+    # tilde-abbreviate a path for display
+    _tilde() { case "$1" in "$HOME"/*) printf '~/%s' "${1#"$HOME"/}" ;; *) printf '%s' "$1" ;; esac; }
+
+    # Remove one regenerable $HOME entry (file or dir). Refuses nix-store symlinks.
+    _safe_rm() {
+        local p="$1"
+        [[ -e "$p" || -L "$p" ]] || return 0
+        if [[ -L "$p" ]] && readlink "$p" | grep -q '/nix/store'; then
+            _item "skip $(_tilde "$p") (home-manager symlink)"
+            return 0
+        fi
+        if $dry_run; then
+            _item "would remove $(_tilde "$p")"
+        else
+            /bin/rm -rf "$p" 2> /dev/null && _item "removed $(_tilde "$p")"
+        fi
+        removed=$((removed + 1))
+    }
+
+    # Clear the CONTENTS of a cache dir (keep the dir), with size accounting.
+    _clear_contents() {
+        local dir="$1"
+        [[ -d "$dir" ]] || return 0
+        local kb
+        kb=$(du -sk "$dir" 2> /dev/null | cut -f1)
+        total_freed=$((total_freed + kb))
+        _task "$(_tilde "$dir")"
+        if $dry_run; then
+            _item "would free ~$((kb / 1024))MB"
+        else
+            /bin/rm -rf "${dir:?}"/* 2> /dev/null
+            _done "$(_tilde "$dir") (${DIM}~$((kb / 1024))MB${RESET})"
+        fi
+    }
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # 1. Scrub $HOME — dead dotfile scatter (absorbed from the old `clean`)
+    # ─────────────────────────────────────────────────────────────────────────
+    _header "Scrubbing \$HOME"
+
+    # Regenerable caches/artifacts that keep reappearing in $HOME despite XDG.
+    # (.docker is safe here because DOCKER_CONFIG points at $XDG_CONFIG_HOME/docker,
+    #  so this is a redundant copy, not your registry auth.)
+    local home_junk=(
+        "$HOME/.npm" "$HOME/.matplotlib" "$HOME/.node-gyp"
+        "$HOME/.aspnet" "$HOME/.dotnet" "$HOME/.nuget" "$HOME/.templateengine"
+        "$HOME/.docker" "$HOME/.lesshst"
+        "$HOME/.DS_Store" "$HOME/.claude.json.backup"
+    )
+    local removed=0 p name
+    for p in "${home_junk[@]}"; do _safe_rm "$p"; done
+    # host/version-suffixed zsh compdumps ((N) = expand to nothing if absent)
+    for p in "$HOME"/.zcompdump*(N); do _safe_rm "$p"; done
+
+    # Empty dead dirs from tools you don't use — removed ONLY while still empty,
+    # so if you ever start using one, its data is automatically spared.
+    for name in .ansible .bun .yarn .pdf-filler-profiles .pdf-toolkit-files; do
+        p="$HOME/$name"
+        [[ -d "$p" && -z "$(ls -A "$p" 2> /dev/null)" ]] && _safe_rm "$p"
+    done
+    [[ $removed -eq 0 ]] && printf '  %bnothing to scrub%b\n' "$DIM" "$RESET"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # 2. Clear caches (contents only; every entry regenerates on demand)
+    # ─────────────────────────────────────────────────────────────────────────
     _header "Clearing caches"
 
+    local dir
     local cache_dirs=(
-        "$HOME/Library/Caches"
-        "$HOME/.cache"
-        "$HOME/.npm/_cacache"
+        "$HOME/Library/Caches"                              # app caches: Spotify, Brave, Homebrew…
+        "$HOME/.cache"                                      # XDG caches: npm, pnpm, nix, typescript
+        "$HOME/Library/Application Support/Caches"          # shared app cache bucket
+        "$HOME/Library/Application Support/Code/CachedData" # VS Code compiled-code cache
     )
+    for dir in "${cache_dirs[@]}"; do _clear_contents "$dir"; done
 
-    local total_freed=0
-    local size
-    for dir in "${cache_dirs[@]}"; do
-        if [[ -d "$dir" ]]; then
-            size=$(du -sk "$dir" 2> /dev/null | cut -f1)
-            _task "$dir"
-            if $dry_run; then
-                _item "would clear ~$((size / 1024))MB"
-            else
-                rm -rf "${dir:?}"/* 2> /dev/null
-                total_freed=$((total_freed + size))
-                _done "$dir (${DIM}~$((size / 1024))MB${RESET})"
-            fi
-        fi
-    done
+    # ─────────────────────────────────────────────────────────────────────────
+    # 3. Xcode / iOS simulator caches — the big reclaimers
+    #    DeviceSupport = per-iOS-VERSION debug symbols. Deleting them costs a
+    #    ONE-TIME ~1–3 min re-extract the next time you connect a device running
+    #    a given iOS version — NOT every plug-in, and only for versions you
+    #    actually connect again. DerivedData rebuilds. Archives are left alone.
+    # ─────────────────────────────────────────────────────────────────────────
+    _header "Clearing Xcode caches"
 
-    # Clear Xcode derived data if present
-    local xcode_derived="$HOME/Library/Developer/Xcode/DerivedData"
-    if [[ -d "$xcode_derived" ]]; then
-        size=$(du -sk "$xcode_derived" 2> /dev/null | cut -f1)
-        _task "Xcode DerivedData"
+    local xcode_dirs=(
+        "$HOME/Library/Developer/Xcode/DerivedData"
+        "$HOME/Library/Developer/Xcode/iOS DeviceSupport"
+        "$HOME/Library/Developer/Xcode/watchOS DeviceSupport"
+        "$HOME/Library/Developer/Xcode/tvOS DeviceSupport"
+    )
+    for dir in "${xcode_dirs[@]}"; do _clear_contents "$dir"; done
+
+    # Delete only simulators whose runtime is no longer installed (orphans);
+    # your active/usable simulators are kept.
+    if command -v xcrun > /dev/null 2>&1; then
+        _task "Removing unavailable simulators"
         if $dry_run; then
-            _item "would clear ~$((size / 1024))MB"
+            _item "would run: xcrun simctl delete unavailable"
         else
-            rm -rf "${xcode_derived:?}"/* 2> /dev/null
-            total_freed=$((total_freed + size))
-            _done "Xcode DerivedData (${DIM}~$((size / 1024))MB${RESET})"
+            xcrun simctl delete unavailable > /dev/null 2>&1 && _done "Unavailable simulators removed"
         fi
     fi
 
-    printf '  %bTotal freed: ~%dMB%b\n' "$DIM" "$((total_freed / 1024))" "$RESET"
+    if $dry_run; then
+        printf '  %bWould free: ~%dMB%b\n' "$DIM" "$((total_freed / 1024))" "$RESET"
+    else
+        printf '  %bTotal freed: ~%dMB%b\n' "$DIM" "$((total_freed / 1024))" "$RESET"
+    fi
 
-    # ─────────────────────────────────────────────────────────────────────────────
-    # 2. Hide special folders in user spaces
-    # ─────────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
+    # 4. Prune package-manager stores (safe: only unreferenced content removed)
+    # ─────────────────────────────────────────────────────────────────────────
+    _header "Pruning package stores"
+
+    if command -v pnpm > /dev/null 2>&1; then
+        _task "pnpm store prune"
+        if $dry_run; then
+            _item "would run: pnpm store prune"
+        else
+            pnpm store prune > /dev/null 2>&1 && _done "pnpm store pruned"
+        fi
+    else
+        _skip "pnpm not installed"
+    fi
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # 5. Hide special folders in user spaces
+    # ─────────────────────────────────────────────────────────────────────────
     _header "Hiding special folders"
 
-    local hide_patterns=(
-        "_archive"
-        "_processing"
-        "_old"
-        "_backup"
-        "_temp"
-        "_wip"
-    )
-
-    local hidden_count=0
-    local flags
+    local hide_patterns=("_archive" "_processing" "_old" "_backup" "_temp" "_wip")
+    local hidden_count=0 flags pattern folder
     for pattern in "${hide_patterns[@]}"; do
-        # Search in common user directories
         while IFS= read -r -d '' folder; do
-            # Check if already hidden using stat
             flags=$(stat -f "%Xf" "$folder" 2> /dev/null)
             if [[ $((flags & 0x8000)) -eq 0 ]]; then
                 _task "Hiding $folder"
@@ -92,26 +179,22 @@ tidy() {
                 else
                     chflags hidden "$folder" 2> /dev/null && {
                         _done "Hidden: $folder"
-                        ((hidden_count++))
+                        hidden_count=$((hidden_count + 1))
                     }
                 fi
             fi
         done < <(find "$HOME" -maxdepth 4 -type d -name "$pattern" -print0 2> /dev/null)
     done
+    [[ $hidden_count -eq 0 ]] && printf '  %bNo new folders to hide%b\n' "$DIM" "$RESET" \
+        || printf '  %bHidden %d folders%b\n' "$DIM" "$hidden_count" "$RESET"
 
-    if [[ $hidden_count -eq 0 ]]; then
-        printf '  %bNo new folders to hide%b\n' "$DIM" "$RESET"
-    else
-        printf '  %bHidden %d folders%b\n' "$DIM" "$hidden_count" "$RESET"
-    fi
-
-    # ─────────────────────────────────────────────────────────────────────────────
-    # 3. Homebrew update
-    # ─────────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
+    # 6. Homebrew — update, upgrade, cleanup, drop unused deps
+    # ─────────────────────────────────────────────────────────────────────────
     _header "Updating Homebrew"
 
     if $dry_run; then
-        _item "would run: brew update && brew upgrade && brew cleanup"
+        _item "would run: brew update && brew upgrade && brew cleanup && brew autoremove"
     else
         _task "Updating formulae..."
         brew update --quiet && _done "Formulae updated"
@@ -132,10 +215,33 @@ tidy() {
 
         _task "Cleaning up..."
         brew cleanup --quiet && _done "Cleanup complete"
+
+        _task "Removing unused dependencies..."
+        brew autoremove --quiet && _done "Autoremove complete"
     fi
 
-    # ─────────────────────────────────────────────────────────────────────────────
-    # Summary
-    # ─────────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
+    # 7. Nix garbage collection — drop generations older than 7 days.
+    #    User + home-manager profiles only (no sudo); these are what `re` creates.
+    #    The root-owned nix-darwin system profile is GC'd via nix.gc in darwin.nix.
+    # ─────────────────────────────────────────────────────────────────────────
+    _header "Nix garbage collection"
+
+    if ! command -v nix-collect-garbage > /dev/null 2>&1; then
+        _skip "nix not installed"
+    elif $dry_run; then
+        _task "Scanning generations (dry run)..."
+        local ngc_preview
+        ngc_preview=$(nix-collect-garbage --delete-older-than 7d --dry-run 2>&1 | grep -iE "would|delete" | tail -1)
+        _done "Nix GC"
+        _item "${ngc_preview:-would delete generations older than 7d}"
+    else
+        _task "Deleting generations older than 7d..."
+        local ngc_freed
+        ngc_freed=$(nix-collect-garbage --delete-older-than 7d 2>&1 | grep -iE "freed" | tail -1)
+        _done "Nix GC (${DIM}${ngc_freed:-done}${RESET})"
+    fi
+
+    # ─────────────────────────────────────────────────────────────────────────
     printf '\n%b✓%b %bTidy complete%b\n\n' "$GREEN" "$RESET" "$BOLD" "$RESET"
 }
