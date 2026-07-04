@@ -36,6 +36,11 @@ tidy() {
 
     local total_freed=0 # kB, accumulated across cache clears
 
+    # container free space (bytes) for the end-of-run reclaim report
+    _free_bytes() { diskutil info / 2> /dev/null | awk -F'[()]' '/Container Free Space/{gsub(/[^0-9]/,"",$2); print $2}'; }
+    local free_before
+    free_before=$(_free_bytes)
+
     # tilde-abbreviate a path for display
     _tilde() { case "$1" in "$HOME"/*) printf '~/%s' "${1#"$HOME"/}" ;; *) printf '%s' "$1" ;; esac; }
 
@@ -243,5 +248,13 @@ tidy() {
     fi
 
     # ─────────────────────────────────────────────────────────────────────────
+    if ! $dry_run; then
+        local free_after delta
+        free_after=$(_free_bytes)
+        delta=$((free_after - free_before))
+        printf '  %b♻%b Reclaimed %s GB — now %s GB free\n' "$GREEN" "$RESET" \
+            "$(awk -v d="$delta" 'BEGIN{printf "%.1f", d/1e9}')" \
+            "$(awk -v f="$free_after" 'BEGIN{printf "%.1f", f/1e9}')"
+    fi
     printf '\n%b✓%b %bTidy complete%b\n\n' "$GREEN" "$RESET" "$BOLD" "$RESET"
 }
