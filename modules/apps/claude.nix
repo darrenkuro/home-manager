@@ -89,7 +89,7 @@ in
     if [[ ! -f "$settings" ]]; then
       echo '{}' > "$settings"
     fi
-    ${pkgs.jq}/bin/jq '. * {"cleanupPeriodDays":36500,"env":{"DISABLE_AUTOUPDATER":"1"},"hooks":{"PreToolUse":[{"matcher":"Read|Edit|Write|MultiEdit|Bash","hooks":[{"type":"command","command":"~/.config/claude/hooks/protect-env.sh"}]}]}}' \
+    ${pkgs.jq}/bin/jq '. * {"cleanupPeriodDays":36500,"env":{"DISABLE_AUTOUPDATER":"1"},"hooks":{"PreToolUse":[{"matcher":"Read|Edit|Write|MultiEdit|Bash","hooks":[{"type":"command","command":"~/.config/claude/hooks/protect-env.sh"}]},{"matcher":"Skill","hooks":[{"type":"command","command":"~/.config/claude/hooks/skill-standards-gate.sh"}]}]}}' \
       "$settings" > "$settings.tmp" \
       && mv "$settings.tmp" "$settings"
     chmod u+w "$settings"
