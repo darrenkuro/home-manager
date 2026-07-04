@@ -146,8 +146,10 @@
         ./modules/apps/helix.nix
         ./modules/apps/claude.nix
         ./modules/apps/ssh.nix
-    ] ++ lib.optionals ( tag == "mac" ) [
+    ] ++
+    lib.optionals ( tag == "mac" ) [
         ./modules/apps/netusage.nix
+        ./modules/apps/mdserve.nix
         ./modules/apps/ghostty.nix
 
         # ── Services (user half; each also has a darwin.nix imported from darwin.nix) ──

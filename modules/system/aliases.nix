@@ -35,7 +35,7 @@
                 # `sync-local`/`sync-cloud` (iCloud) moved to functions/icloud-sync.sh
                 rm = "echo \"☠️$YELLOW DANGEROUS CMD: using trash instread!$RESET\" && trash";
                 ytd = "yt-dlp -t mp4 --cookies-from-browser brave";
-                mdserve = "node $DEV/mdserve/mdserve.mjs"; # serve a .md as a styled local page (blocks; single instance)
+                # `mdserve` is installed as a real binary via modules/apps/mdserve.nix
                 # `netusage` is installed as a real binary via modules/apps/netusage.nix
                 nu = "netusage"; # short form
                 kotr = "nix-shell -p whisper-cpp --run 'whisper-stream -m $HOME/.local/share/whisper-cpp/ggml-large-v3-turbo.bin -l ko -tr'";
