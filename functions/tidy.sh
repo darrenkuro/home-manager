@@ -51,7 +51,7 @@ tidy() {
         # hardcoded-path tools (can't be XDG'd — deleting forces re-link/re-setup)
         .ssh .dropbox Dropbox .yarn
         # data we intentionally keep in-place
-        .claude .pdf-toolkit-files .vscode .vscode-shared
+        .claude .vscode .vscode-shared
         # SwiftPM compat symlinks (0B) → real data lives in ~/Library; auto-regenerated
         .swiftpm
     )
