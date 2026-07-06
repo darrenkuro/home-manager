@@ -31,6 +31,7 @@
         ZSH_SESSION_DIR = "$HOME/.local/state/zsh/sessions";
         PYTHON_HISTORY = "$HOME/.local/state/python/history"; # requires Python 3.13+
         NODE_REPL_HISTORY = "$HOME/.local/state/node/history";
+        PSQL_HISTORY = "$HOME/.local/state/psql/history";
 
         # ── Tools ──
         HOMEBREW_NO_ENV_HINTS = "1";

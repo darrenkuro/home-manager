@@ -71,8 +71,9 @@ tidy() {
         .rbenv      RBENV_ROOT
         .android    ANDROID_USER_HOME
         .nuget      NUGET_PACKAGES
-        .pkuseg     PKUSEG_HOME
-        .rustup     RUSTUP_HOME
+        .pkuseg       PKUSEG_HOME
+        .rustup       RUSTUP_HOME
+        .psql_history PSQL_HISTORY
     )
 
     # container free space (bytes) for the end-of-run reclaim report
