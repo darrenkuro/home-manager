@@ -151,6 +151,7 @@
         ./modules/apps/netusage.nix
         ./modules/apps/mdserve.nix
         ./modules/apps/ghostty.nix
+        ./modules/apps/app-icons.nix
 
         # ── Services (user half; each also has a darwin.nix imported from darwin.nix) ──
         ./modules/services/postgresql/home.nix
