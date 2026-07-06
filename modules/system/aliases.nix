@@ -41,6 +41,9 @@
                 kotr = "nix-shell -p whisper-cpp --run 'whisper-stream -m $HOME/.local/share/whisper-cpp/ggml-large-v3-turbo.bin -l ko -tr'";
                 remoteon = "sudo systemsetup -setremotelogin on";
                 remoteoff = "sudo systemsetup -setremotelogin off";
+                # cc telegram — phone→this Mac via Telegram channel.
+                # ⚠ --dangerously-skip-permissions: allowlisted texters run commands with NO prompts.
+                cct = "claude --channels plugin:telegram@claude-plugins-official --dangerously-skip-permissions";
                 # brew tmux (stable 3.7) fixes the Claude Code rendering issue.
                 # Keep this alias until pinned nixpkgs ships tmux >=3.7, then drop it and the brew entry for nix-managed tmux.
                 tmux = "/opt/homebrew/bin/tmux";
