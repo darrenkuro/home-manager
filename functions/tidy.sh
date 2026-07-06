@@ -134,10 +134,13 @@ tidy() {
     # Regenerable caches/artifacts that keep reappearing in $HOME despite XDG.
     # (.docker is safe here because DOCKER_CONFIG points at $XDG_CONFIG_HOME/docker,
     #  so this is a redundant copy, not your registry auth.)
+    # NOTE: relocated paths (.npm .docker .nuget .matplotlib …) are deliberately
+    # NOT here — they're report-only via the xdg_relocated drift map, so a broken
+    # relocation surfaces as a warning instead of a silent delete. Only genuinely
+    # ownerless, non-relocated junk that has no env var belongs in this list.
     local home_junk=(
-        "$HOME/.npm" "$HOME/.matplotlib" "$HOME/.node-gyp"
-        "$HOME/.aspnet" "$HOME/.dotnet" "$HOME/.nuget" "$HOME/.templateengine"
-        "$HOME/.docker" "$HOME/.lesshst"
+        "$HOME/.node-gyp" "$HOME/.aspnet" "$HOME/.dotnet"
+        "$HOME/.templateengine" "$HOME/.lesshst"
         "$HOME/.DS_Store" "$HOME/.claude.json.backup"
     )
     local removed=0 p name
