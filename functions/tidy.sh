@@ -70,6 +70,7 @@ tidy() {
         .android    ANDROID_USER_HOME
         .nuget      NUGET_PACKAGES
         .pkuseg     PKUSEG_HOME
+        .rustup     RUSTUP_HOME
     )
 
     # container free space (bytes) for the end-of-run reclaim report

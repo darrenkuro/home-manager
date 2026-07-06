@@ -20,6 +20,7 @@
     NPM_CONFIG_USERCONFIG = "${home}/.config/npm/npmrc";
     NPM_CONFIG_CACHE = "${home}/.cache/npm";
     CARGO_HOME = "${home}/.local/share/cargo";
+    RUSTUP_HOME = "${home}/.local/share/rustup"; # unused (Rust via Nix); set so a future rustup install can't scatter ~/.rustup
     DOCKER_CONFIG = "${home}/.config/docker";
     ANDROID_USER_HOME = "${home}/.local/share/android";
     BUNDLE_USER_HOME = "${home}/.local/share/bundle";
