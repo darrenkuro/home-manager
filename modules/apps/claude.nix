@@ -29,6 +29,7 @@
         "context7"
         "explanatory-output-style"
         "learning-output-style"
+        "telegram"
     ];
 
     # hm-managed PreToolUse hooks — reconciled into settings.json by claudeSettings
@@ -147,6 +148,22 @@ in
         echo "⚠ Claude: these required plugins are missing or disabled:"
         printf "$missing"
         echo "  Run: claude /plugin install <name>@claude-plugins-official"
+        echo ""
+      fi
+
+      # Enabled plugins unknown to claude.nix — neither required nor hm-managed
+      unknown=""
+      for key in $(${pkgs.jq}/bin/jq -r '(.enabledPlugins // {}) | to_entries[] | select(.value == true) | .key' "$settings" 2>/dev/null); do
+        plugin="''${key%%@*}"
+        case " ${lib.concatStringsSep " " ( requiredPlugins ++ hmManagedPlugins )} " in
+          *" $plugin "*) ;;
+          *) unknown="$unknown  - $key\n" ;;
+        esac
+      done
+      if [ -n "$unknown" ]; then
+        echo ""
+        echo "⚠ Claude: these enabled plugins are not tracked in claude.nix (add to requiredPlugins or disable):"
+        printf "$unknown"
         echo ""
       fi
     fi
