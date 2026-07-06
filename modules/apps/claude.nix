@@ -31,6 +31,23 @@
         "learning-output-style"
     ];
 
+    # hm-managed PreToolUse hooks — reconciled into settings.json by claudeSettings
+    # below, keyed by command path so user-added hooks survive every rebuild
+    hmHooks = [
+        {
+            matcher = "Read|Edit|Write|Bash|Grep";
+            hooks = [ { type = "command"; command = "~/.config/claude/hooks/protect-env.sh"; } ];
+        }
+        {
+            matcher = "Skill";
+            hooks = [
+                { type = "command"; command = "~/.config/claude/hooks/skill-standards-gate.sh"; }
+            ];
+        }
+    ];
+    notHmHook = lib.concatMapStringsSep " and "
+    ( h: ''.command != "${( builtins.head h.hooks ).command}"'' ) hmHooks;
+
     # Extract skill-only plugins from the official repo into a flat skills directory
     officialSkills = pkgs.runCommand "claude-official-skills" { } ''
     mkdir -p $out
@@ -74,11 +91,12 @@ in
     };
 
     # settings.json — owned by Claude Code (writable, never symlinked); hm injects
-    # the hooks key, env.DISABLE_AUTOUPDATER (binary self-updates were flaky over
-    # the 215MB native download; update manually via `claude update`), and
-    # cleanupPeriodDays=36500 (~100y — the 30-day default silently deletes session
-    # transcripts under ~/.config/claude/projects at startup; we keep them) via an
-    # idempotent jq merge that preserves all other keys.
+    # env.DISABLE_AUTOUPDATER (binary self-updates were flaky over the 215MB native
+    # download; update manually via `claude update`) and cleanupPeriodDays=36500
+    # (~100y — the 30-day default silently deletes session transcripts under
+    # ~/.config/claude/projects at startup; we keep them), and reconciles its own
+    # PreToolUse entries (matched by hook command path) while preserving all other
+    # keys and any user-added hooks.
     home.activation.claudeSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     settings="${config.xdg.configHome}/claude/settings.json"
     # Remove old hm symlink if present
@@ -89,7 +107,10 @@ in
     if [[ ! -f "$settings" ]]; then
       echo '{}' > "$settings"
     fi
-    ${pkgs.jq}/bin/jq '. * {"cleanupPeriodDays":36500,"env":{"DISABLE_AUTOUPDATER":"1"},"hooks":{"PreToolUse":[{"matcher":"Read|Edit|Write|MultiEdit|Bash","hooks":[{"type":"command","command":"~/.config/claude/hooks/protect-env.sh"}]},{"matcher":"Skill","hooks":[{"type":"command","command":"~/.config/claude/hooks/skill-standards-gate.sh"}]}]}}' \
+    ${pkgs.jq}/bin/jq '. * {"cleanupPeriodDays":36500,"env":{"DISABLE_AUTOUPDATER":"1"}}
+      | .hooks.PreToolUse = ([ (.hooks.PreToolUse // [])[]
+          | select((.hooks // []) | all(${notHmHook})) ]
+        + ${builtins.toJSON hmHooks})' \
       "$settings" > "$settings.tmp" \
       && mv "$settings.tmp" "$settings"
     chmod u+w "$settings"
