@@ -60,20 +60,30 @@ tidy() {
     # If the legacy path still exists AND the var is set, that's XDG *drift*:
     # a stale copy the var failed to prevent. Reported (never auto-deleted) so
     # you can confirm each relocation is actually taking effect.
+    # Keep this in sync with the relocation vars in lib/xdg-paths.nix and
+    # modules/system/env.nix — every var that moves a ~/.dotfile out of $HOME
+    # should appear here so the audit can confirm the relocation is winning.
     local -A xdg_relocated=(
-        .wakatime   WAKATIME_HOME
-        .cargo      CARGO_HOME
-        .bundle     BUNDLE_USER_HOME
-        .docker     DOCKER_CONFIG
-        .npm        NPM_CONFIG_CACHE
-        .matplotlib MPLCONFIGDIR
-        .gem        GEM_HOME
-        .rbenv      RBENV_ROOT
-        .android    ANDROID_USER_HOME
-        .nuget      NUGET_PACKAGES
-        .pkuseg       PKUSEG_HOME
-        .rustup       RUSTUP_HOME
-        .psql_history PSQL_HISTORY
+        # tool homes / data dirs (lib/xdg-paths.nix)
+        .wakatime          WAKATIME_HOME
+        .cargo             CARGO_HOME
+        .rustup            RUSTUP_HOME
+        .bundle            BUNDLE_USER_HOME
+        .gem               GEM_HOME
+        .rbenv             RBENV_ROOT
+        .android           ANDROID_USER_HOME
+        .docker            DOCKER_CONFIG
+        .npm               NPM_CONFIG_CACHE
+        .npmrc             NPM_CONFIG_USERCONFIG
+        .nuget             NUGET_PACKAGES
+        .matplotlib        MPLCONFIGDIR
+        .pkuseg            PKUSEG_HOME
+        # shell / REPL history files (modules/system/env.nix)
+        .bash_history      HISTFILE
+        .zsh_sessions      ZSH_SESSION_DIR
+        .python_history    PYTHON_HISTORY
+        .node_repl_history NODE_REPL_HISTORY
+        .psql_history      PSQL_HISTORY
     )
 
     # container free space (bytes) for the end-of-run reclaim report
