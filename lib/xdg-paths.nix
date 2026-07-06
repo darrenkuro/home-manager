@@ -29,6 +29,7 @@
     NUGET_PACKAGES = "${home}/.local/share/NuGet/packages";
     DOTNET_CLI_TELEMETRY_OPTOUT = "1";
     MPLCONFIGDIR = "${home}/.config/matplotlib";
+    PKUSEG_HOME = "${home}/.local/share/pkuseg"; # spaCy Chinese segmentation models
 
     # ── Tools ──
     PNPM_HOME = "${home}/Library/pnpm";

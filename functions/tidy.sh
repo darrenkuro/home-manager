@@ -36,6 +36,42 @@ tidy() {
 
     local total_freed=0 # kB, accumulated across cache clears
 
+    # ── Home-audit config (edit as your setup evolves) ────────────────────────
+    # Approved top-level $HOME entries. Anything present but NOT listed here is
+    # flagged by the "Auditing $HOME" section so new scatter can't hide. Grouped
+    # by *why* it's allowed — move borderline entries in once you've decided to
+    # keep them; leave them out to keep getting reminded every run.
+    local home_approved=(
+        # nix / home-manager managed dotfiles + infra
+        .bash_profile .bashrc .profile .zshenv .nix-defexpr .nix-profile
+        # XDG base dirs
+        .cache .config .local
+        # macOS standard home
+        Applications Desktop Documents Downloads Library Movies Music Pictures Public .Trash
+        # hardcoded-path tools (can't be XDG'd — deleting forces re-link/re-setup)
+        .ssh .dropbox Dropbox .yarn
+        # data we intentionally keep in-place
+        .claude .pdf-toolkit-files .vscode .vscode-shared
+    )
+
+    # Legacy path → the env var that is supposed to relocate it out of $HOME.
+    # If the legacy path still exists AND the var is set, that's XDG *drift*:
+    # a stale copy the var failed to prevent. Reported (never auto-deleted) so
+    # you can confirm each relocation is actually taking effect.
+    local -A xdg_relocated=(
+        .wakatime   WAKATIME_HOME
+        .cargo      CARGO_HOME
+        .bundle     BUNDLE_USER_HOME
+        .docker     DOCKER_CONFIG
+        .npm        NPM_CONFIG_CACHE
+        .matplotlib MPLCONFIGDIR
+        .gem        GEM_HOME
+        .rbenv      RBENV_ROOT
+        .android    ANDROID_USER_HOME
+        .nuget      NUGET_PACKAGES
+        .pkuseg     PKUSEG_HOME
+    )
+
     # container free space (bytes) for the end-of-run reclaim report
     _free_bytes() { diskutil info / 2> /dev/null | awk -F'[()]' '/Container Free Space/{gsub(/[^0-9]/,"",$2); print $2}'; }
     local free_before
@@ -246,6 +282,43 @@ tidy() {
         ngc_freed=$(nix-collect-garbage --delete-older-than 7d 2>&1 | grep -iE "freed" | tail -1)
         _done "Nix GC (${DIM}${ngc_freed:-done}${RESET})"
     fi
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # 8. Audit $HOME — report-only. Two checks:
+    #    (a) XDG drift  — a relocated tool left a legacy copy behind ($var set
+    #        but the old ~/.foo still exists → the relocation isn't winning).
+    #    (b) Unlisted   — a top-level entry absent from home_approved above.
+    #    Nothing is deleted here; this is the "is my $HOME still correct?" report.
+    # ─────────────────────────────────────────────────────────────────────────
+    _header "Auditing \$HOME"
+
+    # (a) XDG drift — legacy path present despite its relocation var being set.
+    local drift=0 var val
+    for name in "${(@k)xdg_relocated}"; do # @k: each key stays a separate word
+        var="${xdg_relocated[$name]}"
+        val="${(P)var}" # indirect: value of the env var *named* $var
+        if [[ -e "$HOME/$name" && -n "$val" ]]; then
+            printf '  %b⚠%b %s exists but %b$%s%b→%s %b(stale copy — safe to remove)%b\n' \
+                "$YELLOW" "$RESET" "$name" "$BOLD" "$var" "$RESET" "$(_tilde "$val")" "$DIM" "$RESET"
+            drift=$((drift + 1))
+        fi
+    done
+    [[ $drift -eq 0 ]] && printf '  %b✓ no XDG drift — every relocated tool stays out of $HOME%b\n' "$DIM" "$RESET"
+
+    # (b) Unlisted entries — present in $HOME but not on the approved list.
+    #     (drift entries already reported above are skipped to avoid double-listing)
+    local -A approved_set
+    for name in "${home_approved[@]}"; do approved_set[$name]=1; done
+    local unlisted=0 e
+    for e in "$HOME"/.*(N) "$HOME"/*(N); do
+        name="${e:t}" # zsh basename
+        [[ "$name" == "." || "$name" == ".." ]] && continue
+        [[ -n "${approved_set[$name]}" || -n "${xdg_relocated[$name]}" ]] && continue
+        printf '  %b?%b %s %b(unlisted — review, then approve or clean)%b\n' \
+            "$CYAN" "$RESET" "$name" "$DIM" "$RESET"
+        unlisted=$((unlisted + 1))
+    done
+    [[ $unlisted -eq 0 ]] && printf '  %b✓ every top-level entry is on the approved list%b\n' "$DIM" "$RESET"
 
     # ─────────────────────────────────────────────────────────────────────────
     if ! $dry_run; then
