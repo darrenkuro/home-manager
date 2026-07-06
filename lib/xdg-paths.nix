@@ -17,6 +17,7 @@
     # ── XDG Overrides (keep $HOME clean) ──
     WAKATIME_HOME = "${home}/.local/state/wakatime";
     CLAUDE_CONFIG_DIR = "${home}/.config/claude";
+    TELEGRAM_STATE_DIR = "${home}/.config/claude/channels/telegram"; # channel plugin ignores CLAUDE_CONFIG_DIR — pin state here to keep it out of ~/.claude
     NPM_CONFIG_USERCONFIG = "${home}/.config/npm/npmrc";
     NPM_CONFIG_CACHE = "${home}/.cache/npm";
     CARGO_HOME = "${home}/.local/share/cargo";
