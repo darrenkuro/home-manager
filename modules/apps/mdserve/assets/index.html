@@ -15,13 +15,19 @@
   <div class="layout">
     <nav class="toc" aria-label="Contents" hidden>
       <div class="toc-inner">
+        <section class="files" aria-label="Files" hidden>
+          <p class="files-label">Files</p>
+          <input class="files-search" type="search" placeholder="search  /" autocomplete="off" spellcheck="false" aria-label="Search files">
+          <ol class="files-list"></ol>
+          <ol class="search-results" hidden></ol>
+        </section>
         <details>
           <summary>Contents</summary>
           <ol></ol>
         </details>
       </div>
     </nav>
-    <main id="content"><p class="loading">Loading…</p></main>
+    <main id="content" tabindex="-1"><p class="loading">Loading…</p></main>
   </div>
 </div>
 <script src="/marked.min.js"></script>
