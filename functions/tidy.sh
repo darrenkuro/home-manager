@@ -223,25 +223,66 @@ tidy() {
     # ─────────────────────────────────────────────────────────────────────────
     # 5. Hide special folders in user spaces
     # ─────────────────────────────────────────────────────────────────────────
+    # NOTE: chflags hidden is a FINDER-ONLY hide — it sets the UF_HIDDEN inode
+    # flag, which Dropbox web + mobile ignore. To hide something in Dropbox's own
+    # UI you'd need the com.dropbox.ignored xattr (which also stops it syncing),
+    # not this. This section only declutters local Finder/Terminal views.
+    #
+    # Scans a LIST OF ROOTS, each to its own depth (measured from that root), and
+    # prunes heavy/regenerable trees so the walk stays cheap. Per-root depth is
+    # deliberate: the macOS Dropbox path (~/Library/CloudStorage/Dropbox) already
+    # eats 3 levels, so a category archive like pictures/_archive sits at depth 5
+    # — a single shallow maxdepth from $HOME can't reach it. So $HOME stays
+    # shallow (and prunes Library) while Dropbox gets its own deeper root.
     _header "Hiding special folders"
 
-    local hide_patterns=("_archive" "_processing" "_old" "_backup" "_temp" "_wip")
-    local hidden_count=0 flags pattern folder
-    for pattern in "${hide_patterns[@]}"; do
+    # Personal scratch/stage folder names to hide (Finder-only). Kept explicit
+    # rather than a '_*' glob so it never catches _-prefixed SOURCE dirs like
+    # Jekyll's _posts/_sass/_includes or __pycache__.
+    local hide_patterns=(_archive _processing _trash)
+    # root:maxdepth — depth counts from that root, not from $HOME. Edit freely.
+    local hide_roots=(
+        "$HOME:3"                               # top-level $HOME scatter
+        "$HOME/Library/CloudStorage/Dropbox:6"  # Dropbox categories nest deep
+        "$HOME/Documents/dev:5"                 # project _archive/_processing dirs
+    )
+    # Names never descended into — dotdirs, dunder dirs, and heavy/regenerable
+    # trees where a stray _match is noise, not something to hide. '.*' subsumes
+    # .git/.venv/.cache/.build/.Trash; '__*' excludes __pycache__/__tests__ etc.
+    # Pruned by NAME, at any level.
+    local hide_prune=('.*' '__*' node_modules venv target build dist Caches Library)
+
+    # Build the find expressions from the lists above. In zsh an empty unquoted
+    # $sep expands to zero words, so the first term gets no leading -o.
+    local -a prune_expr match_expr
+    local n sep=""
+    for n in "${hide_prune[@]}";    do prune_expr+=($sep -name "$n"); sep="-o"; done
+    sep=""
+    for n in "${hide_patterns[@]}"; do match_expr+=($sep -name "$n"); sep="-o"; done
+
+    local -A seen                        # dedupe folders reachable from >1 root
+    local hidden_count=0 flags folder spec root depth
+    for spec in "${hide_roots[@]}"; do
+        root="${spec%:*}"; depth="${spec##*:}"
+        [[ -d "$root" ]] || continue
         while IFS= read -r -d '' folder; do
+            [[ -n "${seen[$folder]}" ]] && continue
+            seen[$folder]=1
+            # %Xf prints hex with NO 0x prefix — force base-16 or it parses as decimal
             flags=$(stat -f "%Xf" "$folder" 2> /dev/null)
-            if [[ $((flags & 0x8000)) -eq 0 ]]; then
-                _task "Hiding $folder"
-                if $dry_run; then
-                    _item "would hide"
-                else
-                    chflags hidden "$folder" 2> /dev/null && {
-                        _done "Hidden: $folder"
-                        hidden_count=$((hidden_count + 1))
-                    }
-                fi
+            [[ $((0x${flags:-0} & 0x8000)) -ne 0 ]] && continue   # already hidden
+            _task "Hiding $(_tilde "$folder")"
+            if $dry_run; then
+                _item "would hide"
+            else
+                chflags hidden "$folder" 2> /dev/null && {
+                    _done "Hidden: $(_tilde "$folder")"
+                    hidden_count=$((hidden_count + 1))
+                }
             fi
-        done < <(find "$HOME" -maxdepth 4 -type d -name "$pattern" -print0 2> /dev/null)
+        done < <(find "$root" -maxdepth "$depth" \
+            \( "${prune_expr[@]}" \) -prune -o \
+            -type d \( "${match_expr[@]}" \) -print0 2> /dev/null)
     done
     [[ $hidden_count -eq 0 ]] && printf '  %bNo new folders to hide%b\n' "$DIM" "$RESET" \
         || printf '  %bHidden %d folders%b\n' "$DIM" "$hidden_count" "$RESET"
