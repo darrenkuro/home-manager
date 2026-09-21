@@ -55,7 +55,6 @@ in
             "spotify"
             "steam"
             "visual-studio-code"
-            "trello"
             "slack"
         ];
         masApps = {
