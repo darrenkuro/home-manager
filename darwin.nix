@@ -55,6 +55,8 @@ in
             "spotify"
             "steam"
             "visual-studio-code"
+            "trello"
+            "slack"
         ];
         masApps = {
             "CleanMyMac" = 1339170533;
