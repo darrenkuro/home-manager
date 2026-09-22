@@ -93,14 +93,43 @@ nix flake update
 
 ### Work macOS
 
-First validate the work profile, then activate it with the full system target:
+The flake includes the private `claude-config` repository over SSH. Before the
+first switch, create or copy a GitHub-authorized SSH key onto this Mac, add it
+to the macOS Keychain/agent, and verify it. Replace the key path below if you
+use a different key name:
+
+```bash
+# Only if this Mac does not already have a GitHub SSH key.
+ssh-keygen -t ed25519 -C "your-github-email" -f ~/.ssh/id_ed25519
+
+# Load the key for this shell and future macOS logins.
+eval "$(ssh-agent -s)"
+ssh-add --apple-use-keychain ~/.ssh/id_ed25519
+
+# Copy this into GitHub → Settings → SSH and GPG keys → New SSH key.
+pbcopy < ~/.ssh/id_ed25519.pub
+
+# GitHub should greet your username; it must not report publickey denied.
+ssh -T git@github.com
+```
+
+First validate the work profile, then activate it with the full system target.
+The `SSH_AUTH_SOCK` forwarding is required only for the first privileged
+evaluation: it lets root use your already-unlocked SSH agent rather than
+looking for a separate root GitHub key.
 
 ```bash
 nix flake check --no-write-lock-file
-sudo darwin-rebuild switch --flake ~/.config/home-manager#mac-work
+sudo env SSH_AUTH_SOCK="$SSH_AUTH_SOCK" \
+  nix --extra-experimental-features "nix-command flakes" run nix-darwin -- \
+  switch --flake ~/.config/home-manager#mac-work
 ```
 
 After activation, `re` and `sure` automatically keep using `mac-work`.
+
+If the `sudo env ...` command still reports `Permission denied (publickey)`,
+confirm that `ssh-add -l` lists the key and that `ssh -T git@github.com` works
+as your normal user. Do not add a private key to `/var/root/.ssh`.
 
 **Note:** On macOS, nix-darwin includes home-manager as a module, so `darwin-rebuild switch` activates both system and user config together.
 
