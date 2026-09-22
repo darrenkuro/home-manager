@@ -1,4 +1,6 @@
-{ tag, lib, ... }: {
+{ tag, profile ? "personal", lib, ... }: let
+    macTarget = if profile == "work" then "mac-work" else "mac";
+in {
     programs.zsh.shellAliases = lib.mkMerge [
         # ---- common aliases (always enabled)
         {
@@ -26,27 +28,28 @@
             lib.mkIf ( tag == "mac" ) {
                 p = "hx $HM/darwin.nix";
                 hm = "code $HM";
-                re = "nix run home-manager -- switch --flake $HM#mac && exec zsh"; # HM only (no brew, system.defaults, launchd)
-                sure = "sudo darwin-rebuild switch --flake $HM#mac && sudo $HM/scripts/btm-patch-nix.sh && exec zsh"; # full system + BTM
+                re = "nix run home-manager -- switch --flake $HM#${macTarget} && exec zsh"; # HM only (no brew, system.defaults, launchd)
+                sure = "sudo darwin-rebuild switch --flake $HM#${macTarget} && sudo $HM/scripts/btm-patch-nix.sh && exec zsh"; # full system + BTM
 
                 dbox = "cd $DBOX";
                 hide = "chflags hidden";
                 unhide = "chflags nohidden";
                 # `sync-local`/`sync-cloud` (iCloud) moved to functions/icloud-sync.sh
                 rm = "echo \"☠️$YELLOW DANGEROUS CMD: using trash instread!$RESET\" && trash";
-                ytd = "yt-dlp -t mp4 --cookies-from-browser brave";
                 # `mdserve` is installed as a real binary via modules/apps/mdserve.nix
                 # `netusage` is installed as a real binary via modules/apps/netusage.nix
                 nu = "netusage"; # short form
-                kotr = "nix-shell -p whisper-cpp --run 'whisper-stream -m $HOME/.local/share/whisper-cpp/ggml-large-v3-turbo.bin -l ko -tr'";
                 remoteon = "sudo systemsetup -setremotelogin on";
                 remoteoff = "sudo systemsetup -setremotelogin off";
-                # cc telegram — phone→this Mac via Telegram channel.
-                # ⚠ --dangerously-skip-permissions: allowlisted texters run commands with NO prompts.
-                cct = "claude --channels plugin:telegram@claude-plugins-official --dangerously-skip-permissions";
                 # brew tmux (stable 3.7) fixes the Claude Code rendering issue.
                 # Keep this alias until pinned nixpkgs ships tmux >=3.7, then drop it and the brew entry for nix-managed tmux.
                 tmux = "/opt/homebrew/bin/tmux";
+            } // lib.optionalAttrs (profile != "work") {
+                ytd = "yt-dlp -t mp4 --cookies-from-browser brave";
+                kotr = "nix-shell -p whisper-cpp --run 'whisper-stream -m $HOME/.local/share/whisper-cpp/ggml-large-v3-turbo.bin -l ko -tr'";
+                # cc telegram — phone→this Mac via Telegram channel.
+                # ⚠ --dangerously-skip-permissions: allowlisted texters run commands with NO prompts.
+                cct = "claude --channels plugin:telegram@claude-plugins-official --dangerously-skip-permissions";
             } )
 
         # ---- ft-only aliases

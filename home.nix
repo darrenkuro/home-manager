@@ -1,4 +1,7 @@
-{ pkgs, config, tag, lib, ... }: {
+{ pkgs, config, tag, profile ? "personal", lib, ... }: let
+    isMac = tag == "mac";
+    isWork = profile == "work";
+in {
     # ----------- Base Settings
     home.username = if tag == "mac"
     then
@@ -29,17 +32,10 @@
         bat
         gettext # envsubst
         wakatime-cli
-        clang-tools # C, CPP
         dprint # Unified formatter (nix, ts, json, md, toml, python, c/cpp, shell, rust, swift)
         nil # Nix LSP
         shfmt
         shellcheck
-        cargo
-        rust-analyzer
-        rustfmt
-        clippy
-        asm-lsp
-        asmfmt
 
         # Ensure Consistency
         openssl # Apple ships LibreSSL
@@ -47,9 +43,19 @@
         cmake
         # nerd-fonts.hack — not cached for aarch64-darwin
         # cachix — not currently needed
+    ] ++ lib.optionals (!isWork) [
+        # Keep specialist native toolchains on the personal/development target.
+        # The work profile still has the general Nix, JavaScript, Python and
+        # container toolchain below.
+        clang-tools # C, C++
+        cargo
+        rust-analyzer
+        rustfmt
+        clippy
+        asm-lsp
+        asmfmt
     ] ++
-    lib.optionals ( tag == "mac" ) [
-        rustc
+    lib.optionals isMac [
         nodejs_22 # LTS; nodejs_latest (v25) fails to build, nodejs_24 not cached for aarch64-darwin
         typescript
         typescript-language-server
@@ -62,12 +68,6 @@
         python313Packages.virtualenv
 
         darwin.trash # Replace rm (safer)
-        ffmpeg
-        poppler-utils # PDF tools
-        yt-dlp # Youtube download
-
-        pnpm
-        bun
 
         # Docker (via Colima)
         colima # Docker replacement
@@ -76,7 +76,14 @@
         docker-buildx
 
         pandoc
+    ] ++ lib.optionals (isMac && !isWork) [
+        rustc
         # typst — not currently needed
+        ffmpeg
+        poppler-utils # PDF tools
+        yt-dlp # Youtube download
+        pnpm
+        bun
     ];
 
     # ── Activation Scripts ──
@@ -128,7 +135,7 @@
                 ( builtins.readFile ./scripts/source.sh )
                 ( builtins.readFile ./scripts/hygiene.sh )
             ] ++
-            lib.optionals ( tag == "mac" ) [ ( builtins.readFile ./scripts/ssh-keychain.sh ) ] ++
+            lib.optionals isMac [ ( builtins.readFile ./scripts/ssh-keychain.sh ) ] ++
             lib.optionals ( tag == "ft" ) [ ( builtins.readFile ./scripts/repeat-rate.sh ) ] );
     };
     programs.direnv = { enable = true; nix-direnv.enable = true; };
@@ -147,13 +154,14 @@
         ./modules/apps/claude.nix
         ./modules/apps/ssh.nix
     ] ++
-    lib.optionals ( tag == "mac" ) [
+    lib.optionals isMac [
         ./modules/apps/netusage.nix
         ./modules/apps/mdserve.nix
         ./modules/apps/ghostty.nix
         ./modules/apps/app-icons.nix
 
-        # ── Services (user half; each also has a darwin.nix imported from darwin.nix) ──
+    ] ++ lib.optionals (isMac && !isWork) [
+        # PostgreSQL is deliberately absent from the clean work profile.
         ./modules/services/postgresql/home.nix
     ] ++ lib.optionals ( tag == "ft" ) [ ./modules/system/linux-ft.nix ];
 }

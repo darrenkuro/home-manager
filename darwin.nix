@@ -13,16 +13,19 @@
 #   - XDG dotfiles and app configs
 #   - Services' user halves (modules/services/<name>/home.nix)
 #
-{ ... }: let
+{ profile ? "personal" }: { ... }: let
     homeDir = "/Users/darrenlu";
+    profiles = import ./profiles/macos.nix;
+    selected = profiles.${profile} or (throw "Unknown macOS profile: ${profile}");
 in
 {
     # ── Services — comment out to disable ──
     imports = [
-        ./modules/services/postgresql/darwin.nix
+        # PostgreSQL is useful for the personal machine, but a clean work
+        # profile should not start a local database at login.
         ./modules/services/nix-daemon/darwin.nix
         # ./modules/services/polymarket/darwin.nix
-    ];
+    ] ++ (if selected.enablePostgresql then [ ./modules/services/postgresql/darwin.nix ] else [ ]);
 
     # Nix settings
     nix.settings.experimental-features = [ "nix-command" "flakes" ];
@@ -40,36 +43,8 @@ in
             # Still brew (not nix) because pinned nixpkgs is on 3.6a — move to nix-managed tmux once it ships >=3.7.
             "tmux"
         ];
-        casks = [
-            "alfred"
-            "anki"
-            "brave-browser"
-            "claude"
-            "dropbox"
-            "font-carlito"
-            "ghostty"
-            "notion"
-            "obsidian"
-            "pearcleaner"
-            "sf-symbols"
-            "spotify"
-            "steam"
-            "visual-studio-code"
-            "slack"
-        ];
-        masApps = {
-            "CleanMyMac" = 1339170533;
-            "Developer" = 640199958;
-            "Final Cut Pro" = 424389933;
-            "iA Writer" = 775737590;
-            "Mirror Magnet" = 1563698880;
-            "Xcode" = 497799835;
-            "Yoink" = 457622435;
-
-            "OmniFocus 3" = 904071710;
-            "Trello" = 1278508951;
-            "Pages" = 409201541;
-        };
+        casks = selected.casks;
+        masApps = selected.masApps;
     };
 
     # macOS system defaults (declarative)
@@ -91,17 +66,7 @@ in
             tilesize = 61;
             show-process-indicators = true;
             wvous-br-corner = 1; # Disabled hot corner
-            persistent-apps = [
-                "/System/Applications/Mail.app"
-                "/System/Applications/Calendar.app"
-                "/System/Cryptexes/App/System/Applications/Safari.app"
-                "/Applications/Brave Browser.app"
-                "/Applications/Obsidian.app"
-                "/Applications/Ghostty.app"
-                "/Applications/Visual Studio Code.app"
-                "/System/Applications/Utilities/Activity Monitor.app"
-                "/System/Applications/System Settings.app"
-            ];
+            persistent-apps = selected.dockApps;
         };
 
         # ── Finder ──
@@ -139,7 +104,7 @@ in
 
     # Finder: custom window target
     /usr/bin/defaults write com.apple.finder NewWindowTarget -string "PfLo"
-    /usr/bin/defaults write com.apple.finder NewWindowTargetPath -string "file:///Users/darrenlu/Dropbox/"
+    /usr/bin/defaults write com.apple.finder NewWindowTargetPath -string "file:///Users/darrenlu/${selected.finderStartFolder}/"
     /usr/bin/defaults write com.apple.finder ShowHardDrivesOnDesktop -bool false
     /usr/bin/defaults write com.apple.finder ShowExternalHardDrivesOnDesktop -bool true
     /usr/bin/defaults write com.apple.finder ShowRemovableMediaOnDesktop -bool true

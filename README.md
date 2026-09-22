@@ -18,9 +18,28 @@ Personal [Home Manager](https://github.com/nix-community/home-manager) configura
 | Tag   | System           | Description                    |
 | ----- | ---------------- | ------------------------------ |
 | `mac` | `aarch64-darwin` | Personal macOS (Apple Silicon) |
+| `mac-work` | `aarch64-darwin` | Lean work macOS (Apple Silicon) |
 | `ft`  | `x86_64-linux`   | 42 school Linux (rootless)     |
 
 The `tag` parameter flows through the entire config, conditionally including modules, packages, and aliases per target.
+
+### macOS profiles
+
+`mac` remains the full personal setup. `mac-work` is a separate, lean work
+profile: it retains the managed shell, Git, SSH, Helix, Claude, Ghostty,
+VS Code, Brave, Slack, Notion, Alfred and the JavaScript/Python/Docker
+toolchain. It deliberately excludes personal media, gaming, study, Dropbox,
+local PostgreSQL, App Store apps, specialist Rust/assembly/C++ toolchains, and
+media-download tools.
+
+The exact app and Dock inventories live in `profiles/macos.nix`, making those
+choices easy to review without touching system defaults or dotfiles.
+
+> **Important:** profiles are alternative configurations for the same macOS
+> user, not isolated macOS accounts. `homebrew.onActivation.cleanup = "zap"`
+> means a full `mac-work` activation removes Homebrew-managed apps absent from
+> its work list. Back up or move any data you need first, and use a separate
+> macOS account if browser logins, app data, and `~/Library` must be isolated.
 
 ## Config Strategies
 
@@ -71,6 +90,17 @@ re
 # 4. Update flake inputs
 nix flake update
 ```
+
+### Work macOS
+
+First validate the work profile, then activate it with the full system target:
+
+```bash
+nix flake check --no-write-lock-file
+sudo darwin-rebuild switch --flake ~/.config/home-manager#mac-work
+```
+
+After activation, `re` and `sure` automatically keep using `mac-work`.
 
 **Note:** On macOS, nix-darwin includes home-manager as a module, so `darwin-rebuild switch` activates both system and user config together.
 
