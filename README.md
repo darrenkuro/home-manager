@@ -93,24 +93,44 @@ nix flake update
 
 ### Work macOS
 
-The flake includes the private `claude-config` repository over SSH. Before the
-first switch, create or copy a GitHub-authorized SSH key onto this Mac, add it
-to the macOS Keychain/agent, and verify it. Replace the key path below if you
-use a different key name:
+This configuration uses nix-darwin's Homebrew module for the work applications
+(Alfred, Brave, Claude, Ghostty, Notion, Slack, and VS Code). Homebrew is not
+installed by Home Manager or nix-darwin, so install it once before the first
+switch:
 
 ```bash
-# Only if this Mac does not already have a GitHub SSH key.
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+brew --version
+```
+
+Read the installer prompt before confirming; on Apple Silicon it installs under
+`/opt/homebrew`. If the new terminal cannot find `brew`, follow the installer’s
+printed "Next steps" to add Homebrew to your shell `PATH`.
+
+The flake includes the private `claude-config` repository over SSH. Complete
+this sequence before the first switch. Replace the key path below if you use a
+different key name.
+
+```bash
+# 1. Only if this Mac does not already have a GitHub SSH key: create one.
 ssh-keygen -t ed25519 -C "your-github-email" -f ~/.ssh/id_ed25519
 
-# Load the key for this shell and future macOS logins.
-eval "$(ssh-agent -s)"
-ssh-add --apple-use-keychain ~/.ssh/id_ed25519
-
-# Copy this into GitHub → Settings → SSH and GPG keys → New SSH key.
+# 2. Copy the PUBLIC key. In GitHub, open Settings → SSH and GPG keys →
+#    New SSH key, choose "Authentication Key", and paste it there.
 pbcopy < ~/.ssh/id_ed25519.pub
 
-# GitHub should greet your username; it must not report publickey denied.
+# 3. Load the PRIVATE key into the macOS SSH agent and save its passphrase
+#    in Keychain. This is needed because the first Nix activation uses sudo.
+#    If no agent is already available, start one for this terminal session.
+if [ -z "${SSH_AUTH_SOCK:-}" ]; then eval "$(ssh-agent -s)"; fi
+ssh-add --apple-use-keychain ~/.ssh/id_ed25519
+
+# 4. Test normal GitHub access. The expected success message says GitHub does
+#    not provide shell access; that is normal and confirms authentication.
 ssh -T git@github.com
+
+# 5. Test the same key is visible to the privileged process used by Nix.
+sudo env SSH_AUTH_SOCK="$SSH_AUTH_SOCK" ssh -T git@github.com
 ```
 
 First validate the work profile, then activate it with the full system target.
