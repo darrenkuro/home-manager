@@ -119,7 +119,8 @@ evaluation: it lets root use your already-unlocked SSH agent rather than
 looking for a separate root GitHub key.
 
 ```bash
-nix flake check --no-write-lock-file
+nix --extra-experimental-features "nix-command flakes" \
+  flake check --no-write-lock-file
 sudo env SSH_AUTH_SOCK="$SSH_AUTH_SOCK" \
   nix --extra-experimental-features "nix-command flakes" run nix-darwin -- \
   switch --flake ~/.config/home-manager#mac-work
