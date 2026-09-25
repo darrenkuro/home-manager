@@ -1,6 +1,11 @@
 { tag, profile, lib, ... }: let
-    macTarget = if profile == "work" then "mac-work" else "mac";
-in {
+    macTarget = if profile == "work"
+    then
+        "mac-work"
+    else
+        "mac";
+in
+{
     programs.zsh.shellAliases = lib.mkMerge [
         # ---- common aliases (always enabled)
         {
@@ -31,9 +36,9 @@ in {
                 re = "nix run home-manager -- switch --flake $HM#${macTarget} && exec zsh"; # HM only (no brew, system.defaults, launchd)
                 # full system rebuild; the BTM patch step is personal-only (the
                 # work profile runs stock nix-darwin daemons, no stubs to patch)
-                sure = "sudo darwin-rebuild switch --flake $HM#${macTarget}"
-                + lib.optionalString ( profile == "personal" ) " && sudo $HM/scripts/btm-patch-nix.sh"
-                + " && exec zsh";
+                sure = "sudo darwin-rebuild switch --flake $HM#${macTarget}" +
+                lib.optionalString ( profile == "personal" )
+                " && sudo $HM/scripts/btm-patch-nix.sh" + " && exec zsh";
 
                 dbox = "cd $DBOX";
                 hide = "chflags hidden";
@@ -48,7 +53,8 @@ in {
                 # brew tmux (stable 3.7) fixes the Claude Code rendering issue.
                 # Keep this alias until pinned nixpkgs ships tmux >=3.7, then drop it and the brew entry for nix-managed tmux.
                 tmux = "/opt/homebrew/bin/tmux";
-            } // lib.optionalAttrs (profile != "work") {
+            } //
+            lib.optionalAttrs ( profile != "work" ) {
                 ytd = "yt-dlp -t mp4 --cookies-from-browser brave";
                 kotr = "nix-shell -p whisper-cpp --run 'whisper-stream -m $HOME/.local/share/whisper-cpp/ggml-large-v3-turbo.bin -l ko -tr'";
                 # cc telegram — phone→this Mac via Telegram channel.

@@ -1,7 +1,8 @@
 { pkgs, config, tag, profile, user, homeDir, lib, ... }: let
     isMac = tag == "mac";
     isWork = profile == "work";
-in {
+in
+{
     # ----------- Base Settings (identity comes from the flake's machine map)
     home.username = user;
     home.homeDirectory = homeDir;
@@ -29,7 +30,8 @@ in {
         cmake
         # nerd-fonts.hack — not cached for aarch64-darwin
         # cachix — not currently needed
-    ] ++ lib.optionals (!isWork) [
+    ] ++
+    lib.optionals ( !isWork ) [
         # Keep specialist native toolchains on the personal/development target.
         # The work profile still has the general Nix, JavaScript, Python and
         # container toolchain below.
@@ -62,7 +64,7 @@ in {
         docker-buildx
 
         pandoc
-    ] ++ lib.optionals (isMac && !isWork) [
+    ] ++ lib.optionals ( isMac && !isWork ) [
         rustc
         # typst — not currently needed
         ffmpeg
@@ -145,8 +147,8 @@ in {
         ./modules/apps/mdserve.nix
         ./modules/apps/ghostty.nix
         ./modules/apps/app-icons.nix
-
-    ] ++ lib.optionals (isMac && !isWork) [
+    ] ++
+    lib.optionals ( isMac && !isWork ) [
         # PostgreSQL is deliberately absent from the clean work profile.
         ./modules/services/postgresql/home.nix
     ] ++ lib.optionals ( tag == "ft" ) [ ./modules/system/linux-ft.nix ];
