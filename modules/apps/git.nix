@@ -1,4 +1,4 @@
-{ pkgs, ... }: {
+{ pkgs, sshKey, ... }: {
     home.packages = with pkgs;
     [ git gh ];
 
@@ -80,7 +80,7 @@
         settings = {
             user.name = "darrenkuro";
             user.email = "odon5ht@gmail.com";
-            user.signingKey = "~/.ssh/id_rsa.pub";
+            user.signingKey = "~/.ssh/${sshKey}.pub"; # per machine, from flake.nix `machines`
             gpg.format = "ssh";
             commit.gpgsign = "true";
             core.editor = "hx";

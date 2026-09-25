@@ -123,7 +123,9 @@ different key name.
 ssh-keygen -t ed25519 -C "your-github-email" -f ~/.ssh/id_ed25519
 
 # 2. Copy the PUBLIC key. In GitHub, open Settings → SSH and GPG keys →
-#    New SSH key, choose "Authentication Key", and paste it there.
+#    New SSH key, choose "Authentication Key", and paste it there. Then add it
+#    a second time as a "Signing Key" (git signs every commit with it; see
+#    git.nix) and set this machine's `sshKey` in flake.nix `machines`.
 pbcopy < ~/.ssh/id_ed25519.pub
 
 # 3. Load the PRIVATE key into the macOS SSH agent and save its passphrase

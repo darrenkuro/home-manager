@@ -84,6 +84,47 @@ doctor() {
         _issues=$((_issues + 1))
     fi
 
+    # --- SSH key: per machine (flake.nix `machines.<m>.sshKey`), used for GitHub
+    # auth + commit signing and the hetzner deploy user. Read the effective path
+    # from git so this check can't drift from git.nix.
+    local _key
+    _key=$(git config --get user.signingKey)
+    _key=${_key/#\~/$HOME}
+    if [ -f "$_key" ]; then
+        _done "ssh key present (${_key/#$HOME/~})"
+    else
+        _skip "ssh key (${_key/#$HOME/~} missing)"
+        _item "run: ssh-keygen -t ed25519 -f ${_key%.pub} (README) — or fix sshKey for this machine in flake.nix"
+        _issues=$((_issues + 1))
+    fi
+    if ssh -o BatchMode=yes -o ConnectTimeout=5 -T git@github.com 2>&1 | grep -q "successfully authenticated"; then
+        _done "GitHub SSH auth"
+    else
+        _skip "GitHub SSH auth"
+        _item "GitHub → Settings → SSH and GPG keys → New SSH key → Authentication Key (pbcopy < $_key)"
+        _issues=$((_issues + 1))
+    fi
+    # Signing-key registration is what makes commits show "Verified"; needs the
+    # read:ssh_signing_key scope on the gh token.
+    if gh api user/ssh_signing_keys --jq '.[].key' 2> /dev/null | grep -qF "$(cut -d' ' -f1,2 "$_key" 2> /dev/null)"; then
+        _done "GitHub signing key registered"
+    else
+        _skip "GitHub signing key registration"
+        _item "GitHub → Settings → SSH and GPG keys → New SSH key → Signing Key (pbcopy < $_key)"
+        _item "if already added: gh auth refresh -s read:ssh_signing_key (lets doctor verify it)"
+        _issues=$((_issues + 1))
+    fi
+    # Personal server — the work profile never needs it
+    if [ "$HM_PROFILE" = PERSONAL ]; then
+        if ssh -o BatchMode=yes -o ConnectTimeout=5 -o StrictHostKeyChecking=accept-new hetzner true 2> /dev/null; then
+            _done "hetzner ssh (deploy)"
+        else
+            _skip "hetzner ssh (deploy)"
+            _item "append $_key to deploy's ~/.ssh/authorized_keys on hetzner (from an already-authorized machine)"
+            _issues=$((_issues + 1))
+        fi
+    fi
+
     # --- Not machine-checkable — verify by hand (docs/manual-setup.md)
     _header "manual (not checkable)"
     _item "Brave Sync: brave://settings/braveSync/setup — join chain + enable 'Sync everything'"

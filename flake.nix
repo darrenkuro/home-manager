@@ -42,17 +42,19 @@
 
     # Machine identity — the single source of truth. Every target below and
     # every module arg (user, homeDir, tag, profile) derives from this map.
+    # sshKey — basename under ~/.ssh; one key per machine (never copied between
+    # them), used for both GitHub auth and commit signing (see git.nix).
     machines = {
-      mac = { system = "aarch64-darwin"; tag = "mac"; profile = "personal"; user = "darrenlu"; };
-      mac-work = { system = "aarch64-darwin"; tag = "mac"; profile = "work"; user = "darrenlu"; };
-      ft = { system = "x86_64-linux"; tag = "ft"; profile = "personal"; user = "dlu"; };
+      mac = { system = "aarch64-darwin"; tag = "mac"; profile = "personal"; user = "darrenlu"; sshKey = "id_rsa"; };
+      mac-work = { system = "aarch64-darwin"; tag = "mac"; profile = "work"; user = "darrenlu"; sshKey = "id_ed25519"; };
+      ft = { system = "x86_64-linux"; tag = "ft"; profile = "personal"; user = "dlu"; sshKey = "id_ed25519"; };
     };
 
     isDarwin = m: lib.hasSuffix "darwin" m.system;
     specialArgsFor = m:
       hmExtraArgs
       // {
-        inherit (m) system tag profile user;
+        inherit (m) system tag profile user sshKey;
         homeDir = if isDarwin m then "/Users/${m.user}" else "/home/${m.user}";
       };
 
