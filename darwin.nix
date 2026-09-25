@@ -72,6 +72,11 @@ in
         fi
     '';
 
+    # sudo via Touch ID — written to /etc/pam.d/sudo_local, which macOS
+    # updates leave alone (unlike pam.d/sudo). Enrollment itself is
+    # per-machine (Secure Enclave); see docs/manual-setup.md.
+    security.pam.services.sudo_local.touchIdAuth = true;
+
     # macOS system defaults (declarative)
     system.defaults = {
         # ── NSGlobalDomain ──
