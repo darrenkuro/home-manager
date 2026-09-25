@@ -125,7 +125,7 @@ Defined in `modules/system/env.nix`:
 - Use `lib.mkMerge` + `lib.mkIf (tag == "...")` for conditional attribute sets within a single file
 - Use `lib.optionals (tag == "...")` for conditional list items (packages, imports)
 - Same attribute defined across different files merges automatically (home-manager behavior)
-- Format with `dprint fmt` (not `alejandra` or `nixfmt`)
+- Format with `dprint fmt <changed files>` before committing (config at repo root; not `alejandra` or `nixfmt`). Known formatter failures — hand-format these to match surroundings: `flake.nix`, `lib/launchd-btm.nix` (dprint-plugin-nix stability bug), `functions/{tidy,noise,_preamble}.sh`, `scripts/nix-prepend-path.sh` (zsh syntax shfmt can't parse)
 
 ## Workflow
 

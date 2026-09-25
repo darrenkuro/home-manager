@@ -9,11 +9,13 @@ This file: `~/.config/home-manager/configs/claude/CLAUDE.md` (edit, then `re` to
 **Tool installation**: Never install tools without permission. Use `nix-shell -p <pkg>` or `nix run nixpkgs#<pkg>` for one-off needs.
 
 ### Tool overrides (these override ANY skill or other context that says otherwise)
+
 - `defuddle` is NOT globally installed. Always use `npx defuddle`, never bare `defuddle`. If a skill tells you to run `defuddle parse`, prepend `npx`.
 
 **Python**: System Python is Nix-managed. Always use `python3 -m venv /tmp/<name>_env`.
 
 **Apple code signing**: Always use real identity, never ad-hoc.
+
 - `codesign -fs "Apple Development: odon5ht@gmail.com (497TM5HK44)"`
 
 **Media playback (macOS)**: NEVER `open` audio/video files — it hijacks Music/QuickTime. Play audio with `afplay <file>` (CLI, blocks until playback finishes); pass `-t <seconds>` to cap length. Inspect media with `ffprobe`, never `open`.
@@ -29,11 +31,14 @@ This file: `~/.config/home-manager/configs/claude/CLAUDE.md` (edit, then `re` to
 ## Behavior
 
 ### Project Context
+
 - When entering a repo, check for CLAUDE.md (or `.claude/CLAUDE.md`) first — it contains project-specific instructions
 - When editing files in a repo that isn't cwd, load that repo's CLAUDE.md first
 
 ### Project-Local Files
+
 Keep plans, tasks, lessons **local to the project** in `.claude/`:
+
 - `.claude/lessons.md` — learnings
 - `.claude/todo.md` — task list
 - `.claude/architecture-*.md` — plans
@@ -43,11 +48,23 @@ Plans from plan mode go here too — never write plans to `~/.config/claude/plan
 Use global `~/.config/claude/` only when not in a project context.
 
 ### Core Principles
+
 - **Simplicity**: Minimal code, minimal changes
 - **No laziness**: Find root causes, no temporary fixes
 - **Research before guessing**: Verify uncertain claims online
 
+### Formatting (all projects)
+
+- While editing, match the file's existing style exactly
+- Before committing, run the project's formatter **on the files you changed**
+  (find it in the repo's CLAUDE.md, config files, or package.json — e.g.
+  `dprint fmt <files>`, `cargo fmt`, `prettier`). Never reformat the whole
+  repo or unrelated files unless explicitly asked
+- If a file is a known formatter failure (tool bug, unsupported syntax),
+  hand-format to match its surroundings and note it in `.claude/lessons.md`
+
 ### Workflow
+
 - **Plan first**: Enter plan mode for non-trivial tasks (3+ steps)
 - **Use subagents generously**: Default to offloading substantial or independent work (research, broad search, multi-file implementation) to subagents whenever you see fit — lean toward delegating rather than doing it inline, and run long-running ones in the background so the main thread stays responsive and its context clean. Exception: keep quick, conversational, or decision-heavy/interactive work inline — a subagent runs to completion and can't ask you mid-task.
 - **Subagent limits**: Limit scope to avoid 32k output limit; for PDF-heavy tasks use smaller batches
@@ -57,20 +74,25 @@ Use global `~/.config/claude/` only when not in a project context.
 - **Autonomous**: Fix bugs and failing CI without hand-holding
 
 ### Process Management
+
 Verify processes are killed before restarting. `kill` may not kill child processes — check with `ps aux | grep <pattern>`.
 
 ### Refactoring
+
 Make ALL changes in a single atomic pass — move files, update imports, verify compilation before reporting done.
 
 ### Pull Requests
+
 - Read repo README and `.github/` for PR templates
 - Show full PR title, body, and diff to user before pushing
 - Never push without explicit approval
 
 ### New Project Init
+
 - Create in `~/Documents/dev/`
 - `git init && gh repo create --private`
 - Add LICENSE (MIT, "Darren Kuro") and README (use `/readme-style`)
 
 ### Docker
+
 Create .dockerignore, use pnpm hoisted layout, test `docker build` before reporting done.
