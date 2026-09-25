@@ -84,6 +84,15 @@ repo style; everything else formats normally. Also: from the repo root,
 plain `dprint fmt` needs `--config-discovery=global` (config lives at
 ~/.config/dprint/dprint.json, not in-repo).
 
+## brew bundle cleanup DOES uninstall Mac App Store apps
+
+`sure` runs `brew bundle --zap --force-cleanup`; with current Homebrew that
+uninstalls mas apps missing from `masApps` (observed Sep 2026: removing 4
+entries from profiles/macos.nix deleted Pages, Numbers, Trello, OmniFocus
+from /Applications on the next sure). Don't assume cleanup is cask-only —
+treat any masApps removal as a destructive change. Restore = re-add the id
+and rerun sure (mas reinstalls free/purchased apps).
+
 ## zsh Alias-in-Alias Expansion (why functions use /bin/rm)
 
 zsh re-expands aliases in an alias's expansion text, AND expands aliases
