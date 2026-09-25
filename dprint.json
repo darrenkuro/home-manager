@@ -11,7 +11,7 @@
   "toml": {},
   "exec": {
     "commands": [{
-      "command": "clang-format -style={BasedOnStyle: LLVM, IndentWidth: {{indent_width}}, ColumnLimit: {{line_width}}, BreakTemplateDeclarations: Yes, AllowShortFunctionsOnASingleLine: Inline, AllowShortIfStatementsOnASingleLine: Always, AlignConsecutiveAssignments: true}",
+      "command": "clang-format -style=file -fallback-style=LLVM -assume-filename={{file_path}}",
       "exts": ["c", "h", "cpp", "hpp"]
     }, {
       "command": "shfmt -i {{indent_width}} -ci -sr",

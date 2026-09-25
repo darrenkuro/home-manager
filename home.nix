@@ -80,6 +80,7 @@ in
         # Create XDG state/cache directories for shell history, sessions, etc.
         xdgStateDirs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
         run mkdir -p \
+          "$HOME/Documents/dev" \
           "$HOME/.local/state/zsh" \
           "$HOME/.local/state/bash" \
           "$HOME/.local/state/less" \
@@ -135,6 +136,8 @@ in
     # its formatter to the discovered config's folder — covers the whole repo,
     # and plain `dprint fmt` works here without --config-discovery=global.
     xdg.configFile."dprint/dprint.json".source = ./dprint.json;
+    # Style for dprint's clang-format exec command (see configs/clang-format)
+    home.file.".clang-format".source = ./configs/clang-format;
 
     imports = [
         ./modules/system/aliases.nix

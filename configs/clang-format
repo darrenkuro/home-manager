@@ -1,0 +1,14 @@
+# Global clang-format style, symlinked to ~/.clang-format by home.nix.
+# clang-format walks up from the file's directory, so a project's own
+# .clang-format takes precedence; this is the fallback for everything else.
+# Invoked via dprint's exec plugin (dprint.json) — the style used to be inline
+# there, but dprint-plugin-exec whitespace-splits the command and ignores quotes,
+# so a YAML style string with spaces can't survive the trip.
+# IndentWidth/ColumnLimit mirror dprint.json's indentWidth/lineWidth — keep in sync.
+BasedOnStyle: LLVM
+IndentWidth: 4
+ColumnLimit: 100
+BreakTemplateDeclarations: Yes
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: Always
+AlignConsecutiveAssignments: true
