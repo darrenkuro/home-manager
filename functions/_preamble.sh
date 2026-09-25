@@ -17,6 +17,7 @@
 #
 # Usage in each function file:
 #   INSTALL_TAG=(MAC FT)
+#   INSTALL_PROFILE=(PERSONAL)   # optional; absent/empty = all profiles
 #   REQUIRED_TOOLS=(gh git)
 #   _check_preamble || return 0
 _check_preamble() {
@@ -33,6 +34,19 @@ _check_preamble() {
     fi
   done
   unset INSTALL_TAG
+
+  # --- Profile check (opt-in: only gates when INSTALL_PROFILE is non-empty)
+  if $_matched && [ ${#INSTALL_PROFILE[@]} -gt 0 ]; then
+    _matched=false
+    local _profile
+    for _profile in "${INSTALL_PROFILE[@]}"; do
+      if [ "$_profile" = "$HM_PROFILE" ]; then
+        _matched=true
+        break
+      fi
+    done
+  fi
+  unset INSTALL_PROFILE
 
   if ! $_matched; then
     unset REQUIRED_TOOLS

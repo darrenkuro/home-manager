@@ -1,14 +1,9 @@
-{ tag, lib, ... }: {
+{ tag, profile, lib, ... }: {
     home.sessionVariables = ( import ../../lib/xdg-paths.nix { home = "$HOME"; } ) // {
-        # ── System ──
-        HM_TAG = if tag == "mac"
-        then
-            "MAC"
-        else if tag == "ft"
-        then
-            "FT"
-        else
-            "UNKNOWN";
+        # ── System ── (uppercase to match the INSTALL_TAG/INSTALL_PROFILE
+        # gates in functions/_preamble.sh)
+        HM_TAG = lib.toUpper tag;
+        HM_PROFILE = lib.toUpper profile;
 
         # ── Shortcuts ──
         DBOX = "$HOME/Dropbox";
