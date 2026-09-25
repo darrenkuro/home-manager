@@ -3,9 +3,8 @@
 #
 # Currently DISABLED — its import in the root darwin.nix is commented out.
 # To enable: uncomment that import, then `sure`.
-{ lib, pkgs, ... }: let
-    homeDir = "/Users/darrenlu";
-    btm = import ../../../lib/launchd-btm.nix { inherit lib pkgs; };
+{ lib, pkgs, homeDir, ... }: let
+    btm = import ../../../lib/launchd-btm.nix { inherit lib pkgs homeDir; };
     workDir = "${homeDir}/Documents/dev/polymarket-trading-bot";
 
     polymarketWrapper = btm.mkWrapper {

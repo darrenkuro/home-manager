@@ -7,8 +7,8 @@
 # user-agent patching in mkStubInstall.
 #
 # No home.nix half — nothing user-scoped to manage.
-{ lib, pkgs, ... }: let
-    btm = import ../../../lib/launchd-btm.nix { inherit lib pkgs; };
+{ lib, pkgs, homeDir, ... }: let
+    btm = import ../../../lib/launchd-btm.nix { inherit lib pkgs homeDir; };
 
     nixDaemonWrapper = btm.mkWrapper {
         name = "NixDaemonStart";

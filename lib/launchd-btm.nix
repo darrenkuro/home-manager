@@ -13,9 +13,9 @@
 #
 # Codesigning is NOT done here — scripts/btm-patch-nix.sh signs all stubs
 # with the real Apple Development identity (runs via `sure`).
-{ lib, pkgs }: rec {
-    stubDir = "/Users/darrenlu/.local/share/app-stubs";
-    agentDir = "/Users/darrenlu/Library/LaunchAgents";
+{ lib, pkgs, homeDir }: rec {
+    stubDir = "${homeDir}/.local/share/app-stubs";
+    agentDir = "${homeDir}/Library/LaunchAgents";
 
     # useSystemBash — for pre-mount scripts (darwin-store) that run before /nix exists.
     mkWrapper = {

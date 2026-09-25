@@ -4,9 +4,8 @@
 #
 # Toggle: comment out this module's import in the root darwin.nix
 # (and ./home.nix's import in the root home.nix), then `sure`.
-{ lib, pkgs, ... }: let
-    homeDir = "/Users/darrenlu";
-    btm = import ../../../lib/launchd-btm.nix { inherit lib pkgs; };
+{ lib, pkgs, homeDir, ... }: let
+    btm = import ../../../lib/launchd-btm.nix { inherit lib pkgs homeDir; };
     pg = import ./spec.nix { inherit pkgs; home = homeDir; };
 
     pgConf = pkgs.writeText "postgresql.conf" ''
