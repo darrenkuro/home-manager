@@ -13,8 +13,7 @@
 #   - XDG dotfiles and app configs
 #   - Services' user halves (modules/services/<name>/home.nix)
 #
-{ profile ? "personal" }: { config, lib, ... }: let
-    homeDir = "/Users/darrenlu";
+{ config, lib, profile, user, homeDir, ... }: let
     profiles = import ./profiles/macos.nix;
     selected = profiles.${profile} or ( throw "Unknown macOS profile: ${profile}" );
     act = import ./lib/activation.nix { inherit lib; };
@@ -132,7 +131,7 @@ in
 
     # Finder: custom window target
     /usr/bin/defaults write com.apple.finder NewWindowTarget -string "PfLo"
-    /usr/bin/defaults write com.apple.finder NewWindowTargetPath -string "file:///Users/darrenlu/${selected.finderStartFolder}/"
+    /usr/bin/defaults write com.apple.finder NewWindowTargetPath -string "file://${homeDir}/${selected.finderStartFolder}/"
     /usr/bin/defaults write com.apple.finder ShowHardDrivesOnDesktop -bool false
     /usr/bin/defaults write com.apple.finder ShowExternalHardDrivesOnDesktop -bool true
     /usr/bin/defaults write com.apple.finder ShowRemovableMediaOnDesktop -bool true
@@ -148,10 +147,10 @@ in
     ];
 
     # User (needed for home-manager integration to infer home.homeDirectory)
-    users.users.darrenlu = { name = "darrenlu"; home = "/Users/darrenlu"; };
+    users.users.${user} = { name = user; home = homeDir; };
 
     # Required for user-level options (launchd.user.agents, system.defaults.dock, etc.)
-    system.primaryUser = "darrenlu";
+    system.primaryUser = user;
 
     # GUI env vars — single source of truth lives in lib/xdg-paths.nix.
     # Shell-only vars (HISTFILE, ZSH_SESSION_DIR, color codes, DBOX/DEV/HM,

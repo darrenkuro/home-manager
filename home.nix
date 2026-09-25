@@ -1,24 +1,10 @@
-{ pkgs, config, tag, profile ? "personal", lib, ... }: let
+{ pkgs, config, tag, profile, user, homeDir, lib, ... }: let
     isMac = tag == "mac";
     isWork = profile == "work";
 in {
-    # ----------- Base Settings
-    home.username = if tag == "mac"
-    then
-        "darrenlu"
-    else if tag == "ft"
-    then
-        "dlu"
-    else
-        throw "Unknown tag: ${tag}";
-    home.homeDirectory = if tag == "mac"
-    then
-        "/Users/darrenlu"
-    else if tag == "ft"
-    then
-        "/home/dlu"
-    else
-        throw "Unknown tag: ${tag}";
+    # ----------- Base Settings (identity comes from the flake's machine map)
+    home.username = user;
+    home.homeDirectory = homeDir;
     home.stateVersion = "25.11"; # Version when started using
 
     home.packages = with pkgs;

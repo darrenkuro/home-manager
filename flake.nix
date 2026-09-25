@@ -35,88 +35,58 @@
     netusage,
     ...
   }: let
+    lib = nixpkgs.lib;
     hmExtraArgs = {
       inherit claude-plugins-official obsidian-skills claude-config netusage;
     };
-    mkHome = {
-      system,
-      tag,
-      profile ? "personal",
-    }:
+
+    # Machine identity — the single source of truth. Every target below and
+    # every module arg (user, homeDir, tag, profile) derives from this map.
+    machines = {
+      mac = { system = "aarch64-darwin"; tag = "mac"; profile = "personal"; user = "darrenlu"; };
+      mac-work = { system = "aarch64-darwin"; tag = "mac"; profile = "work"; user = "darrenlu"; };
+      ft = { system = "x86_64-linux"; tag = "ft"; profile = "personal"; user = "dlu"; };
+    };
+
+    isDarwin = m: lib.hasSuffix "darwin" m.system;
+    specialArgsFor = m:
+      hmExtraArgs
+      // {
+        inherit (m) system tag profile user;
+        homeDir = if isDarwin m then "/Users/${m.user}" else "/home/${m.user}";
+      };
+
+    # nix-darwin system + embedded HM (used by `sure`)
+    mkDarwin = m:
+      nix-darwin.lib.darwinSystem {
+        inherit (m) system;
+        specialArgs = specialArgsFor m;
+        modules = [
+          ./darwin.nix
+          home-manager.darwinModules.home-manager
+          {
+            nixpkgs.config.allowUnfree = true;
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.extraSpecialArgs = specialArgsFor m;
+            home-manager.users.${m.user} = import ./home.nix;
+          }
+        ];
+      };
+
+    # Standalone HM — used by `re` for fast user-only rebuilds (no sudo,
+    # no brew/system changes).
+    mkHome = m:
       home-manager.lib.homeManagerConfiguration {
         pkgs = import nixpkgs {
-          inherit system;
+          inherit (m) system;
           config.allowUnfree = true;
         };
-        extraSpecialArgs =
-          hmExtraArgs
-          // {
-            inherit tag system profile;
-          };
+        extraSpecialArgs = specialArgsFor m;
         modules = [./home.nix];
       };
   in {
-    # nix-darwin (mac system-level + embedded HM)
-    darwinConfigurations.mac = nix-darwin.lib.darwinSystem {
-      system = "aarch64-darwin";
-      modules = [
-        (import ./darwin.nix { profile = "personal"; })
-        home-manager.darwinModules.home-manager
-        {
-          nixpkgs.config.allowUnfree = true;
-          home-manager.useGlobalPkgs = true;
-          home-manager.useUserPackages = true;
-          home-manager.extraSpecialArgs =
-            hmExtraArgs
-            // {
-              tag = "mac";
-              profile = "personal";
-              system = "aarch64-darwin";
-            };
-          home-manager.users.darrenlu = import ./home.nix;
-        }
-      ];
-    };
-
-    # Lean work macOS profile.  It has its own Homebrew app list, Dock and
-    # Home Manager package set; the existing `mac` target stays personal.
-    darwinConfigurations.mac-work = nix-darwin.lib.darwinSystem {
-      system = "aarch64-darwin";
-      modules = [
-        (import ./darwin.nix { profile = "work"; })
-        home-manager.darwinModules.home-manager
-        {
-          nixpkgs.config.allowUnfree = true;
-          home-manager.useGlobalPkgs = true;
-          home-manager.useUserPackages = true;
-          home-manager.extraSpecialArgs =
-            hmExtraArgs
-            // {
-              tag = "mac";
-              profile = "work";
-              system = "aarch64-darwin";
-            };
-          home-manager.users.darrenlu = import ./home.nix;
-        }
-      ];
-    };
-
-    # Standalone HM — used by `re` for fast user-only rebuilds (no sudo,
-    # no brew/system changes). `sure` uses darwinConfigurations.mac above.
-    homeConfigurations = {
-      mac = mkHome {
-        system = "aarch64-darwin";
-        tag = "mac";
-      };
-      mac-work = mkHome {
-        system = "aarch64-darwin";
-        tag = "mac";
-        profile = "work";
-      };
-      ft = mkHome {
-        system = "x86_64-linux";
-        tag = "ft";
-      };
-    };
+    darwinConfigurations = lib.mapAttrs (_: mkDarwin) (lib.filterAttrs (_: isDarwin) machines);
+    homeConfigurations = lib.mapAttrs (_: mkHome) machines;
   };
 }
