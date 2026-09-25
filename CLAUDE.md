@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Nix Home Manager flake for declaratively managing user environments across three targets:
 
 - **mac** (`aarch64-darwin`) — personal macOS
-- **mac-work** (`aarch64-darwin`) — lean work iMac (no BTM, no PostgreSQL, small app list)
+- **mac-work** (`aarch64-darwin`) — work iMac: same toolchain as personal, smaller app list, no BTM
 - **ft** (`x86_64-linux`) — 42 school rootless Linux
 
 Machine identity (system, tag, profile, user — homeDir derived) lives in the `machines` map in `flake.nix`; `specialArgs` carry those values into every module. Two dimensions flow through the config: `tag` (`"mac"`/`"ft"`, OS/machine) and `profile` (`"personal"`/`"work"`, purpose — macOS app/service choices per profile live in `profiles/macos.nix`).

@@ -27,8 +27,9 @@ in
     # BTM takeover of the Nix daemons (named, icon-grouped Login Items).
     # Work profile stays on stock nix-darwin plists — see profiles/macos.nix.
      ++ lib.optionals selected.enableNixBtm [ ./modules/services/nix-daemon/darwin.nix ]
-    # PostgreSQL is useful for the personal machine, but a clean work
-    # profile should not start a local database at login.
+    # PostgreSQL's launchd agents run through BTM stubs that btm-patch-nix.sh
+    # codesigns with the personal Apple Development identity — the work Mac has
+    # neither the cert nor the patch step, so it stays personal-only.
      ++ lib.optionals selected.enablePostgresql [ ./modules/services/postgresql/darwin.nix ];
 
     # Nix settings

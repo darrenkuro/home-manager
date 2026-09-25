@@ -30,11 +30,9 @@ in
         cmake
         # nerd-fonts.hack — not cached for aarch64-darwin
         # cachix — not currently needed
-    ] ++
-    lib.optionals ( !isWork ) [
-        # Keep specialist native toolchains on the personal/development target.
-        # The work profile still has the general Nix, JavaScript, Python and
-        # container toolchain below.
+
+        # Native toolchains — every profile gets the full set; profiles differ
+        # only in GUI apps (profiles/macos.nix), never in tooling.
         clang-tools # C, C++
         cargo
         rust-analyzer
@@ -67,7 +65,7 @@ in
         docker-buildx
 
         pandoc
-    ] ++ lib.optionals ( isMac && !isWork ) [
+
         rustc
         # typst — not currently needed
         ffmpeg
@@ -157,7 +155,8 @@ in
         ./modules/apps/app-icons.nix
     ] ++
     lib.optionals ( isMac && !isWork ) [
-        # PostgreSQL is deliberately absent from the clean work profile.
+        # PostgreSQL is personal-only: its launchd half needs codesigned BTM
+        # stubs (see root darwin.nix). The only tooling the work profile lacks.
         ./modules/services/postgresql/home.nix
     ] ++ lib.optionals ( tag == "ft" ) [ ./modules/system/linux-ft.nix ];
 }

@@ -56,9 +56,9 @@
         enableNixBtm = true;
     };
 
-    # A deliberately small work desktop.  It includes the configured terminal,
-    # editor, browser, communication and knowledge apps, but excludes personal
-    # media, study, gaming, cloud-sync and consumer App Store software.
+    # Same tooling as personal (home.nix ships the full toolchain to every
+    # profile); only the GUI app list differs — no personal media, study,
+    # gaming, cloud-sync or consumer App Store software.
     work = {
         casks = [
             "alfred"

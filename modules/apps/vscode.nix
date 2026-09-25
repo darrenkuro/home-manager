@@ -3,9 +3,7 @@
 # below is the source of truth, activation installs what's missing and warns
 # about anything installed that isn't tracked here (same warn-not-remove policy
 # as claude.nix's plugin check). ~/.vscode/extensions stays VS Code's.
-{ lib, pkgs, tag, profile, ... }: let
-    isWork = profile == "work";
-
+{ lib, pkgs, tag, ... }: let
     requiredExtensions = [
         "anthropic.claude-code"
         "dprint.dprint"
@@ -22,9 +20,6 @@
         "tamasfe.even-better-toml"
         "wakatime.vscode-wakatime"
         "zokugun.explicit-folding"
-    ] ++
-    lib.optionals ( !isWork ) [
-        # Specialist toolchains stay on the personal target (see home.nix packages)
         "13xforever.language-x86-64-assembly"
         "dan-c-underwood.arm"
         "haxogames.x86-assembly-syntax"

@@ -50,8 +50,6 @@ in
                 nu = "netusage"; # short form
                 remoteon = "sudo systemsetup -setremotelogin on";
                 remoteoff = "sudo systemsetup -setremotelogin off";
-            } //
-            lib.optionalAttrs ( profile != "work" ) {
                 ytd = "yt-dlp -t mp4 --cookies-from-browser brave";
                 kotr = "nix-shell -p whisper-cpp --run 'whisper-stream -m $HOME/.local/share/whisper-cpp/ggml-large-v3-turbo.bin -l ko -tr'";
                 # cc telegram — phone→this Mac via Telegram channel.

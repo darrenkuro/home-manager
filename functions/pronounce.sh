@@ -1,5 +1,4 @@
 INSTALL_TAG=(MAC)
-INSTALL_PROFILE=(PERSONAL)
 REQUIRED_TOOLS=(say ffmpeg curl)
 _check_preamble || return 0
 
