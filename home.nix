@@ -130,7 +130,10 @@ in
 
     fonts.fontconfig.enable = true;
 
-    xdg.configFile."dprint/dprint.json".source = ./configs/dprint.json;
+    # Repo ROOT (not configs/) so the dprint VSCode extension — which scopes
+    # its formatter to the discovered config's folder — covers the whole repo,
+    # and plain `dprint fmt` works here without --config-discovery=global.
+    xdg.configFile."dprint/dprint.json".source = ./dprint.json;
 
     imports = [
         ./modules/system/aliases.nix

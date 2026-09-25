@@ -80,9 +80,18 @@ pkgs.writeTextFile {
 "Formatting succeeded initially, but failed when ensuring a stable format"
 — a dprint-plugin-nix bug triggered by certain constructs (it leaves the
 file untouched, so it's safe but noisy). Hand-format those two files in
-repo style; everything else formats normally. Also: from the repo root,
-plain `dprint fmt` needs `--config-discovery=global` (config lives at
-~/.config/dprint/dprint.json, not in-repo).
+repo style; everything else formats normally. The plugin is Darren's own
+(github.com/darrenkuro/dprint-plugin-nix v0.1.0) — fixable at the source.
+
+## dprint VSCode extension only formats under the discovered config's folder
+
+The extension searches the workspace for dprint.json and registers its
+formatter scoped to that file's FOLDER (see the dprint Output channel:
+"Folder: …"). It never falls back to ~/.config/dprint/dprint.json (the
+CLI does, for single files). Hence dprint.json lives at the repo ROOT —
+moving it under configs/ would silently kill format-on-save for the rest
+of the repo. Projects without their own dprint.json get no formatter at
+all in VSCode.
 
 ## brew bundle cleanup DOES uninstall Mac App Store apps
 
