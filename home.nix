@@ -52,6 +52,7 @@ in
 
         python313Packages.flake8
         pyright # Python LSP (Claude pyright-lsp plugin needs pyright-langserver)
+        ruff # Python linter LSP (helix pairs it with pyright; also dprint's py formatter engine)
 
         python313
         python313Packages.pip
@@ -145,6 +146,7 @@ in
         ./modules/apps/git.nix
         ./modules/apps/helix.nix
         ./modules/apps/claude.nix
+        ./modules/apps/vscode.nix
         ./modules/apps/ssh.nix
     ] ++
     lib.optionals isMac [

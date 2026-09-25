@@ -13,6 +13,7 @@
             "claude"
             "dropbox"
             "font-carlito" # Google's metric-compatible substitute for Microsoft's Calibri
+            "font-hack-nerd-font" # editor.fontFamily in configs/vscode-settings.jsonc
             "ghostty"
             "notion"
             "obsidian"
@@ -63,6 +64,7 @@
             "alfred"
             "brave-browser"
             "claude"
+            "font-hack-nerd-font" # editor.fontFamily in configs/vscode-settings.jsonc
             "ghostty"
             # "notion"
             "slack"

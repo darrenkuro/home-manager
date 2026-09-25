@@ -27,7 +27,14 @@ in
             { name = "cpp"; auto-format = true; indent = indent4; formatter = fmt "cpp"; }
             { name = "nix"; auto-format = true; indent = indent4; formatter = fmt "nix"; }
             { name = "rust"; auto-format = true; indent = indent4; formatter = fmt "rs"; }
-            { name = "python"; auto-format = true; indent = indent4; formatter = fmt "py"; }
+            # Helix 25.07 defaults to ty+ruff; pyright is what we ship (see home.nix)
+            {
+                name = "python";
+                auto-format = true;
+                indent = indent4;
+                formatter = fmt "py";
+                language-servers = [ "pyright" "ruff" ];
+            }
             { name = "javascript"; auto-format = true; indent = indent4; formatter = fmt "js"; }
             { name = "typescript"; auto-format = true; indent = indent4; formatter = fmt "ts"; }
             { name = "json"; auto-format = true; indent = indent2; formatter = fmt "json"; }
