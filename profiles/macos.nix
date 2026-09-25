@@ -64,7 +64,7 @@
             "brave-browser"
             "claude"
             "ghostty"
-            "notion"
+            # "notion"
             "slack"
             "visual-studio-code"
         ];
@@ -73,7 +73,7 @@
 
         dockApps = [
             "/Applications/Brave Browser.app"
-            "/Applications/Notion.app"
+            "/Applications/Trello.app"
             "/Applications/Slack.app"
             "/Applications/Ghostty.app"
             "/Applications/Visual Studio Code.app"
