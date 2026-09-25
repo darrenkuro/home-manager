@@ -1,4 +1,4 @@
-{ tag, profile ? "personal", lib, ... }: let
+{ tag, profile, lib, ... }: let
     macTarget = if profile == "work" then "mac-work" else "mac";
 in {
     programs.zsh.shellAliases = lib.mkMerge [
@@ -29,7 +29,11 @@ in {
                 p = "hx $HM/darwin.nix";
                 hm = "code $HM";
                 re = "nix run home-manager -- switch --flake $HM#${macTarget} && exec zsh"; # HM only (no brew, system.defaults, launchd)
-                sure = "sudo darwin-rebuild switch --flake $HM#${macTarget} && sudo $HM/scripts/btm-patch-nix.sh && exec zsh"; # full system + BTM
+                # full system rebuild; the BTM patch step is personal-only (the
+                # work profile runs stock nix-darwin daemons, no stubs to patch)
+                sure = "sudo darwin-rebuild switch --flake $HM#${macTarget}"
+                + lib.optionalString ( profile == "personal" ) " && sudo $HM/scripts/btm-patch-nix.sh"
+                + " && exec zsh";
 
                 dbox = "cd $DBOX";
                 hide = "chflags hidden";

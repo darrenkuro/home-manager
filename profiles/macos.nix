@@ -52,6 +52,7 @@
 
         finderStartFolder = "Dropbox";
         enablePostgresql = true;
+        enableNixBtm = true;
     };
 
     # A deliberately small work desktop.  It includes the configured terminal,
@@ -83,5 +84,9 @@
 
         finderStartFolder = "Documents/Work";
         enablePostgresql = false;
+        # Stock nix-darwin daemons — no BTM stubs/codesigning, and no encrypted
+        # Nix Store volume assumption (NixStoreMount needs the personal Mac's
+        # keychain passphrase entry). `sure` skips btm-patch-nix.sh here too.
+        enableNixBtm = false;
     };
 }

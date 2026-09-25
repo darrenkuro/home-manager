@@ -19,17 +19,17 @@
     act = import ./lib/activation.nix { inherit lib; };
 in
 {
-    # ── Services — comment out to disable ──
+    # ── Services — comment out to disable; profile-dependent ones gate on the
+    # catalogue booleans in profiles/macos.nix ──
     imports = [
-        # PostgreSQL is useful for the personal machine, but a clean work
-        # profile should not start a local database at login.
-        ./modules/services/nix-daemon/darwin.nix
         # ./modules/services/polymarket/darwin.nix
-    ] ++ ( if selected.enablePostgresql
-        then
-            [ ./modules/services/postgresql/darwin.nix ]
-        else
-            [ ] );
+    ]
+    # BTM takeover of the Nix daemons (named, icon-grouped Login Items).
+    # Work profile stays on stock nix-darwin plists — see profiles/macos.nix.
+    ++ lib.optionals selected.enableNixBtm [ ./modules/services/nix-daemon/darwin.nix ]
+    # PostgreSQL is useful for the personal machine, but a clean work
+    # profile should not start a local database at login.
+    ++ lib.optionals selected.enablePostgresql [ ./modules/services/postgresql/darwin.nix ];
 
     # Nix settings
     nix.settings.experimental-features = [ "nix-command" "flakes" ];
