@@ -32,22 +32,45 @@
         "telegram"
     ];
 
-    # hm-managed PreToolUse hooks — reconciled into settings.json by claudeSettings
+    # hm-managed hooks by event — reconciled into settings.json by claudeSettings
     # below, keyed by command path so user-added hooks survive every rebuild
-    hmHooks = [
-        {
-            matcher = "Read|Edit|Write|Bash|Grep";
-            hooks = [ { type = "command"; command = "~/.config/claude/hooks/protect-env.sh"; } ];
-        }
-        {
-            matcher = "Skill";
-            hooks = [
-                { type = "command"; command = "~/.config/claude/hooks/skill-standards-gate.sh"; }
-            ];
-        }
-    ];
-    notHmHook = lib.concatMapStringsSep " and "
-    ( h: ''.command != "${( builtins.head h.hooks ).command}"'' ) hmHooks;
+    hmHooks = {
+        PreToolUse = [
+            {
+                matcher = "Read|Edit|Write|Bash|Grep";
+                hooks = [
+                    { type = "command"; command = "~/.config/claude/hooks/protect-env.sh"; }
+                ];
+            }
+            {
+                matcher = "Skill";
+                hooks = [
+                    {
+                        type = "command";
+                        command = "~/.config/claude/hooks/skill-standards-gate.sh";
+                    }
+                ];
+            }
+        ];
+        PostToolUse = [
+            {
+                # Format the edited file when its repo has a dprint config
+                matcher = "Edit|Write|MultiEdit";
+                hooks = [
+                    { type = "command"; command = "~/.config/claude/hooks/format-on-edit.sh"; }
+                ];
+            }
+        ];
+    };
+    # One jq assignment per event: keep foreign entries, replace hm-owned ones
+    mergeHmHooks = lib.concatMapStringsSep "\n      | " ( event: let
+            entries = hmHooks.${event};
+            notHm = lib.concatMapStringsSep " and "
+            ( h: ''.command != "${( builtins.head h.hooks ).command}"'' ) entries;
+        in
+        ''.hooks.${event} = ([ (.hooks.${event} // [])[]
+          | select((.hooks // []) | all(${notHm})) ]
+        + ${builtins.toJSON entries})'' ) ( builtins.attrNames hmHooks );
 
     # Extract skill-only plugins from the official repo into a flat skills directory
     officialSkills = pkgs.runCommand "claude-official-skills" { } ''
@@ -96,7 +119,7 @@ in
     # download; update manually via `claude update`) and cleanupPeriodDays=36500
     # (~100y — the 30-day default silently deletes session transcripts under
     # ~/.config/claude/projects at startup; we keep them), and reconciles its own
-    # PreToolUse entries (matched by hook command path) while preserving all other
+    # hook entries per event (matched by hook command path) while preserving all other
     # keys and any user-added hooks.
     home.activation.claudeSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     settings="${config.xdg.configHome}/claude/settings.json"
@@ -109,9 +132,7 @@ in
       echo '{}' > "$settings"
     fi
     ${pkgs.jq}/bin/jq '. * {"cleanupPeriodDays":36500,"env":{"DISABLE_AUTOUPDATER":"1"}}
-      | .hooks.PreToolUse = ([ (.hooks.PreToolUse // [])[]
-          | select((.hooks // []) | all(${notHmHook})) ]
-        + ${builtins.toJSON hmHooks})' \
+      | ${mergeHmHooks}' \
       "$settings" > "$settings.tmp" \
       && mv "$settings.tmp" "$settings"
     chmod u+w "$settings"
