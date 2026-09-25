@@ -52,8 +52,8 @@ Configs are managed two ways depending on whether the target app needs write acc
 
 ```
 .
-├── flake.nix              # Entry point — darwinConfigurations.mac (`sure`),
-│                          #   homeConfigurations.{mac,ft} (`re`)
+├── flake.nix              # Entry point — machine map (user/arch/profile) +
+│                          #   darwinConfigurations (`sure`), homeConfigurations (`re`)
 ├── darwin.nix             # macOS system: homebrew, defaults, GUI env, service imports
 ├── home.nix               # User env: packages, shell, activation, service imports
 ├── lib/
@@ -92,6 +92,13 @@ nix flake update
 ```
 
 ### Work macOS
+
+Full bootstrap order on a fresh machine: Command Line Tools
+(`xcode-select --install`) → Nix (step 1 above) → Homebrew (below) →
+GitHub SSH key (below) → clone this repo to `~/.config/home-manager` →
+`scripts/work-preflight.sh` → the switch command it prints. The preflight
+script validates every prerequisite read-only and fails with a fix hint
+instead of letting the first activation die halfway.
 
 This configuration uses nix-darwin's Homebrew module for the work applications
 (Alfred, Brave, Claude, Ghostty, Notion, Slack, and VS Code). Homebrew is not
@@ -133,17 +140,13 @@ ssh -T git@github.com
 sudo env SSH_AUTH_SOCK="$SSH_AUTH_SOCK" ssh -T git@github.com
 ```
 
-First validate the work profile, then activate it with the full system target.
-The `SSH_AUTH_SOCK` forwarding is required only for the first privileged
-evaluation: it lets root use your already-unlocked SSH agent rather than
-looking for a separate root GitHub key.
+Then run the preflight and, once every check passes, the bootstrap command it
+prints (the `SSH_AUTH_SOCK` forwarding is required only for this first
+privileged evaluation — it lets root use your already-unlocked SSH agent
+rather than looking for a separate root GitHub key):
 
 ```bash
-nix --extra-experimental-features "nix-command flakes" \
-  flake check --no-write-lock-file
-sudo env SSH_AUTH_SOCK="$SSH_AUTH_SOCK" \
-  nix --extra-experimental-features "nix-command flakes" run nix-darwin -- \
-  switch --flake ~/.config/home-manager#mac-work
+~/.config/home-manager/scripts/work-preflight.sh
 ```
 
 After activation, `re` and `sure` automatically keep using `mac-work`.

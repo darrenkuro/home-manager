@@ -4,12 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Is
 
-Nix Home Manager flake for declaratively managing user environments across two machines:
+Nix Home Manager flake for declaratively managing user environments across three targets:
 
 - **mac** (`aarch64-darwin`) — personal macOS
+- **mac-work** (`aarch64-darwin`) — lean work iMac (no BTM, no PostgreSQL, small app list)
 - **ft** (`x86_64-linux`) — 42 school rootless Linux
 
-The `tag` parameter (`"mac"` or `"ft"`) flows through the entire config to conditionally include modules, packages, and aliases.
+Machine identity (system, tag, profile, user — homeDir derived) lives in the `machines` map in `flake.nix`; `specialArgs` carry those values into every module. Two dimensions flow through the config: `tag` (`"mac"`/`"ft"`, OS/machine) and `profile` (`"personal"`/`"work"`, purpose — macOS app/service choices per profile live in `profiles/macos.nix`).
 
 ## Commands
 
@@ -44,9 +45,7 @@ nix-collect-garbage -d
 ### Entry Points
 
 - `flake.nix` — defines configurations:
-  - `darwinConfigurations.mac` — nix-darwin system config with embedded home-manager (`sure`)
-  - `homeConfigurations.mac` — standalone home-manager for fast rebuilds (`re`)
-  - `homeConfigurations.ft` — standalone home-manager config for Linux
+  - `machines` map → `darwinConfigurations.{mac,mac-work}` (nix-darwin + embedded HM, `sure`) and `homeConfigurations.{mac,mac-work,ft}` (standalone HM, `re`)
 - `darwin.nix` — nix-darwin system-level config (LaunchDaemons, system settings, BTM, Homebrew)
 - `home.nix` — main module: packages, shell config, zsh init chain, XDG config files
 
@@ -117,7 +116,7 @@ All Claude config is owned by `modules/apps/claude.nix`:
 Defined in `modules/system/env.nix`:
 
 - `$HM` → `~/.config/home-manager` (this repo)
-- `$HM_TAG` → `"MAC"` or `"FT"` (uppercase, used by shell function preambles)
+- `$HM_TAG` → `"MAC"` or `"FT"`; `$HM_PROFILE` → `"PERSONAL"` or `"WORK"` (uppercase, used by the `INSTALL_TAG`/`INSTALL_PROFILE` gates in shell function preambles)
 - `$DEV` → `~/Documents/dev`
 - XDG dirs are explicitly set to keep `$HOME` clean
 
