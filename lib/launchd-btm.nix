@@ -58,6 +58,7 @@
         wrappers,
         agents ? [ ],
     }: let
+        act = import ./activation.nix { inherit lib; };
         # Manifest = stub identity. If it matches, the stub is up to date and
         # left untouched (rewriting would invalidate the codesignature and
         # re-trigger BTM notifications).
@@ -76,12 +77,13 @@
                   /usr/libexec/PlistBuddy \
                     -c "Add :AssociatedBundleIdentifiers array" \
                     -c "Add :AssociatedBundleIdentifiers:0 string $_bid" \
-                    "$_plist" 2>/dev/null && echo "BTM: patched ${label} -> ${name}"
+                    "$_plist"
+                  echo "BTM: patched ${label} -> ${name}"
                 fi
               fi
             fi
         '';
-    in ''
+        install = ''
         # ── BTM stub: ${name}.app ──
         _stub_dst="${stubDir}/${name}.app"
         _manifest="${stubDir}/.stub-manifest-${name}"
@@ -117,4 +119,11 @@
 
         ${lib.concatStringsSep "\n" ( map patchAgent agents )}
     '';
+    # Fail-soft: one broken stub must not abort activation (or the other
+    # stubs' install/patch blocks that follow it in postActivation).
+    # mkOrder 900 runs stubs before the other postActivation contributions
+    # (default order 1000) — notably home-manager's activation, whose failure
+    # must not skip BTM patching. Launchd plists are written well before
+    # postActivation, so the agents this patches already exist.
+    in lib.mkOrder 900 ( act.failSoft "BTM stub ${name}" install );
 }

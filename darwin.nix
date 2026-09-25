@@ -13,10 +13,11 @@
 #   - XDG dotfiles and app configs
 #   - Services' user halves (modules/services/<name>/home.nix)
 #
-{ profile ? "personal" }: { ... }: let
+{ profile ? "personal" }: { config, lib, ... }: let
     homeDir = "/Users/darrenlu";
     profiles = import ./profiles/macos.nix;
-    selected = profiles.${profile} or (throw "Unknown macOS profile: ${profile}");
+    selected = profiles.${profile} or ( throw "Unknown macOS profile: ${profile}" );
+    act = import ./lib/activation.nix { inherit lib; };
 in
 {
     # ── Services — comment out to disable ──
@@ -25,7 +26,11 @@ in
         # profile should not start a local database at login.
         ./modules/services/nix-daemon/darwin.nix
         # ./modules/services/polymarket/darwin.nix
-    ] ++ (if selected.enablePostgresql then [ ./modules/services/postgresql/darwin.nix ] else [ ]);
+    ] ++ ( if selected.enablePostgresql
+        then
+            [ ./modules/services/postgresql/darwin.nix ]
+        else
+            [ ] );
 
     # Nix settings
     nix.settings.experimental-features = [ "nix-command" "flakes" ];
@@ -46,6 +51,27 @@ in
         casks = selected.casks;
         masApps = selected.masApps;
     };
+
+    # Fail-soft prelude (defines _hm_warn) — extraActivation is the earliest
+    # user hook in the assembled activate script, so every later step
+    # (homebrew override, defaults, BTM stubs) can use it.
+    system.activationScripts.extraActivation.text = act.prelude;
+
+    # Override nix-darwin's homebrew step: a dead cask/masApps id makes
+    # `brew bundle` exit non-zero, which under the script-wide `set -e` used
+    # to abort activation before home-manager and BTM patching ran. Reuses the
+    # module's own brewBundleCmd (internal option — a rename in nix-darwin
+    # fails loudly at eval, not silently at runtime).
+    system.activationScripts.homebrew.text = lib.mkForce ''
+        # Homebrew Bundle (fail-soft)
+        echo >&2 "Homebrew bundle..."
+        if [ -f "${config.homebrew.prefix}/bin/brew" ]; then
+          ${act.failSoft "brew bundle"
+    ( config.homebrew.onActivation.brewBundleCmd { onlyCheck = false; } )}
+        else
+          _hm_warn "Homebrew is not installed; skipped brew bundle"
+        fi
+    '';
 
     # macOS system defaults (declarative)
     system.defaults = {
@@ -91,8 +117,10 @@ in
         };
     };
 
-    # Post-activation: settings not in nix-darwin + BTM agent patching
-    system.activationScripts.postActivation.text = ''
+    # Post-activation: settings not in nix-darwin + BTM agent patching.
+    # Each block is fail-soft; act.summary recaps warnings at the very end.
+    system.activationScripts.postActivation.text = lib.mkMerge [
+        ( act.failSoft "macOS defaults (post-activation)" ''
     # ── macOS defaults not in nix-darwin ──
     /usr/bin/defaults write -g NSRecentDocumentsLimit 0
     /usr/bin/defaults write -g AppleMeasurementUnits -string "Centimeters"
@@ -115,7 +143,9 @@ in
     /usr/bin/defaults write com.apple.AppleMultitouchTrackpad ActuationStrength -int 0
     /usr/bin/defaults write com.apple.AppleMultitouchTrackpad FirstClickThreshold -int 0
     /usr/bin/defaults write com.apple.AppleMultitouchTrackpad SecondClickThreshold -int 0
-  '';
+  '' )
+        act.summary
+    ];
 
     # User (needed for home-manager integration to infer home.homeDirectory)
     users.users.darrenlu = { name = "darrenlu"; home = "/Users/darrenlu"; };
