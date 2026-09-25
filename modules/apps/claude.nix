@@ -102,7 +102,10 @@ in
     home.activation.claudeInstall = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     if [[ ! -x "$HOME/.local/bin/claude" ]]; then
       echo "Installing Claude Code (native installer)..."
-      PATH="${lib.makeBinPath [ pkgs.curl pkgs.bash ]}:$PATH" ${pkgs.bash}/bin/bash -c \
+      PATH="${lib.makeBinPath [
+        pkgs.curl
+        pkgs.bash
+    ]}:$PATH:/usr/bin:/bin" ${pkgs.bash}/bin/bash -c \
         'curl -fsSL https://claude.ai/install.sh | bash' \
         || echo "⚠ Claude Code install failed — run manually: curl -fsSL https://claude.ai/install.sh | bash"
     fi
@@ -123,6 +126,7 @@ in
     # keys and any user-added hooks.
     home.activation.claudeSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     settings="${config.xdg.configHome}/claude/settings.json"
+    mkdir -p "$(dirname "$settings")"
     # Remove old hm symlink if present
     if [[ -L "$settings" ]]; then
       rm "$settings"
