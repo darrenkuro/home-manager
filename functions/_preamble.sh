@@ -21,53 +21,55 @@
 #   REQUIRED_TOOLS=(gh git)
 #   _check_preamble || return 0
 _check_preamble() {
-  local _script_name="${BASH_SOURCE[1]:-${(%):-%x}}"
-  _script_name="${_script_name##*/}"
+    # bash: BASH_SOURCE[1] is the caller; zsh: funcfiletrace[1] is "file:line"
+    # of the call site (%x would name this file, not the caller)
+    local _script_name="${BASH_SOURCE[1]:-${funcfiletrace[1]%:*}}"
+    _script_name="${_script_name##*/}"
 
-  # --- Tag check
-  local _matched=false
-  local _tag
-  for _tag in "${INSTALL_TAG[@]}"; do
-    if [ "$_tag" = "$HM_TAG" ]; then
-      _matched=true
-      break
-    fi
-  done
-  unset INSTALL_TAG
-
-  # --- Profile check (opt-in: only gates when INSTALL_PROFILE is non-empty)
-  if $_matched && [ ${#INSTALL_PROFILE[@]} -gt 0 ]; then
-    _matched=false
-    local _profile
-    for _profile in "${INSTALL_PROFILE[@]}"; do
-      if [ "$_profile" = "$HM_PROFILE" ]; then
-        _matched=true
-        break
-      fi
+    # --- Tag check
+    local _matched=false
+    local _tag
+    for _tag in "${INSTALL_TAG[@]}"; do
+        if [ "$_tag" = "$HM_TAG" ]; then
+            _matched=true
+            break
+        fi
     done
-  fi
-  unset INSTALL_PROFILE
+    unset INSTALL_TAG
 
-  if ! $_matched; then
-    unset REQUIRED_TOOLS
-    return 1
-  fi
-
-  # --- Dependency check
-  local _missing=()
-  local _cmd
-  for _cmd in "${REQUIRED_TOOLS[@]}"; do
-    if ! command -v "$_cmd" > /dev/null 2>&1; then
-      _missing+=("$_cmd")
+    # --- Profile check (opt-in: only gates when INSTALL_PROFILE is non-empty)
+    if $_matched && [ ${#INSTALL_PROFILE[@]} -gt 0 ]; then
+        _matched=false
+        local _profile
+        for _profile in "${INSTALL_PROFILE[@]}"; do
+            if [ "$_profile" = "$HM_PROFILE" ]; then
+                _matched=true
+                break
+            fi
+        done
     fi
-  done
-  unset REQUIRED_TOOLS
+    unset INSTALL_PROFILE
 
-  if [ ${#_missing[@]} -gt 0 ]; then
-    printf '⚠️ Skipping sourcing of %s — missing required tools: %s\n' \
-      "$_script_name" "${_missing[*]}" >&2
-    return 1
-  fi
+    if ! $_matched; then
+        unset REQUIRED_TOOLS
+        return 1
+    fi
 
-  return 0
+    # --- Dependency check
+    local _missing=()
+    local _cmd
+    for _cmd in "${REQUIRED_TOOLS[@]}"; do
+        if ! command -v "$_cmd" > /dev/null 2>&1; then
+            _missing+=("$_cmd")
+        fi
+    done
+    unset REQUIRED_TOOLS
+
+    if [ ${#_missing[@]} -gt 0 ]; then
+        printf '⚠️ Skipping sourcing of %s — missing required tools: %s\n' \
+            "$_script_name" "${_missing[*]}" >&2
+        return 1
+    fi
+
+    return 0
 }

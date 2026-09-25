@@ -1,4 +1,5 @@
 INSTALL_TAG=(MAC FT)
+INSTALL_PROFILE=(PERSONAL)
 REQUIRED_TOOLS=(ffmpeg ffprobe)
 _check_preamble || return 0
 
