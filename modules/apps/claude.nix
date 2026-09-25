@@ -161,18 +161,25 @@ in
         echo ""
       fi
 
-      # Required plugins — warn if missing or disabled
-      missing=""
+      # Required plugins — auto-install missing/disabled ones via Claude's own
+      # CLI (plugin state stays Claude-owned; hm never writes it directly).
+      # Fail-soft: network/marketplace failures warn and leave a manual command.
+      claudeBin="$HOME/.local/bin/claude"
+      failed=""
       for plugin in ${lib.concatStringsSep " " requiredPlugins}; do
         if ! ${pkgs.gnugrep}/bin/grep -q "\"$plugin@claude-plugins-official\": true" "$settings" 2>/dev/null; then
-          missing="$missing  - $plugin@claude-plugins-official\n"
+          echo "Claude: installing plugin $plugin..."
+          if ! [ -x "$claudeBin" ] \
+            || ! "$claudeBin" plugin install "$plugin@claude-plugins-official" >/dev/null 2>&1; then
+            failed="$failed  - $plugin@claude-plugins-official\n"
+          fi
         fi
       done
-      if [ -n "$missing" ]; then
+      if [ -n "$failed" ]; then
         echo ""
-        echo "⚠ Claude: these required plugins are missing or disabled:"
-        printf "$missing"
-        echo "  Run: claude /plugin install <name>@claude-plugins-official"
+        echo "⚠ Claude: failed to auto-install these required plugins:"
+        printf "$failed"
+        echo "  Run: claude plugin install <name>@claude-plugins-official"
         echo ""
       fi
 
