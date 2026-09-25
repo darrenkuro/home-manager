@@ -125,6 +125,15 @@ doctor() {
         fi
     fi
 
+    # --- WakaTime API key (secret — never in the repo; nothing tracks without it)
+    if grep -q "^api_key" "${WAKATIME_HOME:-$HOME/.local/state/wakatime}/.wakatime.cfg" 2> /dev/null; then
+        _done "WakaTime API key"
+    else
+        _skip "WakaTime API key"
+        _item "printf '[settings]\\napi_key = <key>\\n' > \$WAKATIME_HOME/.wakatime.cfg — key at wakatime.com/api-key"
+        _issues=$((_issues + 1))
+    fi
+
     # --- Not machine-checkable — verify by hand (docs/manual-setup.md)
     _header "manual (not checkable)"
     _item "Brave Sync: brave://settings/braveSync/setup — join chain + enable 'Sync everything'"
