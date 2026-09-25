@@ -18,11 +18,11 @@ _check_preamble || return 0
 #   CRF=26 vcompress "clip.mp4"
 #   HEIGHT=0 vcompress "screencast.mp4"
 vcompress() {
-  local script="$HOME/.config/claude/skills/video-compress/scripts/compress.sh"
-  if [[ ! -x "$script" ]]; then
-    echo "vcompress: skill script not found at $script" >&2
-    echo "  (is claude-config deployed? check ~/.config/claude/skills/video-compress/)" >&2
-    return 1
-  fi
-  "$script" "$@"
+    local script="$HOME/.config/claude/skills/video-compress/scripts/compress.sh"
+    if [[ ! -x "$script" ]]; then
+        echo "vcompress: skill script not found at $script" >&2
+        echo "  (is claude-config deployed? check ~/.config/claude/skills/video-compress/)" >&2
+        return 1
+    fi
+    "$script" "$@"
 }

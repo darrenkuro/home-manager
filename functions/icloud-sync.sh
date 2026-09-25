@@ -5,7 +5,7 @@ _check_preamble || return 0
 # Force-download a file (or every file under a directory) from iCloud,
 # so it's materialized locally instead of evicted/"online-only".
 sync-local() {
-  swift -e '
+    swift -e '
     import Foundation
     let p = CommandLine.arguments[1]
     let u = URL(fileURLWithPath: p)
@@ -25,7 +25,7 @@ sync-local() {
 
 # Evict the local copy of an iCloud file (keep it cloud-only).
 sync-cloud() {
-  swift -e '
+    swift -e '
     import Foundation
     try FileManager.default.evictUbiquitousItem(at: URL(fileURLWithPath: CommandLine.arguments[1]))
   ' "$1"

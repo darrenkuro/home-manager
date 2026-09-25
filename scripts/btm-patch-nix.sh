@@ -19,8 +19,8 @@ ACTIVATE_PLIST="/Library/LaunchDaemons/org.nixos.activate-system.plist"
 
 # Plists that need AssociatedBundleIdentifiers
 PLISTS=(
-  "/Library/LaunchDaemons/org.nixos.nix-daemon.plist"
-  "/Library/LaunchDaemons/org.nixos.darwin-store.plist"
+    "/Library/LaunchDaemons/org.nixos.nix-daemon.plist"
+    "/Library/LaunchDaemons/org.nixos.darwin-store.plist"
 )
 
 # Failures are reported loudly but don't stop the remaining plists/stubs;
@@ -31,107 +31,107 @@ echo "BTM: checking Nix daemon plists..."
 
 # Helper: Check if plist has our bundle ID
 is_patched() {
-  local plist=$1
-  /usr/libexec/PlistBuddy -c "Print :AssociatedBundleIdentifiers:0" "$plist" 2>/dev/null | grep -q "$BUNDLE_ID"
+    local plist=$1
+    /usr/libexec/PlistBuddy -c "Print :AssociatedBundleIdentifiers:0" "$plist" 2> /dev/null | grep -q "$BUNDLE_ID"
 }
 
 # Helper: Check if ProgramArguments points to our wrapper
 uses_wrapper() {
-  local plist=$1
-  /usr/libexec/PlistBuddy -c "Print :ProgramArguments:0" "$plist" 2>/dev/null | grep -q "$NIX_APP"
+    local plist=$1
+    /usr/libexec/PlistBuddy -c "Print :ProgramArguments:0" "$plist" 2> /dev/null | grep -q "$NIX_APP"
 }
 
 # Patch AssociatedBundleIdentifiers for standard plists
 for plist in "${PLISTS[@]}" "$ACTIVATE_PLIST"; do
-  if [[ -f "$plist" ]]; then
-    if is_patched "$plist"; then
-      echo "  already patched: $(basename "$plist")"
-    elif /usr/libexec/PlistBuddy \
-      -c "Add :AssociatedBundleIdentifiers array" \
-      -c "Add :AssociatedBundleIdentifiers:0 string $BUNDLE_ID" \
-      "$plist"; then
-      echo "  patched AssociatedBundleIdentifiers: $(basename "$plist")"
-    else
-      echo "  error: failed to patch $(basename "$plist")" >&2
-      failures=$((failures + 1))
+    if [[ -f "$plist" ]]; then
+        if is_patched "$plist"; then
+            echo "  already patched: $(basename "$plist")"
+        elif /usr/libexec/PlistBuddy \
+            -c "Add :AssociatedBundleIdentifiers array" \
+            -c "Add :AssociatedBundleIdentifiers:0 string $BUNDLE_ID" \
+            "$plist"; then
+            echo "  patched AssociatedBundleIdentifiers: $(basename "$plist")"
+        else
+            echo "  error: failed to patch $(basename "$plist")" >&2
+            failures=$((failures + 1))
+        fi
     fi
-  fi
 done
 
 # Special handling for activate-system: create wrapper if needed
 if [[ -f "$ACTIVATE_PLIST" ]] && ! uses_wrapper "$ACTIVATE_PLIST"; then
-  echo "  patching activate-system wrapper..."
+    echo "  patching activate-system wrapper..."
 
-  # Extract the activate-system-start path from the plist
-  # Could be in ProgramArguments:0 (direct) or ProgramArguments:2 (via /bin/sh)
-  activate_path=""
-  for idx in 0 1 2; do
-    cmd=$(/usr/libexec/PlistBuddy -c "Print :ProgramArguments:$idx" "$ACTIVATE_PLIST" 2>/dev/null || true)
-    if [[ "$cmd" == *"activate-system"* ]]; then
-      # Extract store path, handling both direct paths and shell commands
-      activate_path=$(echo "$cmd" | grep -o '/nix/store/[^[:space:]"]*activate-system[^[:space:]"]*' | head -1)
-      break
-    fi
-  done
+    # Extract the activate-system-start path from the plist
+    # Could be in ProgramArguments:0 (direct) or ProgramArguments:2 (via /bin/sh)
+    activate_path=""
+    for idx in 0 1 2; do
+        cmd=$(/usr/libexec/PlistBuddy -c "Print :ProgramArguments:$idx" "$ACTIVATE_PLIST" 2> /dev/null || true)
+        if [[ "$cmd" == *"activate-system"* ]]; then
+            # Extract store path, handling both direct paths and shell commands
+            activate_path=$(echo "$cmd" | grep -o '/nix/store/[^[:space:]"]*activate-system[^[:space:]"]*' | head -1)
+            break
+        fi
+    done
 
-  if [[ -z "$activate_path" ]]; then
-    echo "  error: could not find activate-system path in plist" >&2
-    failures=$((failures + 1))
-  else
-    wrapper="$NIX_APP/Contents/MacOS/NixActivateSystem"
+    if [[ -z "$activate_path" ]]; then
+        echo "  error: could not find activate-system path in plist" >&2
+        failures=$((failures + 1))
+    else
+        wrapper="$NIX_APP/Contents/MacOS/NixActivateSystem"
 
-    # Create wrapper script
-    cat > "$wrapper" << 'WRAPPER_EOF'
+        # Create wrapper script
+        cat > "$wrapper" << 'WRAPPER_EOF'
 #!/bin/bash
 set -euo pipefail
 /bin/wait4path /nix/store &>/dev/null
 WRAPPER_EOF
-    echo "exec $activate_path" >> "$wrapper"
-    chmod +x "$wrapper"
-    chown "$real_user:staff" "$wrapper"
+        echo "exec $activate_path" >> "$wrapper"
+        chmod +x "$wrapper"
+        chown "$real_user:staff" "$wrapper"
 
-    # Update plist to use wrapper
-    if /usr/libexec/PlistBuddy \
-      -c "Delete :ProgramArguments" \
-      -c "Add :ProgramArguments array" \
-      -c "Add :ProgramArguments:0 string $wrapper" \
-      "$ACTIVATE_PLIST"; then
-      echo "  updated ProgramArguments: $(basename "$ACTIVATE_PLIST")"
-    else
-      echo "  error: failed to update ProgramArguments: $(basename "$ACTIVATE_PLIST")" >&2
-      failures=$((failures + 1))
+        # Update plist to use wrapper
+        if /usr/libexec/PlistBuddy \
+            -c "Delete :ProgramArguments" \
+            -c "Add :ProgramArguments array" \
+            -c "Add :ProgramArguments:0 string $wrapper" \
+            "$ACTIVATE_PLIST"; then
+            echo "  updated ProgramArguments: $(basename "$ACTIVATE_PLIST")"
+        else
+            echo "  error: failed to update ProgramArguments: $(basename "$ACTIVATE_PLIST")" >&2
+            failures=$((failures + 1))
+        fi
+
+        # Refresh LaunchServices registration
+        /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f "$NIX_APP" 2> /dev/null || true
     fi
-
-    # Refresh LaunchServices registration
-    /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f "$NIX_APP" 2>/dev/null || true
-  fi
 else
-  echo "  activate-system already uses wrapper"
+    echo "  activate-system already uses wrapper"
 fi
 
 # Sign all app stubs with real Apple Development identity
 # This must run as the real user to access keychain
 echo "BTM: signing app stubs..."
 if [[ -d "$STUBS_DIR" ]]; then
-  # Fix ownership (wrapper binaries are copied as root during darwin-rebuild)
-  chown -R "$real_user:staff" "$STUBS_DIR"
+    # Fix ownership (wrapper binaries are copied as root during darwin-rebuild)
+    chown -R "$real_user:staff" "$STUBS_DIR"
 
-  for app in "$STUBS_DIR"/*.app; do
-    [[ -d "$app" ]] || continue
-    app_name=$(basename "$app")
-    if sudo -u "$real_user" codesign -fs "$CODESIGN_ID" --deep "$app"; then
-      echo "  signed: $app_name"
-    else
-      echo "  error: codesign failed for $app_name (exit code: $?)" >&2
-      failures=$((failures + 1))
-    fi
-  done
+    for app in "$STUBS_DIR"/*.app; do
+        [[ -d "$app" ]] || continue
+        app_name=$(basename "$app")
+        if sudo -u "$real_user" codesign -fs "$CODESIGN_ID" --deep "$app"; then
+            echo "  signed: $app_name"
+        else
+            echo "  error: codesign failed for $app_name (exit code: $?)" >&2
+            failures=$((failures + 1))
+        fi
+    done
 else
-  echo "  no stubs directory found: $STUBS_DIR"
+    echo "  no stubs directory found: $STUBS_DIR"
 fi
 
 if [[ $failures -gt 0 ]]; then
-  echo "BTM: done with $failures error(s)" >&2
-  exit 1
+    echo "BTM: done with $failures error(s)" >&2
+    exit 1
 fi
 echo "BTM: done"

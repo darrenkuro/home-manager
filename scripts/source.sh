@@ -5,8 +5,8 @@ source "$HM/functions/_preamble.sh"
 source "$HM/functions/_ui.sh"
 
 for f in "$HM"/functions/*.sh; do
-  [[ "${f##*/}" == _* ]] && continue
-  [ -r "$f" ] && source "$f"
+    [[ "${f##*/}" == _* ]] && continue
+    [ -r "$f" ] && source "$f"
 done
 
 # Note: ~/.local/bin is on PATH via home.sessionPath (env.nix), which loads in

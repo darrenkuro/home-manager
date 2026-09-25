@@ -16,7 +16,7 @@ work() {
     osascript -e 'tell application "QuickTime Player" to quit'
 
     # Wait until both have actually exited
-    while pgrep -x "Safari" >/dev/null || pgrep -x "Brave Browser" >/dev/null; do
+    while pgrep -x "Safari" > /dev/null || pgrep -x "Brave Browser" > /dev/null; do
         sleep 0.2
     done
 

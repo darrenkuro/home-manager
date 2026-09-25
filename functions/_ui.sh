@@ -7,7 +7,7 @@
 # each function redeclaring its own palette. $'…' makes them real ESC bytes, so
 # they render whether printf sees them via %b or %s.
 typeset -g _C_CYAN=$'\033[0;36m' _C_GREEN=$'\033[0;32m' _C_YELLOW=$'\033[0;33m' \
-  _C_DIM=$'\033[2m' _C_RESET=$'\033[0m' _C_BOLD=$'\033[1m'
+    _C_DIM=$'\033[2m' _C_RESET=$'\033[0m' _C_BOLD=$'\033[1m'
 
 _header() { printf '\n%b━━━%b %b%s%b\n' "$_C_CYAN" "$_C_RESET" "$_C_BOLD" "$1" "$_C_RESET"; }
 _task() { printf '  %b○%b %s' "$_C_DIM" "$_C_RESET" "$1"; }
@@ -16,4 +16,4 @@ _skip() { printf '\r  %b○%b %s %b(skipped)%b\n' "$_C_YELLOW" "$_C_RESET" "$1" 
 _item() { printf '    %b→%b %s\n' "$_C_DIM" "$_C_RESET" "$1"; }
 
 # tilde-abbreviate a path for display
-_tilde() { case "$1" in "$HOME"/*) printf '~/%s' "${1#"$HOME"/}" ;; *) printf '%s' "$1" ;; esac; }
+_tilde() { case "$1" in "$HOME"/*) printf '~/%s' "${1#"$HOME"/}" ;; *) printf '%s' "$1" ;; esac }

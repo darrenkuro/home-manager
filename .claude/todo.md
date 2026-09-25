@@ -62,7 +62,7 @@ in {
 
 ### Add-ons: packaged alternative
 
-home-manager has an official `programs.anki` module (merged ~mid-2025): options incl. `addons`, `theme`, `uiScale`, `videoDriver`, `profiles.<name>.sync.keyFile`, etc. nixpkgs ships an `ankiAddons` set (`ankiAddons.anki-connect`, `review-heatmap`, …). Cleaner *if* the add-on is packaged — but it installs add-ons **read-only** (same UI-inert gotcha as `home.file`). For add-ons whose config we tweak, the copy-based activation script above is friendlier. Also weigh: is Anki itself installed via Nix (`anki`/`anki-bin`, both support darwin) or the official DMG? The activation-script approach works regardless of how Anki was installed.
+home-manager has an official `programs.anki` module (merged ~mid-2025): options incl. `addons`, `theme`, `uiScale`, `videoDriver`, `profiles.<name>.sync.keyFile`, etc. nixpkgs ships an `ankiAddons` set (`ankiAddons.anki-connect`, `review-heatmap`, …). Cleaner _if_ the add-on is packaged — but it installs add-ons **read-only** (same UI-inert gotcha as `home.file`). For add-ons whose config we tweak, the copy-based activation script above is friendlier. Also weigh: is Anki itself installed via Nix (`anki`/`anki-bin`, both support darwin) or the official DMG? The activation-script approach works regardless of how Anki was installed.
 
 ### Note-type CSS: round-trip (separate from add-ons)
 

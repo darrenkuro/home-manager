@@ -6,14 +6,10 @@
 #
 # macOS-only — depends on Apple's `nettop`. Imported conditionally
 # from home.nix on `tag == "mac"`.
-{
-  pkgs,
-  netusage,
-  ...
-}: {
-  home.packages = [
-    (pkgs.writeShellScriptBin "netusage" ''
+{ pkgs, netusage, ... }: {
+    home.packages = [
+        ( pkgs.writeShellScriptBin "netusage" ''
       exec ${pkgs.python3}/bin/python3 ${netusage}/netusage.py "$@"
-    '')
-  ];
+    '' )
+    ];
 }

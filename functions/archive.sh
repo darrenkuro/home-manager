@@ -111,6 +111,6 @@ archive() {
         fi
     done < <(_scan_candidates)
 
-    [[ $hidden_count -eq 0 ]] && printf '  %bNo new folders to hide%b\n' "$_C_DIM" "$_C_RESET" \
-        || printf '  %bHidden %d folders%b\n' "$_C_DIM" "$hidden_count" "$_C_RESET"
+    [[ $hidden_count -eq 0 ]] && printf '  %bNo new folders to hide%b\n' "$_C_DIM" "$_C_RESET" ||
+        printf '  %bHidden %d folders%b\n' "$_C_DIM" "$hidden_count" "$_C_RESET"
 }

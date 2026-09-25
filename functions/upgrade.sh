@@ -58,7 +58,7 @@ upgrade() {
     local lock="${HM:-$HOME/.config/home-manager}/flake.lock"
     if [[ -f "$lock" ]]; then
         local age_days
-        age_days=$(( ($(date +%s) - $(stat -f %m "$lock")) / 86400 ))
+        age_days=$((($(date +%s) - $(stat -f %m "$lock")) / 86400))
         printf '  %bℹ%b inputs last updated %b%d day(s) ago%b — refresh with: %bnix flake update && re%b\n' \
             "$_C_CYAN" "$_C_RESET" "$_C_BOLD" "$age_days" "$_C_RESET" "$_C_BOLD" "$_C_RESET"
     else

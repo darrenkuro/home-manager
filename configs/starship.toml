@@ -32,7 +32,6 @@ $character\
 palette = 'gruvbox_dark'
 
 [palettes.gruvbox_dark]
-
 # Foregrounds (text hierarchy)
 fg0 = "#fbf1c7" # primary text
 fg1 = "#ebdbb2" # normal text
@@ -48,22 +47,22 @@ bg3 = "#665c54"
 bg4 = "#7c6f64"
 
 # Accents (dark)
-red     = "#cc241d"
-green   = "#98971a"
-yellow  = "#d79921"
-blue    = "#458588"
-purple  = "#b16286"
-aqua    = "#689d6a"
-orange  = "#d65d0e"
+red = "#cc241d"
+green = "#98971a"
+yellow = "#d79921"
+blue = "#458588"
+purple = "#b16286"
+aqua = "#689d6a"
+orange = "#d65d0e"
 
 # Accents (bright)
-red_b     = "#fb4934"
-green_b   = "#b8bb26"
-yellow_b  = "#fabd2f"
-blue_b    = "#83a598"
-purple_b  = "#d3869b"
-aqua_b    = "#8ec07c"
-orange_b  = "#fe8019"
+red_b = "#fb4934"
+green_b = "#b8bb26"
+yellow_b = "#fabd2f"
+blue_b = "#83a598"
+purple_b = "#d3869b"
+aqua_b = "#8ec07c"
+orange_b = "#fe8019"
 
 [os]
 disabled = false

@@ -15,11 +15,11 @@ Personal [Home Manager](https://github.com/nix-community/home-manager) configura
 
 ## Targets
 
-| Tag   | System           | Description                    |
-| ----- | ---------------- | ------------------------------ |
-| `mac` | `aarch64-darwin` | Personal macOS (Apple Silicon) |
+| Tag        | System           | Description                     |
+| ---------- | ---------------- | ------------------------------- |
+| `mac`      | `aarch64-darwin` | Personal macOS (Apple Silicon)  |
 | `mac-work` | `aarch64-darwin` | Lean work macOS (Apple Silicon) |
-| `ft`  | `x86_64-linux`   | 42 school Linux (rootless)     |
+| `ft`       | `x86_64-linux`   | 42 school Linux (rootless)      |
 
 The `tag` parameter flows through the entire config, conditionally including modules, packages, and aliases per target.
 
