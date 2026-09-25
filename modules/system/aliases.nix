@@ -50,9 +50,6 @@ in
                 nu = "netusage"; # short form
                 remoteon = "sudo systemsetup -setremotelogin on";
                 remoteoff = "sudo systemsetup -setremotelogin off";
-                # brew tmux (stable 3.7) fixes the Claude Code rendering issue.
-                # Keep this alias until pinned nixpkgs ships tmux >=3.7, then drop it and the brew entry for nix-managed tmux.
-                tmux = "/opt/homebrew/bin/tmux";
             } //
             lib.optionalAttrs ( profile != "work" ) {
                 ytd = "yt-dlp -t mp4 --cookies-from-browser brave";
