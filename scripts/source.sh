@@ -2,6 +2,7 @@
 # Each script uses _check_preamble to gate on INSTALL_TAG and REQUIRED_TOOLS.
 
 source "$HM/functions/_preamble.sh"
+source "$HM/functions/_ui.sh"
 
 for f in "$HM"/functions/*.sh; do
   [[ "${f##*/}" == _* ]] && continue

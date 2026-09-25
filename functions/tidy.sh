@@ -3,9 +3,13 @@ REQUIRED_TOOLS=(brew)
 _check_preamble || return 0
 
 # ─────────────────────────────────────────────────────────────────────────────
-# tidy — one-shot macOS maintenance. Reclaims disk from regenerable caches,
-# scrubs dead dotfile scatter from $HOME, prunes package stores, garbage-collects
-# Nix, and keeps Homebrew current. Absorbs the old `clean` function.
+# tidy — local disk reclaim + $HOME audit. No network: reclaims disk from
+# regenerable caches, scrubs dead dotfile scatter from $HOME, prunes package
+# stores (pnpm/brew), garbage-collects Nix, then audits $HOME.
+#
+# Siblings: `upgrade` (brew update/upgrade — the network half, split out so a
+# quick reclaim never costs a full upgrade cycle) and `archive` (Finder-hides
+# _archive/_processing/_trash folders). UI helpers come from functions/_ui.sh.
 #
 #   tidy            run everything
 #   tidy --dry-run  (or -n) preview every action + size, delete NOTHING
@@ -21,16 +25,6 @@ _check_preamble || return 0
 #     expect it to exist and regenerate only what they need.
 # ─────────────────────────────────────────────────────────────────────────────
 tidy() {
-    # $'…' so these are real ESC bytes — they render whether printf uses %b or %s
-    local CYAN=$'\033[0;36m' GREEN=$'\033[0;32m' YELLOW=$'\033[0;33m' \
-        DIM=$'\033[2m' RESET=$'\033[0m' BOLD=$'\033[1m'
-
-    _header() { printf '\n%b━━━%b %b%s%b\n' "$CYAN" "$RESET" "$BOLD" "$1" "$RESET"; }
-    _task() { printf '  %b○%b %s' "$DIM" "$RESET" "$1"; }
-    _done() { printf '\r  %b●%b %s\n' "$GREEN" "$RESET" "$1"; }
-    _skip() { printf '\r  %b○%b %s %b(skipped)%b\n' "$YELLOW" "$RESET" "$1" "$DIM" "$RESET"; }
-    _item() { printf '    %b→%b %s\n' "$DIM" "$RESET" "$1"; }
-
     local dry_run=false
     [[ "${1:-}" == "--dry-run" || "${1:-}" == "-n" ]] && dry_run=true
 
@@ -91,9 +85,6 @@ tidy() {
     local free_before
     free_before=$(_free_bytes)
 
-    # tilde-abbreviate a path for display
-    _tilde() { case "$1" in "$HOME"/*) printf '~/%s' "${1#"$HOME"/}" ;; *) printf '%s' "$1" ;; esac; }
-
     # Remove one regenerable $HOME entry (file or dir). Refuses nix-store symlinks.
     _safe_rm() {
         local p="$1"
@@ -122,7 +113,7 @@ tidy() {
             _item "would free ~$((kb / 1024))MB"
         else
             /bin/rm -rf "${dir:?}"/* 2> /dev/null
-            _done "$(_tilde "$dir") (${DIM}~$((kb / 1024))MB${RESET})"
+            _done "$(_tilde "$dir") (${_C_DIM}~$((kb / 1024))MB${_C_RESET})"
         fi
     }
 
@@ -154,7 +145,7 @@ tidy() {
         p="$HOME/$name"
         [[ -d "$p" && -z "$(ls -A "$p" 2> /dev/null)" ]] && _safe_rm "$p"
     done
-    [[ $removed -eq 0 ]] && printf '  %bnothing to scrub%b\n' "$DIM" "$RESET"
+    [[ $removed -eq 0 ]] && printf '  %bnothing to scrub%b\n' "$_C_DIM" "$_C_RESET"
 
     # ─────────────────────────────────────────────────────────────────────────
     # 2. Clear caches (contents only; every entry regenerates on demand)
@@ -199,13 +190,14 @@ tidy() {
     fi
 
     if $dry_run; then
-        printf '  %bWould free: ~%dMB%b\n' "$DIM" "$((total_freed / 1024))" "$RESET"
+        printf '  %bWould free: ~%dMB%b\n' "$_C_DIM" "$((total_freed / 1024))" "$_C_RESET"
     else
-        printf '  %bTotal freed: ~%dMB%b\n' "$DIM" "$((total_freed / 1024))" "$RESET"
+        printf '  %bTotal freed: ~%dMB%b\n' "$_C_DIM" "$((total_freed / 1024))" "$_C_RESET"
     fi
 
     # ─────────────────────────────────────────────────────────────────────────
-    # 4. Prune package-manager stores (safe: only unreferenced content removed)
+    # 4. Prune package stores (safe: only unreferenced/outdated content removed;
+    #    updating/upgrading packages lives in `upgrade`, not here)
     # ─────────────────────────────────────────────────────────────────────────
     _header "Pruning package stores"
 
@@ -220,107 +212,17 @@ tidy() {
         _skip "pnpm not installed"
     fi
 
-    # ─────────────────────────────────────────────────────────────────────────
-    # 5. Hide special folders in user spaces
-    # ─────────────────────────────────────────────────────────────────────────
-    # NOTE: chflags hidden is a FINDER-ONLY hide — it sets the UF_HIDDEN inode
-    # flag, which Dropbox web + mobile ignore. To hide something in Dropbox's own
-    # UI you'd need the com.dropbox.ignored xattr (which also stops it syncing),
-    # not this. This section only declutters local Finder/Terminal views.
-    #
-    # Scans a LIST OF ROOTS, each to its own depth (measured from that root), and
-    # prunes heavy/regenerable trees so the walk stays cheap. Per-root depth is
-    # deliberate: the macOS Dropbox path (~/Library/CloudStorage/Dropbox) already
-    # eats 3 levels, so a category archive like pictures/_archive sits at depth 5
-    # — a single shallow maxdepth from $HOME can't reach it. So $HOME stays
-    # shallow (and prunes Library) while Dropbox gets its own deeper root.
-    _header "Hiding special folders"
-
-    # Personal scratch/stage folder names to hide (Finder-only). Kept explicit
-    # rather than a '_*' glob so it never catches _-prefixed SOURCE dirs like
-    # Jekyll's _posts/_sass/_includes or __pycache__.
-    local hide_patterns=(_archive _processing _trash)
-    # root:maxdepth — depth counts from that root, not from $HOME. Edit freely.
-    local hide_roots=(
-        "$HOME:3"                               # top-level $HOME scatter
-        "$HOME/Library/CloudStorage/Dropbox:6"  # Dropbox categories nest deep
-        "$HOME/Documents/dev:5"                 # project _archive/_processing dirs
-    )
-    # Names never descended into — dotdirs, dunder dirs, and heavy/regenerable
-    # trees where a stray _match is noise, not something to hide. '.*' subsumes
-    # .git/.venv/.cache/.build/.Trash; '__*' excludes __pycache__/__tests__ etc.
-    # Pruned by NAME, at any level.
-    local hide_prune=('.*' '__*' node_modules venv target build dist Caches Library)
-
-    # Build the find expressions from the lists above. In zsh an empty unquoted
-    # $sep expands to zero words, so the first term gets no leading -o.
-    local -a prune_expr match_expr
-    local n sep=""
-    for n in "${hide_prune[@]}";    do prune_expr+=($sep -name "$n"); sep="-o"; done
-    sep=""
-    for n in "${hide_patterns[@]}"; do match_expr+=($sep -name "$n"); sep="-o"; done
-
-    local -A seen                        # dedupe folders reachable from >1 root
-    local hidden_count=0 flags folder spec root depth
-    for spec in "${hide_roots[@]}"; do
-        root="${spec%:*}"; depth="${spec##*:}"
-        [[ -d "$root" ]] || continue
-        while IFS= read -r -d '' folder; do
-            [[ -n "${seen[$folder]}" ]] && continue
-            seen[$folder]=1
-            # %Xf prints hex with NO 0x prefix — force base-16 or it parses as decimal
-            flags=$(stat -f "%Xf" "$folder" 2> /dev/null)
-            [[ $((0x${flags:-0} & 0x8000)) -ne 0 ]] && continue   # already hidden
-            _task "Hiding $(_tilde "$folder")"
-            if $dry_run; then
-                _item "would hide"
-            else
-                chflags hidden "$folder" 2> /dev/null && {
-                    _done "Hidden: $(_tilde "$folder")"
-                    hidden_count=$((hidden_count + 1))
-                }
-            fi
-        done < <(find "$root" -maxdepth "$depth" \
-            \( "${prune_expr[@]}" \) -prune -o \
-            -type d \( "${match_expr[@]}" \) -print0 2> /dev/null)
-    done
-    [[ $hidden_count -eq 0 ]] && printf '  %bNo new folders to hide%b\n' "$DIM" "$RESET" \
-        || printf '  %bHidden %d folders%b\n' "$DIM" "$hidden_count" "$RESET"
-
-    # ─────────────────────────────────────────────────────────────────────────
-    # 6. Homebrew — update, upgrade, cleanup, drop unused deps
-    # ─────────────────────────────────────────────────────────────────────────
-    _header "Updating Homebrew"
-
+    _task "brew cleanup"
     if $dry_run; then
-        _item "would run: brew update && brew upgrade && brew cleanup && brew autoremove"
+        _item "would run: brew cleanup && brew autoremove"
     else
-        _task "Updating formulae..."
-        brew update --quiet && _done "Formulae updated"
-
-        _task "Upgrading packages..."
-        local outdated
-        outdated=$(brew outdated --quiet)
-        if [[ -n "$outdated" ]]; then
-            brew upgrade --quiet
-            _done "Packages upgraded"
-            printf '  %bUpgraded:%b\n' "$DIM" "$RESET"
-            echo "$outdated" | while read -r pkg; do
-                _item "$pkg"
-            done
-        else
-            _skip "All packages up to date"
-        fi
-
-        _task "Cleaning up..."
-        brew cleanup --quiet && _done "Cleanup complete"
-
-        _task "Removing unused dependencies..."
-        brew autoremove --quiet && _done "Autoremove complete"
+        brew cleanup --quiet > /dev/null 2>&1 && _done "brew cleanup complete"
+        _task "brew autoremove"
+        brew autoremove --quiet > /dev/null 2>&1 && _done "brew autoremove complete"
     fi
 
     # ─────────────────────────────────────────────────────────────────────────
-    # 7. Nix garbage collection — drop generations older than 7 days.
+    # 5. Nix garbage collection — drop generations older than 7 days.
     #    User + home-manager profiles only (no sudo); these are what `re` creates.
     #    The root-owned nix-darwin system profile is GC'd via nix.gc in darwin.nix.
     # ─────────────────────────────────────────────────────────────────────────
@@ -338,11 +240,11 @@ tidy() {
         _task "Deleting generations older than 7d..."
         local ngc_freed
         ngc_freed=$(nix-collect-garbage --delete-older-than 7d 2>&1 | grep -iE "freed" | tail -1)
-        _done "Nix GC (${DIM}${ngc_freed:-done}${RESET})"
+        _done "Nix GC (${_C_DIM}${ngc_freed:-done}${_C_RESET})"
     fi
 
     # ─────────────────────────────────────────────────────────────────────────
-    # 8. Audit $HOME — report-only. Two checks:
+    # 6. Audit $HOME — report-only. Two checks:
     #    (a) XDG drift  — a relocated tool left a legacy copy behind ($var set
     #        but the old ~/.foo still exists → the relocation isn't winning).
     #    (b) Unlisted   — a top-level entry absent from home_approved above.
@@ -357,11 +259,11 @@ tidy() {
         val="${(P)var}" # indirect: value of the env var *named* $var
         if [[ -e "$HOME/$name" && -n "$val" ]]; then
             printf '  %b⚠%b %s exists but %b$%s%b→%s %b(stale copy — safe to remove)%b\n' \
-                "$YELLOW" "$RESET" "$name" "$BOLD" "$var" "$RESET" "$(_tilde "$val")" "$DIM" "$RESET"
+                "$_C_YELLOW" "$_C_RESET" "$name" "$_C_BOLD" "$var" "$_C_RESET" "$(_tilde "$val")" "$_C_DIM" "$_C_RESET"
             drift=$((drift + 1))
         fi
     done
-    [[ $drift -eq 0 ]] && printf '  %b✓ no XDG drift — every relocated tool stays out of $HOME%b\n' "$DIM" "$RESET"
+    [[ $drift -eq 0 ]] && printf '  %b✓ no XDG drift — every relocated tool stays out of $HOME%b\n' "$_C_DIM" "$_C_RESET"
 
     # (b) Unlisted entries — present in $HOME but not on the approved list.
     #     (drift entries already reported above are skipped to avoid double-listing)
@@ -373,19 +275,19 @@ tidy() {
         [[ "$name" == "." || "$name" == ".." ]] && continue
         [[ -n "${approved_set[$name]}" || -n "${xdg_relocated[$name]}" ]] && continue
         printf '  %b?%b %s %b(unlisted — review, then approve or clean)%b\n' \
-            "$CYAN" "$RESET" "$name" "$DIM" "$RESET"
+            "$_C_CYAN" "$_C_RESET" "$name" "$_C_DIM" "$_C_RESET"
         unlisted=$((unlisted + 1))
     done
-    [[ $unlisted -eq 0 ]] && printf '  %b✓ every top-level entry is on the approved list%b\n' "$DIM" "$RESET"
+    [[ $unlisted -eq 0 ]] && printf '  %b✓ every top-level entry is on the approved list%b\n' "$_C_DIM" "$_C_RESET"
 
     # ─────────────────────────────────────────────────────────────────────────
     if ! $dry_run; then
         local free_after delta
         free_after=$(_free_bytes)
         delta=$((free_after - free_before))
-        printf '  %b♻%b Reclaimed %s GB — now %s GB free\n' "$GREEN" "$RESET" \
+        printf '  %b♻%b Reclaimed %s GB — now %s GB free\n' "$_C_GREEN" "$_C_RESET" \
             "$(awk -v d="$delta" 'BEGIN{printf "%.1f", d/1e9}')" \
             "$(awk -v f="$free_after" 'BEGIN{printf "%.1f", f/1e9}')"
     fi
-    printf '\n%b✓%b %bTidy complete%b\n\n' "$GREEN" "$RESET" "$BOLD" "$RESET"
+    printf '\n%b✓%b %bTidy complete%b\n\n' "$_C_GREEN" "$_C_RESET" "$_C_BOLD" "$_C_RESET"
 }

@@ -1,7 +1,15 @@
-# tidy — backlog / future enhancements
+# maintenance commands — backlog / future enhancements
 
-`tidy` lives in `functions/tidy.sh`. **Done:** merged `clean`→`tidy`, Xcode/pnpm/Nix
-reclaim, `/bin/rm` safety, whitelist `$HOME` scrub, reclaimed-space report.
+The old `tidy` monolith was split (landed Sep 2026):
+
+- `tidy` (`functions/tidy.sh`) — local disk reclaim + $HOME audit, no network
+- `upgrade` (`functions/upgrade.sh`) — brew update/upgrade + nix-inputs staleness hint
+- `archive` (`functions/archive.sh`) — Finder-hide `_archive`/`_processing`/`_trash`
+  via mdfind (Spotlight) with fd fallback — fixes the CloudStorage `find` hang
+- shared UI helpers in `functions/_ui.sh`
+
+**Done previously:** merged `clean`→`tidy`, Xcode/pnpm/Nix reclaim, `/bin/rm`
+safety, whitelist `$HOME` scrub, reclaimed-space report.
 
 Remaining ideas, in priority order:
 
@@ -39,4 +47,5 @@ Clear Finder litter beyond `$HOME`:
 find "$DEV" "$DBOX" -name .DS_Store -type f -delete 2>/dev/null
 ```
 
-Small tidiness win; low priority.
+Small tidiness win; low priority. (Sticking with `find` here is fine — it's a
+`-type f -delete` over local dirs, not the CloudStorage walk that hung `tidy`.)
