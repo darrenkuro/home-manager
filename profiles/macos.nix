@@ -12,16 +12,15 @@
             "brave-browser"
             "claude"
             "dropbox"
-            "font-carlito"
+            "font-carlito" # Google's metric-compatible substitute for Microsoft's Calibri
             "ghostty"
             "notion"
             "obsidian"
-            "pearcleaner"
             "sf-symbols"
             "spotify"
             "steam"
             "visual-studio-code"
-            "slack"
+            # "pearcleaner"
         ];
 
         masApps = {
@@ -33,7 +32,6 @@
             "Numbers" = 361304891;
             "OmniFocus 3" = 1346203938;
             "Pages" = 361309726;
-            "Trello" = 1278508951;
             "Xcode" = 497799835;
             "Yoink" = 457622435;
         };
@@ -69,8 +67,7 @@
             "visual-studio-code"
         ];
 
-        # No App Store apps are needed on the deliberately minimal work machine.
-        masApps = { };
+        masApps = { "Trello" = 1278508951; "Yoink" = 457622435; };
 
         dockApps = [
             "/Applications/Brave Browser.app"
