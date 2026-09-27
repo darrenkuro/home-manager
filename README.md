@@ -291,6 +291,21 @@ curl -L https://nixos.org/nix/install | sh -s -- --daemon
 
 Then re-run the first-time setup command from the Installation section.
 
+### 6. Background Item Shows Developer Name (BTM)
+
+If System Settings → Login Items shows a background item under the developer's
+name (from the codesign certificate) with a generic icon instead of the stub's
+name, the stub was rewritten by the last `sure` (look for
+`BTM: installing stub: <Name>.app` in its output). BTM caches the association
+to the old bundle instance and won't pick up the new one until reboot:
+
+- `BTM: stub unchanged: <Name>.app` — nothing to do, naming stays intact.
+- `BTM: installing stub: <Name>.app` — the entry looks wrong until you reboot.
+
+Stubs are only rewritten when a wrapper derivation changes (script edits or a
+nixpkgs bump), so this is rare. Don't use `sfltool resetbtm` — it wipes all
+BTM approvals system-wide.
+
 ---
 
 <details>

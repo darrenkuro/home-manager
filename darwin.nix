@@ -109,6 +109,11 @@ in
             TrackpadThreeFingerDrag = false;
         };
 
+        # ── Screenshots ──
+        # A macOS bug (possibly Dropbox-triggered) intermittently deletes the
+        # show-thumbnail key; pinning it here means every `sure` restores it.
+        screencapture.show-thumbnail = true;
+
         # ── Menu Bar Clock ──
         menuExtraClock = {
             ShowAMPM = true;
