@@ -30,6 +30,9 @@
 
         # ── Tools ──
         HOMEBREW_NO_ENV_HINTS = "1";
+
+        # ── Google ── (Application Default Credentials for google-auth / gcloud libs)
+        GOOGLE_APPLICATION_CREDENTIALS = "$HOME/.config/google/gsheets-sa.json";
     };
 
     home.sessionPath = [ "$HOME/.local/bin" "$HOME/Library/pnpm" ] ++
