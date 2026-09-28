@@ -72,6 +72,7 @@ tidy() {
         .nuget             NUGET_PACKAGES
         .matplotlib        MPLCONFIGDIR
         .pkuseg            PKUSEG_HOME
+        .homebrew          XDG_CONFIG_HOME # brew tap-trust store; env-scrubbed brew (sudo) falls back here — see darwin.nix extraEnv
         # shell / REPL history files (modules/system/env.nix)
         .bash_history      HISTFILE
         .zsh_sessions      ZSH_SESSION_DIR

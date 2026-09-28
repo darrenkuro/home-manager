@@ -42,6 +42,9 @@ in
             cleanup = "zap"; # Remove unlisted packages
             autoUpdate = false; # Don't `brew update` on rebuild (use `brew update` explicitly)
             upgrade = false; # Don't auto-upgrade — apps self-update or `brew upgrade` manually
+            # sudo scrubs the env (only PATH/HOME survive); without XDG_CONFIG_HOME
+            # brew's tap-trust store falls back to scattering ~/.homebrew
+            extraEnv.XDG_CONFIG_HOME = "${homeDir}/.config";
         };
         brews = [ ];
         casks = selected.casks;
