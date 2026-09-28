@@ -17,10 +17,7 @@ normalize_repo_url() {
 }
 
 gloc() {
-    local old_opts
-    old_opts=$(set +o)
-    set -uo pipefail
-    trap 'eval "$old_opts"' RETURN
+    setopt localoptions nounset pipefail
 
     if [[ $# -lt 1 ]]; then
         echo "Usage: gloc <repo_url|user/repo>" >&2
@@ -33,7 +30,8 @@ gloc() {
 
     local tmp_dir
     tmp_dir="$(mktemp -d)"
-    trap '/bin/rm -rf "$tmp_dir"; eval "$old_opts"' RETURN
+    # zsh: function-local EXIT trap fires on function return, cleans up on early exits
+    trap '/bin/rm -rf "$tmp_dir"' EXIT
 
     echo "📥 Cloning ${repo_url}..."
     if ! git clone --depth 1 "$repo_url" "$tmp_dir" > /dev/null 2>&1; then
