@@ -61,8 +61,14 @@ def fmt(label, obj):
 print()
 fmt('Session (5h)', d.get('five_hour'))
 fmt('Weekly (7d)', d.get('seven_day'))
-fmt('Sonnet (7d)', d.get('seven_day_sonnet'))
-fmt('Opus (7d)', d.get('seven_day_opus'))
+
+# Per-model weekly caps now live in limits[] as 'weekly_scoped' entries
+# (e.g. Fable). Loop so any scoped model is shown without code changes.
+for lim in d.get('limits') or []:
+    if lim.get('kind') != 'weekly_scoped':
+        continue
+    name = (((lim.get('scope') or {}).get('model') or {}).get('display_name')) or 'Scoped'
+    fmt(f'{name} (7d)', {'utilization': lim.get('percent'), 'resets_at': lim.get('resets_at')})
 print()
 "
 }
