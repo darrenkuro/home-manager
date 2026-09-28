@@ -38,6 +38,7 @@ tidy() {
     local home_approved=(
         # nix / home-manager managed dotfiles + infra
         .bash_profile .bashrc .profile .zshenv .nix-defexpr .nix-profile
+        .clang-format # global fallback style — clang-format only does ancestor search; -style=file:<path> would kill per-project configs
         # XDG base dirs
         .cache .config .local
         # macOS standard home

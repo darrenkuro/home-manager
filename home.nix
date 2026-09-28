@@ -86,6 +86,7 @@ in
           "$HOME/.local/state/less" \
           "$HOME/.local/state/sessions" \
           "$HOME/.local/state/wakatime" \
+          "$HOME/.local/state/vim" \
           "$HOME/.cache/zsh"
       '';
 
@@ -138,6 +139,13 @@ in
     xdg.configFile."dprint/dprint.json".source = ./dprint.json;
     # Style for dprint's clang-format exec command (see configs/clang-format)
     home.file.".clang-format".source = ./configs/clang-format;
+    # System vim (9.1.0327+): XDG vimrc, read only while no ~/.vimrc exists.
+    # defaults.vim stops auto-loading once ANY vimrc exists — re-source it to
+    # keep stock behavior; viminfo moves to XDG state (dir made in xdgStateDirs).
+    xdg.configFile."vim/vimrc".text = ''
+        source $VIMRUNTIME/defaults.vim
+        set viminfofile=$HOME/.local/state/vim/viminfo
+    '';
 
     imports = [
         ./modules/system/aliases.nix
