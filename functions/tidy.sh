@@ -69,6 +69,8 @@ tidy() {
         .docker            DOCKER_CONFIG
         .npm               NPM_CONFIG_CACHE
         .npmrc             NPM_CONFIG_USERCONFIG
+        .copilot           COPILOT_HOME
+        .cups              LPDEST # not a relocation — LPDEST obviates the lpoptions default-printer line; reappearance means real per-printer options were written
         .nuget             NUGET_PACKAGES
         .matplotlib        MPLCONFIGDIR
         .pkuseg            PKUSEG_HOME

@@ -1,5 +1,6 @@
 { tag, profile, lib, ... }: {
-    home.sessionVariables = ( import ../../lib/xdg-paths.nix { home = "$HOME"; } ) // {
+    home.sessionVariables = ( import ../../lib/xdg-paths.nix { home = "$HOME"; } ) //
+    {
         # ── System ── (uppercase to match the INSTALL_TAG/INSTALL_PROFILE
         # gates in functions/_preamble.sh)
         HM_TAG = lib.toUpper tag;
@@ -33,6 +34,12 @@
 
         # ── Google ── (Application Default Credentials for google-auth / gcloud libs)
         GOOGLE_APPLICATION_CREDENTIALS = "$HOME/.config/google/gsheets-sa.json";
+    } //
+    lib.optionalAttrs ( tag == "mac" && profile == "personal" ) {
+        # ── Printing ── CLI default printer; checked before ~/.cups/lpoptions,
+        # which macOS's CUPS hardcodes to $HOME — so this keeps ~/.cups away.
+        # Home printer only: an LPDEST pointing at a missing printer breaks `lp`.
+        LPDEST = "Canon_MG3600_series";
     };
 
     home.sessionPath = [ "$HOME/.local/bin" "$HOME/Library/pnpm" ] ++

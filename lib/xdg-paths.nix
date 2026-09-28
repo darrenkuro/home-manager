@@ -22,6 +22,7 @@
     NPM_CONFIG_CACHE = "${home}/.cache/npm";
     CARGO_HOME = "${home}/.local/share/cargo";
     RUSTUP_HOME = "${home}/.local/share/rustup"; # unused (Rust via Nix); set so a future rustup install can't scatter ~/.rustup
+    COPILOT_HOME = "${home}/.config/copilot"; # Copilot CLI ≥1.0.40 (1.0 dropped XDG support; this is the supported override)
     DOCKER_CONFIG = "${home}/.config/docker";
     ANDROID_USER_HOME = "${home}/.local/share/android";
     BUNDLE_USER_HOME = "${home}/.local/share/bundle";
