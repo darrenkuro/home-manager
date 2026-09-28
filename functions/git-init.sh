@@ -3,10 +3,7 @@ REQUIRED_TOOLS=(gh git)
 _check_preamble || return 0
 
 git-init() {
-    local old_opts
-    old_opts=$(set +o)
-    set -uo pipefail
-    trap 'eval "$old_opts"' RETURN
+    setopt localoptions nounset pipefail
 
     local dir="${1:-.}"
     local public_flag="${2:-}"
