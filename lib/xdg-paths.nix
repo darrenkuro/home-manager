@@ -22,6 +22,12 @@
     NPM_CONFIG_CACHE = "${home}/.cache/npm";
     CARGO_HOME = "${home}/.local/share/cargo";
     RUSTUP_HOME = "${home}/.local/share/rustup"; # unused (Rust via Nix); set so a future rustup install can't scatter ~/.rustup
+    # uv: cache/config honor XDG_CACHE_HOME/XDG_CONFIG_HOME, but the data dir ignores
+    # XDG_DATA_HOME (astral-sh/uv#9985) — pin Python installs + tools so they don't land
+    # in ~/Library/Application Support on macOS.
+    UV_PYTHON_INSTALL_DIR = "${home}/.local/share/uv/python";
+    UV_TOOL_DIR = "${home}/.local/share/uv/tools";
+    UV_NO_MODIFY_PATH = "1"; # Nix owns PATH via sessionPath — never let uv edit a shell rc
     COPILOT_HOME = "${home}/.config/copilot"; # Copilot CLI ≥1.0.40 (1.0 dropped XDG support; this is the supported override)
     DOCKER_CONFIG = "${home}/.config/docker";
     ANDROID_USER_HOME = "${home}/.local/share/android";

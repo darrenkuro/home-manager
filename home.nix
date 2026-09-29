@@ -23,6 +23,7 @@ in
         nil # Nix LSP
         shfmt
         shellcheck
+        uv # Python package/venv/interpreter manager (standalone; supersedes pip + virtualenv)
 
         # Ensure Consistency
         openssl # Apple ships LibreSSL
