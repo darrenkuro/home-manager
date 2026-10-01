@@ -155,6 +155,7 @@ in
         ./modules/apps/starship.nix
         ./modules/apps/git.nix
         ./modules/apps/helix.nix
+        ./modules/apps/neovim.nix
         ./modules/apps/claude.nix
         ./modules/apps/vscode.nix
         ./modules/apps/ssh.nix
