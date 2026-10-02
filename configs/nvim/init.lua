@@ -120,26 +120,8 @@ require("conform").setup({
 
 require("gitsigns").setup()
 
--- ── Multiple cursors (helix-style) ───────────────────────────────────────
-local mc = require("multicursor-nvim")
-mc.setup()
-local map = vim.keymap.set
-map({ "n", "x" }, "<C-Down>", function() mc.lineAddCursor(1) end, { desc = "Add cursor below (helix C)" })
-map({ "n", "x" }, "<C-Up>", function() mc.lineAddCursor(-1) end, { desc = "Add cursor above (helix A-C)" })
-map({ "n", "x" }, "<C-n>", function() mc.matchAddCursor(1) end, { desc = "Add cursor at next match" })
-map({ "n", "x" }, "<leader>A", mc.matchAllAddCursors, { desc = "Cursor at every match" })
-map("x", "s", mc.matchCursors, { desc = "Select regex in selection (helix s)" })
-map("x", "S", mc.splitCursors, { desc = "Split selection on regex (helix S)" })
-mc.addKeymapLayer(function(layer)
-    layer({ "n", "x" }, "<left>", mc.prevCursor)
-    layer({ "n", "x" }, "<right>", mc.nextCursor)
-    layer({ "n", "x" }, "<leader>,", mc.clearCursors, { desc = "Keep primary cursor (helix ,)" })
-    layer("n", "<esc>", function()
-        if not mc.cursorsEnabled() then mc.enableCursors() else mc.clearCursors() end
-    end)
-end)
-
 -- ── Keymaps (helix <space> / g menus) ────────────────────────────────────
+local map = vim.keymap.set
 local p = function(name) return function() Snacks.picker[name]() end end
 map("n", "<leader>f", p("files"), { desc = "File picker" })
 map("n", "<leader>F", function() Snacks.picker.files({ cwd = vim.fn.expand("%:p:h") }) end, { desc = "File picker (buffer dir)" })

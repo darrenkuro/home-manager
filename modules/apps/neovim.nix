@@ -26,7 +26,6 @@
             conform-nvim # format-on-save → dprint, LSP fallback
             gitsigns-nvim # git gutter + hunk nav
             which-key-nvim # Helix-style key menus on <space>, g, ], [
-            multicursor-nvim # Helix-style multiple cursors
             onedark-nvim
         ];
 
