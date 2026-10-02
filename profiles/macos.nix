@@ -11,6 +11,7 @@
             "anki"
             "brave-browser"
             "claude"
+            "discord"
             "dropbox"
             "font-carlito" # Google's metric-compatible substitute for Microsoft's Calibri
             "font-hack-nerd-font" # editor.fontFamily in configs/vscode-settings.jsonc
