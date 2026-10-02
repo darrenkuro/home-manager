@@ -13,6 +13,7 @@ end
 
 local o = vim.o
 o.number = true
+o.relativenumber = true -- hybrid: current line absolute, others relative
 o.cursorline = true
 o.signcolumn = "yes"
 o.scrolloff = 5
@@ -45,6 +46,17 @@ vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "TermClose" }, {
 vim.api.nvim_create_autocmd("FileType", {
     pattern = { "json", "jsonc", "yaml" },
     callback = function() vim.bo.shiftwidth = 2 end,
+})
+-- 'number'/'relativenumber' are window-local; explorers (snacks picker, netrw)
+-- open with them off, and a file opened into that window inherits the off state.
+-- Re-assert hybrid numbers whenever a real file (buftype "") lands in a window.
+vim.api.nvim_create_autocmd("BufWinEnter", {
+    callback = function(ev)
+        if vim.bo[ev.buf].buftype == "" then
+            vim.wo.number = true
+            vim.wo.relativenumber = true
+        end
+    end,
 })
 
 require("onedark").load()
