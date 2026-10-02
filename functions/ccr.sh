@@ -35,5 +35,18 @@ ccr() {
     }
 
     echo "↻ Resuming ${id%%-*}… in $cwd"
-    (cd "$cwd" && claude --resume "$id" --dangerously-skip-permissions "${@:2}")
+    # Claude discovers a session by mapping cwd → a projects/ bucket, so we must
+    # launch from $cwd itself. If the original dir was deleted, recreate it
+    # (empty) rather than falling back elsewhere, which would map to a different
+    # bucket and hide the transcript.
+    (
+        if ! cd "$cwd" 2> /dev/null; then
+            echo "  (original dir gone — recreating $cwd)"
+            if ! { mkdir -p "$cwd" && cd "$cwd"; }; then
+                echo "Couldn't create $cwd" >&2
+                exit 1
+            fi
+        fi
+        claude --resume "$id" --dangerously-skip-permissions "${@:2}"
+    )
 }
