@@ -24,7 +24,7 @@
         # ── Shell-only history paths (not needed by GUI apps) ──
         HISTFILE = "$HOME/.local/state/bash/history";
         LESSHISTFILE = "$HOME/.local/state/less/history";
-        ZSH_SESSION_DIR = "$HOME/.local/state/zsh/sessions";
+        SHELL_SESSIONS_DISABLE = "1"; # Apple's real knob: /etc/zshrc_Apple_Terminal hardcodes ${ZDOTDIR:-$HOME}/.zsh_sessions (no relocation var exists); must be exported before /etc/zshrc runs
         PYTHON_HISTORY = "$HOME/.local/state/python/history"; # requires Python 3.13+
         NODE_REPL_HISTORY = "$HOME/.local/state/node/history";
         PSQL_HISTORY = "$HOME/.local/state/psql/history";
