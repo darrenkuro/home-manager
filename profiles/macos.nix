@@ -18,6 +18,7 @@
             "notion"
             "obsidian"
             "sf-symbols"
+            "slack"
             "spotify"
             "steam"
             "visual-studio-code"
