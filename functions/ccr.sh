@@ -35,18 +35,24 @@ ccr() {
     }
 
     echo "↻ Resuming ${id%%-*}… in $cwd"
-    # Claude discovers a session by mapping cwd → a projects/ bucket, so we must
-    # launch from $cwd itself. If the original dir was deleted, recreate it
-    # (empty) rather than falling back elsewhere, which would map to a different
-    # bucket and hide the transcript.
+    # Claude discovers a session by mapping cwd → a projects/ bucket and only
+    # looks there (it does NOT search by id globally), so we must launch from
+    # $cwd itself. If the original dir was deleted, fabricate it just for the
+    # session — then rmdir it on exit if still empty, so a deleted project
+    # doesn't leave a ghost dir behind. (rmdir only removes empty dirs, so
+    # anything you create during the session is preserved.)
     (
+        local fabricated=
         if ! cd "$cwd" 2> /dev/null; then
-            echo "  (original dir gone — recreating $cwd)"
+            echo "  (original dir gone — fabricating $cwd for this session)"
             if ! { mkdir -p "$cwd" && cd "$cwd"; }; then
                 echo "Couldn't create $cwd" >&2
                 exit 1
             fi
+            fabricated=1
         fi
         claude --resume "$id" --dangerously-skip-permissions "${@:2}"
+        [ -n "$fabricated" ] && rmdir "$cwd" 2> /dev/null &&
+            echo "  (removed empty $cwd)"
     )
 }
