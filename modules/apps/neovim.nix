@@ -27,6 +27,7 @@
             gitsigns-nvim # git gutter + hunk nav
             which-key-nvim # Helix-style key menus on <space>, g, ], [
             multicursor-nvim # Helix-style multiple cursors
+            claudecode-nvim # Claude Code agent in a split (MCP over websocket); reuses snacks as its terminal
             onedark-nvim
         ];
 

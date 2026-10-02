@@ -108,6 +108,10 @@ require("conform").setup({
 
 require("gitsigns").setup()
 
+-- ── Claude Code agent (claudecode.nvim: MCP server; the CLI auto-connects) ─
+-- provider "auto" picks the snacks terminal loaded above — no extra plugin.
+require("claudecode").setup()
+
 -- ── Multiple cursors (helix-style) ───────────────────────────────────────
 local mc = require("multicursor-nvim")
 mc.setup()
@@ -142,6 +146,9 @@ map("n", "<leader>S", p("lsp_workspace_symbols"), { desc = "Workspace symbols" }
 map("n", "<leader>d", p("diagnostics_buffer"), { desc = "Diagnostics (buffer)" })
 map("n", "<leader>D", p("diagnostics"), { desc = "Diagnostics (workspace)" })
 map("n", "<leader>e", function() Snacks.explorer() end, { desc = "File explorer" })
+map("n", "<leader>t", function() Snacks.terminal.toggle() end, { desc = "Terminal toggle" })
+map("n", "<leader>C", "<cmd>ClaudeCode<cr>", { desc = "Claude Code toggle" })
+map("x", "<leader>C", "<cmd>ClaudeCodeSend<cr>", { desc = "Send selection to Claude" })
 
 map("n", "<leader>r", vim.lsp.buf.rename, { desc = "Rename symbol" })
 map({ "n", "x" }, "<leader>a", vim.lsp.buf.code_action, { desc = "Code action" })
