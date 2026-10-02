@@ -64,7 +64,7 @@ tidy() {
         .cargo             CARGO_HOME
         .rustup            RUSTUP_HOME
         .bundle            BUNDLE_USER_HOME
-        .gem               GEM_HOME
+        .gem               GEM_SPEC_CACHE # spec-index cache is what reappears here, not installs (GEM_HOME)
         .rbenv             RBENV_ROOT
         .android           ANDROID_USER_HOME
         .docker            DOCKER_CONFIG

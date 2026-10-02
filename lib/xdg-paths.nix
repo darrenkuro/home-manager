@@ -33,6 +33,7 @@
     ANDROID_USER_HOME = "${home}/.local/share/android";
     BUNDLE_USER_HOME = "${home}/.local/share/bundle";
     GEM_HOME = "${home}/.local/share/gem";
+    GEM_SPEC_CACHE = "${home}/.cache/gem/specs"; # remote spec index (~25MB); governed by this var, not GEM_HOME
     RBENV_ROOT = "${home}/.local/share/rbenv";
     DOTNET_CLI_HOME = "${home}/.local/share";
     NUGET_PACKAGES = "${home}/.local/share/NuGet/packages";
