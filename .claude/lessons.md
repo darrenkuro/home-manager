@@ -116,3 +116,12 @@ When testing a temporary tweak (e.g. uncommenting a toggle with sed),
 don't restore with `git checkout -- <file>` unless the file's real
 changes are already committed/staged — it reverts to HEAD and eats them.
 Stage first, or undo the tweak with a second sed.
+
+## Never Run the `re` Alias from a Script — It Ends in `exec zsh`
+
+`re` = `nix run home-manager -- switch --flake $HM#mac && exec zsh`.
+Non-interactively (background Bash, `zsh -ic 're'`) the trailing
+`exec zsh` becomes an interactive shell idling on a pipe — the switch
+succeeds in seconds but the process hangs forever and buffers all
+output. Run the underlying command directly instead:
+`nix run home-manager -- switch --flake "$HM#mac"`.
