@@ -78,6 +78,7 @@ if [ ! -s "$_DK_DIR/starship.toml" ]; then
     curl -fsSL "$_DK_RAW/configs/starship.toml" -o "$_DK_DIR/starship.toml" 2> /dev/null
 fi
 [ -s "$_DK_DIR/starship.toml" ] && export STARSHIP_CONFIG="$_DK_DIR/starship.toml"
+export STARSHIP_CACHE="$_DK_DIR/cache" # keep starship's session logs out of $HOME
 
 # ── travel-install: persist the kit to ~/.local/bin + ~/.config
 travel-install() {
