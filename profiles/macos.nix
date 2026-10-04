@@ -22,6 +22,7 @@
             "slack"
             "spotify"
             "steam"
+            "tailscale-app" # mesh VPN joining personal+work Macs into one tailnet; route git through the work Mac to satisfy GitHub's IP allowlist
             "visual-studio-code"
             # "pearcleaner"
         ];
@@ -70,6 +71,7 @@
             "ghostty"
             # "notion"
             "slack"
+            "tailscale-app" # mesh VPN joining personal+work Macs into one tailnet; this Mac acts as the egress for GitHub's IP allowlist
             "visual-studio-code"
         ];
 
