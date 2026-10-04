@@ -1,9 +1,9 @@
 # Copy files in place — these need to be writable at runtime
-# Variables (HM, XDG_CONFIG_HOME, HM_TAG) are injected by Nix in home.nix
+# Variables (HM, XDG_CONFIG_HOME, HM_TAG, HM_NAME) are injected by Nix in home.nix
 
 case $HM_TAG in
     MAC) VSCODE_DIR="$HOME/Library/Application Support/Code/User" ;;
-    FT) VSCODE_DIR="$HOME/.config/Code/User" ;;
+    LINUX) VSCODE_DIR="$HOME/.config/Code/User" ;;
 esac
 
 # VSCode settings, so VSCode can change it freely without nix interfering
@@ -16,7 +16,7 @@ mkdir -p "$XDG_CONFIG_HOME/tmux"
 envsubst < "$HM/configs/tmux.conf" > "$XDG_CONFIG_HOME/tmux/tmux.conf"
 chmod u+w "$XDG_CONFIG_HOME/tmux/tmux.conf"
 
-if [[ ${HM_TAG-} == "FT" ]]; then
+if [[ ${HM_NAME-} == "FT" ]]; then
     # Alacritty
     mkdir -p "$XDG_CONFIG_HOME/alacritty"
     envsubst < "$HM/configs/alacritty.toml" > "$XDG_CONFIG_HOME/alacritty/alacritty.toml"

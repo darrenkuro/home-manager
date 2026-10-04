@@ -1,4 +1,4 @@
-INSTALL_TAG=(MAC FT)
+INSTALL_TAG=(MAC LINUX)
 REQUIRED_TOOLS=(fd fzf tr open)
 _check_preamble || return 0
 

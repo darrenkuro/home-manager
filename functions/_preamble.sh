@@ -16,7 +16,7 @@
 # Explicit sourcing in source.sh avoids this locale dependency.
 #
 # Usage in each function file:
-#   INSTALL_TAG=(MAC FT)
+#   INSTALL_TAG=(MAC LINUX)
 #   INSTALL_PROFILE=(PERSONAL)   # optional; absent/empty = all profiles
 #   REQUIRED_TOOLS=(gh git)
 #   _check_preamble || return 0

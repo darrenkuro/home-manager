@@ -11,17 +11,18 @@
 
 ## Overview
 
-Personal [Home Manager](https://github.com/nix-community/home-manager) configuration that defines shell, editor, toolchain, and dotfile setup across two machines. The Linux target (42 school) runs without root privileges, so the config is designed to work in a rootless Nix installation.
+Personal [Home Manager](https://github.com/nix-community/home-manager) configuration that defines shell, editor, toolchain, and dotfile setup across four machines. The Linux target (42 school) runs without root privileges, so the config is designed to work in a rootless Nix installation.
 
 ## Targets
 
-| Tag        | System           | Description                     |
+| Target     | System           | Description                     |
 | ---------- | ---------------- | ------------------------------- |
 | `mac`      | `aarch64-darwin` | Personal macOS (Apple Silicon)  |
 | `mac-work` | `aarch64-darwin` | Lean work macOS (Apple Silicon) |
 | `ft`       | `x86_64-linux`   | 42 school Linux (rootless)      |
+| `hetzner`  | `x86_64-linux`   | Personal server (Ubuntu)        |
 
-The `tag` parameter flows through the entire config, conditionally including modules, packages, and aliases per target.
+Three parameters flow through the entire config, conditionally including modules, packages, and aliases per target: `tag` (`mac`/`linux`, OS), `profile` (`personal`/`work`, purpose), and `name` (machine key, for one-machine quirks).
 
 ### macOS profiles
 
@@ -196,6 +197,20 @@ re
 
 # 5. Update flake inputs
 nix flake update
+```
+
+### Linux server (hetzner)
+
+```bash
+# 1. Install Nix (multi-user; flakes enabled by default)
+curl -fsSL https://install.determinate.systems/nix | sh -s -- install
+
+# 2. Clone and first run
+git clone https://github.com/darrenkuro/home-manager.git ~/.config/home-manager
+nix run home-manager -- switch --flake ~/.config/home-manager#hetzner
+
+# 3. After initial setup, use the alias
+re
 ```
 
 ## Post-Reboot (macOS)

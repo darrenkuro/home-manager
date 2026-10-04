@@ -1,4 +1,4 @@
-{ pkgs, config, tag, profile, user, homeDir, lib, ... }: let
+{ pkgs, config, tag, profile, user, homeDir, name, lib, ... }: let
     isMac = tag == "mac";
     isWork = profile == "work";
 in
@@ -96,6 +96,7 @@ in
         HM="${config.home.homeDirectory}/.config/home-manager"
         XDG_CONFIG_HOME="${config.xdg.configHome}"
         HM_TAG="${lib.toUpper tag}"
+        HM_NAME="${lib.toUpper name}"
 
         ${builtins.readFile ./scripts/copy-files.sh}
       '';
@@ -128,7 +129,7 @@ in
                 ( builtins.readFile ./scripts/hygiene.sh )
             ] ++
             lib.optionals isMac [ ( builtins.readFile ./scripts/ssh-keychain.sh ) ] ++
-            lib.optionals ( tag == "ft" ) [ ( builtins.readFile ./scripts/repeat-rate.sh ) ] );
+            lib.optionals ( name == "ft" ) [ ( builtins.readFile ./scripts/repeat-rate.sh ) ] );
     };
     programs.direnv = { enable = true; nix-direnv.enable = true; };
 
@@ -179,5 +180,5 @@ in
         # PostgreSQL is personal-only: its launchd half needs codesigned BTM
         # stubs (see root darwin.nix). The only tooling the work profile lacks.
         ./modules/services/postgresql/home.nix
-    ] ++ lib.optionals ( tag == "ft" ) [ ./modules/system/linux-ft.nix ];
+    ] ++ lib.optionals ( name == "ft" ) [ ./modules/system/linux-ft.nix ];
 }

@@ -47,14 +47,15 @@
     machines = {
       mac = { system = "aarch64-darwin"; tag = "mac"; profile = "personal"; user = "darrenlu"; sshKey = "id_rsa"; };
       mac-work = { system = "aarch64-darwin"; tag = "mac"; profile = "work"; user = "darrenlu"; sshKey = "id_ed25519"; };
-      ft = { system = "x86_64-linux"; tag = "ft"; profile = "personal"; user = "dlu"; sshKey = "id_ed25519"; };
+      ft = { system = "x86_64-linux"; tag = "linux"; profile = "personal"; user = "dlu"; sshKey = "id_ed25519"; };
+      hetzner = { system = "x86_64-linux"; tag = "linux"; profile = "personal"; user = "deploy"; sshKey = "id_ed25519"; };
     };
 
     isDarwin = m: lib.hasSuffix "darwin" m.system;
     specialArgsFor = m:
       hmExtraArgs
       // {
-        inherit (m) system tag profile user sshKey;
+        inherit (m) system tag profile user sshKey name;
         homeDir = if isDarwin m then "/Users/${m.user}" else "/home/${m.user}";
       };
 
@@ -87,8 +88,11 @@
         extraSpecialArgs = specialArgsFor m;
         modules = [./home.nix];
       };
+    # Machine key doubles as `name` in specialArgs — gates one-machine quirks
+    # (ft's chroot-nix plumbing) and names the flake target in `re`/`sure`.
+    withName = lib.mapAttrs (n: m: m // { name = n; }) machines;
   in {
-    darwinConfigurations = lib.mapAttrs (_: mkDarwin) (lib.filterAttrs (_: isDarwin) machines);
-    homeConfigurations = lib.mapAttrs (_: mkHome) machines;
+    darwinConfigurations = lib.mapAttrs (_: mkDarwin) (lib.filterAttrs (_: isDarwin) withName);
+    homeConfigurations = lib.mapAttrs (_: mkHome) withName;
   };
 }

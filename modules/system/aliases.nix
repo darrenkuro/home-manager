@@ -1,11 +1,4 @@
-{ tag, profile, lib, ... }: let
-    macTarget = if profile == "work"
-    then
-        "mac-work"
-    else
-        "mac";
-in
-{
+{ tag, profile, name, lib, ... }: {
     programs.zsh.shellAliases = lib.mkMerge [
         # ---- common aliases (always enabled)
         {
@@ -33,10 +26,10 @@ in
             lib.mkIf ( tag == "mac" ) {
                 p = "hx $HM/darwin.nix";
                 hm = "code $HM";
-                re = "nix run home-manager -- switch --flake $HM#${macTarget} && exec zsh"; # HM only (no brew, system.defaults, launchd)
+                re = "nix run home-manager -- switch --flake $HM#${name} && exec zsh"; # HM only (no brew, system.defaults, launchd)
                 # full system rebuild; the BTM patch step is personal-only (the
                 # work profile runs stock nix-darwin daemons, no stubs to patch)
-                sure = "sudo darwin-rebuild switch --flake $HM#${macTarget}" +
+                sure = "sudo darwin-rebuild switch --flake $HM#${name}" +
                 lib.optionalString ( profile == "personal" )
                 " && sudo $HM/scripts/btm-patch-nix.sh" + " && exec zsh";
 
@@ -57,12 +50,17 @@ in
                 cct = "claude --channels plugin:telegram@claude-plugins-official --dangerously-skip-permissions";
             } )
 
-        # ---- ft-only aliases
+        # ---- linux-only aliases (ft + hetzner)
         (
-            lib.mkIf ( tag == "ft" ) {
+            lib.mkIf ( tag == "linux" ) {
+                re = "home-manager switch --flake $HM#${name} && exec zsh";
+            } )
+
+        # ---- ft-only quirks (42 school box)
+        (
+            lib.mkIf ( name == "ft" ) {
                 p = "hx $HM/modules/system/linux-ft.nix"; # ft platform file (placeholder)
                 hm = "code --no-sandbox $HM";
-                re = "home-manager switch --flake $HM#ft && exec zsh";
 
                 code = "code --no-sandbox"; # VSCode requires --no-sandbox to run in nix env on 42
             } )

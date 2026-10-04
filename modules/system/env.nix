@@ -1,10 +1,11 @@
-{ tag, profile, lib, ... }: {
+{ tag, profile, name, lib, ... }: {
     home.sessionVariables = ( import ../../lib/xdg-paths.nix { home = "$HOME"; } ) //
     {
         # ── System ── (uppercase to match the INSTALL_TAG/INSTALL_PROFILE
-        # gates in functions/_preamble.sh)
+        # gates in functions/_preamble.sh; HM_NAME gates one-machine quirks)
         HM_TAG = lib.toUpper tag;
         HM_PROFILE = lib.toUpper profile;
+        HM_NAME = lib.toUpper name;
 
         # ── Shortcuts ──
         DBOX = "$HOME/Dropbox";
