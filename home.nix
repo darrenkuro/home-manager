@@ -27,6 +27,7 @@ in
         nil # Nix LSP
         shfmt
         shellcheck
+        mypy # Python static type checker
         uv # Python package/venv/interpreter manager (standalone; supersedes pip + virtualenv)
 
         # Ensure Consistency
