@@ -1,6 +1,8 @@
 { pkgs, config, tag, profile, user, homeDir, name, lib, ... }: let
     isMac = tag == "mac";
     isWork = profile == "work";
+    # Headless box: shell backbone + a hand-picked allowlist, no dev toolchains
+    isServer = profile == "server";
 in
 {
     # ----------- Base Settings (identity comes from the flake's machine map)
@@ -10,13 +12,15 @@ in
 
     home.packages = with pkgs;
     [
-        tokei
+        # Server allowlist — every machine gets these
         eza
         fd
         jq
         fzf
-        rename
         bat
+    ] ++ lib.optionals ( !isServer ) [
+        tokei
+        rename
         gettext # envsubst
         wakatime-cli
         dprint # Unified formatter (nix, ts, json, md, toml, python, c/cpp, shell, rust, swift)
@@ -32,8 +36,8 @@ in
         # nerd-fonts.hack — not cached for aarch64-darwin
         # cachix — not currently needed
 
-        # Native toolchains — every profile gets the full set; profiles differ
-        # only in GUI apps (profiles/macos.nix), never in tooling.
+        # Native toolchains — the personal/work split never touches tooling
+        # (profiles differ only in GUI apps); only the server profile trims it.
         clang-tools # C, C++
         cargo
         rust-analyzer
@@ -79,9 +83,10 @@ in
     # ── Activation Scripts ──
     home.activation = {
         # Create XDG state/cache directories for shell history, sessions, etc.
+        # ($DEV only exists where development happens — not on the server)
         xdgStateDirs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
         run mkdir -p \
-          "$HOME/Documents/dev" \
+          ${lib.optionalString ( !isServer ) ''"$HOME/Documents/dev" \''}
           "$HOME/.local/state/zsh" \
           "$HOME/.local/state/bash" \
           "$HOME/.local/state/less" \
@@ -91,15 +96,17 @@ in
           "$HOME/.cache/zsh"
       '';
 
-        # Copy writable configs (VSCode, tmux; alacritty + tmux-nix on ft)
-        writableConfigs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-        HM="${config.home.homeDirectory}/.config/home-manager"
-        XDG_CONFIG_HOME="${config.xdg.configHome}"
-        HM_TAG="${lib.toUpper tag}"
-        HM_NAME="${lib.toUpper name}"
+        # Copy writable configs (VSCode, tmux; alacritty + tmux-nix on ft).
+        # Server skips it: no VSCode/tmux there, and it spares the envsubst dep.
+        writableConfigs = lib.hm.dag.entryAfter [ "writeBoundary" ]
+        ( lib.optionalString ( !isServer ) ''
+          HM="${config.home.homeDirectory}/.config/home-manager"
+          XDG_CONFIG_HOME="${config.xdg.configHome}"
+          HM_TAG="${lib.toUpper tag}"
+          HM_NAME="${lib.toUpper name}"
 
-        ${builtins.readFile ./scripts/copy-files.sh}
-      '';
+          ${builtins.readFile ./scripts/copy-files.sh}
+        '' );
     };
 
     programs.home-manager.enable = true;
@@ -163,11 +170,13 @@ in
 
         ./modules/apps/starship.nix
         ./modules/apps/git.nix
-        ./modules/apps/helix.nix
         ./modules/apps/neovim.nix
+        ./modules/apps/ssh.nix
+    ] ++
+    lib.optionals ( !isServer ) [
+        ./modules/apps/helix.nix
         ./modules/apps/claude.nix
         ./modules/apps/vscode.nix
-        ./modules/apps/ssh.nix
     ] ++
     lib.optionals isMac [
         ./modules/system/tiling-hotkeys.nix

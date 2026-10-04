@@ -48,7 +48,7 @@
       mac = { system = "aarch64-darwin"; tag = "mac"; profile = "personal"; user = "darrenlu"; sshKey = "id_rsa"; };
       mac-work = { system = "aarch64-darwin"; tag = "mac"; profile = "work"; user = "darrenlu"; sshKey = "id_ed25519"; };
       ft = { system = "x86_64-linux"; tag = "linux"; profile = "personal"; user = "dlu"; sshKey = "id_ed25519"; };
-      hetzner = { system = "x86_64-linux"; tag = "linux"; profile = "personal"; user = "deploy"; sshKey = "id_ed25519"; };
+      hetzner = { system = "x86_64-linux"; tag = "linux"; profile = "server"; user = "deploy"; sshKey = "id_ed25519"; };
     };
 
     isDarwin = m: lib.hasSuffix "darwin" m.system;

@@ -22,7 +22,17 @@ Personal [Home Manager](https://github.com/nix-community/home-manager) configura
 | `ft`       | `x86_64-linux`   | 42 school Linux (rootless)      |
 | `hetzner`  | `x86_64-linux`   | Personal server (Ubuntu)        |
 
-Three parameters flow through the entire config, conditionally including modules, packages, and aliases per target: `tag` (`mac`/`linux`, OS), `profile` (`personal`/`work`, purpose), and `name` (machine key, for one-machine quirks).
+Three parameters flow through the entire config, conditionally including modules, packages, and aliases per target: `tag` (`mac`/`linux`, OS), `profile` (`personal`/`work`/`server`, purpose), and `name` (machine key, for one-machine quirks). The `server` profile is a minimal headless allowlist: shell backbone (zsh, starship, git, direnv, ssh) plus eza/fd/fzf/bat/jq and neovim — no dev toolchains or GUI-adjacent modules.
+
+### Travel kit
+
+For machines that aren't mine (no Nix, no root), `travel.sh` is a self-contained
+portable subset — curated aliases, the dependency-free functions, and a
+`travel-install` helper that drops static binaries into `~/.local/bin`:
+
+```bash
+source <(curl -fsSL https://raw.githubusercontent.com/darrenkuro/home-manager/main/travel.sh)
+```
 
 ### macOS profiles
 
