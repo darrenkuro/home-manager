@@ -140,6 +140,14 @@ in
     xdg.configFile."dprint/dprint.json".source = ./dprint.json;
     # Style for dprint's clang-format exec command (see configs/clang-format)
     home.file.".clang-format".source = ./configs/clang-format;
+    # Ghostty's terminfo compiled into ~/.terminfo so SSH sessions from Ghostty
+    # (TERM=xterm-ghostty) get working keys/colors on machines that only ship
+    # the definition inside the app bundle (or not at all, like ft).
+    # Source vendored with `infocmp -x xterm-ghostty` — re-dump after Ghostty updates.
+    home.file.".terminfo".source = pkgs.runCommandLocal "ghostty-terminfo" { } ''
+        mkdir -p $out
+        ${pkgs.ncurses}/bin/tic -x -o $out ${./configs/ghostty/xterm-ghostty.terminfo}
+    '';
     # System vim (9.1.0327+): XDG vimrc, read only while no ~/.vimrc exists.
     # defaults.vim stops auto-loading once ANY vimrc exists — re-source it to
     # keep stock behavior; viminfo moves to XDG state (dir made in xdgStateDirs).
