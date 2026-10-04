@@ -4,6 +4,7 @@ format = """
 [](orange)\
 $os\
 $username\
+$hostname\
 [](bg:green fg:orange)\
 $directory\
 [](fg:green bg:bg3)\
@@ -94,6 +95,11 @@ Pop = " "
 [username]
 show_always = true
 format = '[$user ](fg:fg1 bg:orange)'
+
+# SSH sessions only — loud machine id so a remote shell is unmistakable
+[hostname]
+ssh_only = true
+format = '[󰣀 $hostname ](bold fg:yellow_b bg:orange)'
 
 [directory]
 style = "fg:fg1 bg:green"
