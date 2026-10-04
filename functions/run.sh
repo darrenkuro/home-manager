@@ -1,4 +1,5 @@
 INSTALL_TAG=(MAC LINUX)
+INSTALL_PROFILE=(PERSONAL WORK)
 REQUIRED_TOOLS=(cc grep)
 _check_preamble || return 0
 

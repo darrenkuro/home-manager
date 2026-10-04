@@ -1,4 +1,5 @@
 INSTALL_TAG=(MAC LINUX)
+INSTALL_PROFILE=(PERSONAL WORK)
 REQUIRED_TOOLS=(fd fzf tr open)
 _check_preamble || return 0
 
