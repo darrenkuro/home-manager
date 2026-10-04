@@ -57,6 +57,7 @@
             "*.py[cod]"
             "*.egg-info/"
             ".venv/"
+            ".mypy_cache/"
 
             # Rust
             "target/"
