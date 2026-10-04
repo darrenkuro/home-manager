@@ -85,8 +85,8 @@ in
         # Create XDG state/cache directories for shell history, sessions, etc.
         # ($DEV only exists where development happens — not on the server)
         xdgStateDirs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        ${lib.optionalString ( !isServer ) ''run mkdir -p "$HOME/Documents/dev"''}
         run mkdir -p \
-          ${lib.optionalString ( !isServer ) ''"$HOME/Documents/dev" \''}
           "$HOME/.local/state/zsh" \
           "$HOME/.local/state/bash" \
           "$HOME/.local/state/less" \
