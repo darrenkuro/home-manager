@@ -1,4 +1,4 @@
-{ tag, profile, name, lib, ... }: {
+{ tag, profile, machine, lib, ... }: {
     programs.zsh.shellAliases = lib.mkMerge [
         # ---- common aliases (always enabled)
         {
@@ -26,10 +26,10 @@
             lib.mkIf ( tag == "mac" ) {
                 p = "hx $HM/darwin.nix";
                 hm = "code $HM";
-                re = "nix run home-manager -- switch --flake $HM#${name} && exec zsh"; # HM only (no brew, system.defaults, launchd)
+                re = "nix run home-manager -- switch --flake $HM#${machine} && exec zsh"; # HM only (no brew, system.defaults, launchd)
                 # full system rebuild; the BTM patch step is personal-only (the
                 # work profile runs stock nix-darwin daemons, no stubs to patch)
-                sure = "sudo darwin-rebuild switch --flake $HM#${name}" +
+                sure = "sudo darwin-rebuild switch --flake $HM#${machine}" +
                 lib.optionalString ( profile == "personal" )
                 " && sudo $HM/scripts/btm-patch-nix.sh" + " && exec zsh";
 
@@ -53,12 +53,12 @@
         # ---- linux-only aliases (ft + hetzner)
         (
             lib.mkIf ( tag == "linux" ) {
-                re = "home-manager switch --flake $HM#${name} && exec zsh";
+                re = "home-manager switch --flake $HM#${machine} && exec zsh";
             } )
 
         # ---- ft-only quirks (42 school box)
         (
-            lib.mkIf ( name == "ft" ) {
+            lib.mkIf ( machine == "ft" ) {
                 p = "hx $HM/modules/system/linux-ft.nix"; # ft platform file (placeholder)
                 hm = "code --no-sandbox $HM";
 

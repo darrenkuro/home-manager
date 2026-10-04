@@ -11,7 +11,7 @@ Nix Home Manager flake for declaratively managing user environments across four 
 - **ft** (`x86_64-linux`) — 42 school rootless Linux
 - **hetzner** (`x86_64-linux`) — personal server (Ubuntu, user `deploy`): minimal profile — shell backbone + allowlist (eza/fd/fzf/bat/jq, neovim), no dev toolchains, no helix/claude/vscode
 
-Machine identity (system, tag, profile, user — homeDir derived) lives in the `machines` map in `flake.nix`; `specialArgs` carry those values into every module, plus `name` (the machine's map key). Three dimensions flow through the config: `tag` (`"mac"`/`"linux"`, OS), `profile` (`"personal"`/`"work"`/`"server"`, purpose — macOS app/service choices per profile live in `profiles/macos.nix`; `server` trims packages/modules to a headless allowlist in `home.nix`), and `name` for one-machine quirks (e.g. ft's chroot-nix plumbing gates on `name == "ft"`; shell-side it's `$HM_NAME`).
+Machine identity (system, tag, profile, user — homeDir derived) lives in the `machines` map in `flake.nix`; `specialArgs` carry those values into every module, plus `machine` (the machine's map key — never call it `name`, which shadows the HM submodule's username arg). Three dimensions flow through the config: `tag` (`"mac"`/`"linux"`, OS), `profile` (`"personal"`/`"work"`/`"server"`, purpose — macOS app/service choices per profile live in `profiles/macos.nix`; `server` trims packages/modules to a headless allowlist in `home.nix`), and `machine` for one-machine quirks (e.g. ft's chroot-nix plumbing gates on `machine == "ft"`; shell-side it's `$HM_NAME`).
 
 ## Commands
 

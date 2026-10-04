@@ -55,7 +55,7 @@
     specialArgsFor = m:
       hmExtraArgs
       // {
-        inherit (m) system tag profile user sshKey name;
+        inherit (m) system tag profile user sshKey machine;
         homeDir = if isDarwin m then "/Users/${m.user}" else "/home/${m.user}";
       };
 
@@ -88,9 +88,11 @@
         extraSpecialArgs = specialArgsFor m;
         modules = [./home.nix];
       };
-    # Machine key doubles as `name` in specialArgs — gates one-machine quirks
+    # Machine key doubles as `machine` in specialArgs — gates one-machine quirks
     # (ft's chroot-nix plumbing) and names the flake target in `re`/`sure`.
-    withName = lib.mapAttrs (n: m: m // { name = n; }) machines;
+    # Not `name`: that would shadow the HM submodule's own `name` arg (the
+    # username) and break the nix-darwin integration.
+    withName = lib.mapAttrs (n: m: m // { machine = n; }) machines;
   in {
     darwinConfigurations = lib.mapAttrs (_: mkDarwin) (lib.filterAttrs (_: isDarwin) withName);
     homeConfigurations = lib.mapAttrs (_: mkHome) withName;
