@@ -9,6 +9,9 @@
   },
   "markdown": {},
   "toml": {},
+  "ruff": {
+    "lineLength": 100
+  },
   "exec": {
     "commands": [{
       "command": "clang-format -style=file -fallback-style=LLVM -assume-filename={{file_path}}",
