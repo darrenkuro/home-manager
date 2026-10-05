@@ -27,12 +27,14 @@ work() {
     defaults write com.apple.finder AppleShowAllFiles -bool false
     osascript -e 'tell application "Finder" to quit'
 
-    # Close personal browsers
-    osascript -e 'tell application "Safari" to quit'
-    osascript -e 'tell application "Brave Browser" to quit'
-    osascript -e 'tell application "QuickTime Player" to quit'
+    # Close personal apps — quitting one that isn't running doesn't launch it
+    local app
+    for app in Safari "Brave Browser" "QuickTime Player" \
+        Mail Dropbox Messages Discord FaceTime; do
+        osascript -e "tell application \"$app\" to quit"
+    done
 
-    # Wait until both have actually exited
+    # Wait until both browsers have actually exited
     _work_wait_quit Safari "Brave Browser" || return 1
 
     # Launch Brave Work profile
