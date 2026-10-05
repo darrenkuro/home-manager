@@ -33,10 +33,10 @@ font-feature = -liga, -calt
 
 # (uncomment to taste — keep any explanatory comment on its own line)
 # font-family = "JetBrainsMono Nerd Font"
-# slight transparency
-# background-opacity = 0.96
+# see-through background (macOS: needs full Ghostty restart)
+background-opacity = 0.84
 # frosted-glass behind the transparency
-# background-blur = true
+background-blur = true
 # reclaim vertical space (keeps rounded corners)
 # macos-titlebar-style = hidden
 
