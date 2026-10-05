@@ -181,6 +181,7 @@ in
     ] ++
     lib.optionals isMac [
         ./modules/system/tiling-hotkeys.nix
+        ./modules/system/wallpaper.nix
         ./modules/apps/netusage.nix
         ./modules/apps/mdserve.nix
         ./modules/apps/ghostty.nix
