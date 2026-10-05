@@ -130,6 +130,7 @@ Defined in `modules/system/env.nix`:
 
 ## Workflow
 
+- **Never run `re` / `sure` / `home-manager switch` / `darwin-rebuild switch` yourself** — rebuilds are manual-only (a PreToolUse hook, `block-rebuild.sh`, enforces it). Commit, then ask the user to run `! re` or `! sure`. Each build bakes its flake target into the aliases, so one wrong target (e.g. `.#mac` on the work iMac, which is `mac-work`) sticks
 - Always `git commit` before running `re` or `sure` — flakes only see committed files, and new files need `git add` first
 - Stage only files you changed (`git add <file> ...`), not `git add -A` — the working tree may have unrelated dirty files
 - **Live on `main`.** Routine config changes commit directly to main; short-lived branches + small PRs for refactors/experiments only. Never let daily work accumulate on a side branch (flakes build whatever is checked out, so a stale main means the repo lies about the machine).

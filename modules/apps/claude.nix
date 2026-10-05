@@ -43,6 +43,13 @@
                 ];
             }
             {
+                # Rebuilds (re/sure/switch) are manual-only — agents must ask
+                matcher = "Bash";
+                hooks = [
+                    { type = "command"; command = "~/.config/claude/hooks/block-rebuild.sh"; }
+                ];
+            }
+            {
                 matcher = "Skill";
                 hooks = [
                     {
