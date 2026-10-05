@@ -14,7 +14,8 @@ in
     programs.desktoppr = {
         enable = true;
         settings = {
-            picture = ../../configs/wallpapers/one-piece-wallpaper-1.jpg;
+            # Interpolated: own store path, stable across repo commits
+            picture = "${../../configs/wallpapers/one-piece-wallpaper-1.jpg}";
             scale = "fill";
         };
     };
@@ -25,6 +26,7 @@ in
         _cur=$("${exe}" 0 2>/dev/null || true)
         if [ ! -e "$_cur" ]; then
             run "${exe}" all "${cfg.settings.picture}"
+            /bin/sleep 1 # let WallpaperAgent publish the new URL before `manage`
         fi
     '';
 }
