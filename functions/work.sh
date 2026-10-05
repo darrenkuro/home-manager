@@ -21,19 +21,11 @@ work() {
     # Clear clipboard
     pbcopy < /dev/null
 
-    # Hide Finder dotfiles — quit Finder gently (killall would abort in-flight
-    # copies/moves), then relaunch it so the setting takes effect. The relaunch
-    # can race LaunchServices still deregistering the old process (open fails
-    # with -600, procNotFound), so retry briefly.
+    # Hide Finder dotfiles and quit Finder gently (killall would abort
+    # in-flight copies/moves). Left closed — this also blanks the Desktop; the
+    # setting applies whenever Finder is next opened.
     defaults write com.apple.finder AppleShowAllFiles -bool false
     osascript -e 'tell application "Finder" to quit'
-    if _work_wait_quit Finder; then
-        local i
-        for i in 1 2 3 4 5; do
-            open -a Finder 2> /dev/null && break
-            sleep 0.5
-        done
-    fi
 
     # Close personal browsers
     osascript -e 'tell application "Safari" to quit'
