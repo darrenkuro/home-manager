@@ -93,13 +93,30 @@ travel-install() {
     echo "dk: persisted to ~/.local/bin (add it to PATH in your rc if keeping)"
 }
 
-# ── Aliases (subset of modules/system/aliases.nix that makes sense anywhere)
+# ── Aliases (subset of modules/system/aliases.nix + modules/apps/*.nix
+#    that makes sense anywhere; machine/path-specific ones stay home)
 if command -v eza > /dev/null 2>&1; then
     alias ls='eza --icons'
 else
     alias ls='ls --color=auto'
 fi
 alias objdump='objdump --disassembler-options=intel'
+command -v hx > /dev/null 2>&1 && alias h='hx'
+command -v nvim > /dev/null 2>&1 && alias v='nvim'
+command -v tokei > /dev/null 2>&1 && alias cloc='tokei'
+
+# git (mirrors modules/apps/git.nix)
+alias gs='git status'
+alias gd='git diff'
+alias ga='git add -A'
+alias gm='git commit -m'
+alias gma='git add -A && git commit -m'
+alias gp='git push'
+alias gpl='git push --force-with-lease'
+alias gpa='git add -A && git commit -m "Update" && git push'
+alias gch='git checkout'
+alias gcl='git clone'
+command -v gh > /dev/null 2>&1 && alias gchp='gh pr checkout'
 
 # ── Functions (portable subset of functions/*.sh, preamble inlined away)
 pull() {
