@@ -1,6 +1,7 @@
 # travel.sh — portable shell kit for machines that aren't mine.
 #
-#   source <(curl -fsSL https://raw.githubusercontent.com/darrenkuro/home-manager/main/travel.sh)
+#   source <(curl -fsSL tinyurl.com/darrenkuro)
+#   (long form: https://raw.githubusercontent.com/darrenkuro/home-manager/main/travel.sh)
 #
 # One command = aliases + functions + starship with my real config.
 # Missing tools are fetched as static builds into a per-user /tmp cache

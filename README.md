@@ -31,7 +31,8 @@ portable subset — curated aliases, the dependency-free functions, and a
 `travel-install` helper that drops static binaries into `~/.local/bin`:
 
 ```bash
-source <(curl -fsSL https://raw.githubusercontent.com/darrenkuro/home-manager/main/travel.sh)
+source <(curl -fsSL tinyurl.com/darrenkuro)
+# long form: source <(curl -fsSL https://raw.githubusercontent.com/darrenkuro/home-manager/main/travel.sh)
 ```
 
 ### macOS profiles
