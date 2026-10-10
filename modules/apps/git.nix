@@ -1,82 +1,12 @@
-{ pkgs, sshKey, ... }: {
+{ lib, pkgs, sshKey, ... }: {
     home.packages = with pkgs;
     [ git gh ];
 
     programs.git = {
         enable = true;
-        ignores = [
-            # Env
-            ".env"
-            ".env.*"
-            "!.env.example"
-
-            # macOS
-            ".DS_Store"
-            "Icon\r"
-            "._*"
-            ".AppleDouble"
-            ".LSOverride"
-            ".Spotlight-V100"
-            ".Trashes"
-
-            # Editors / IDEs
-            ".idea/*"
-            "!.idea/codeStyles/"
-            "!.idea/runConfigurations/"
-            ".vscode/*"
-            "!.vscode/launch.json"
-            "!.vscode/tasks.json"
-            "!.vscode/settings.json"
-
-            # Backup files
-            "*.bak"
-            "*.swp"
-            "*.swo"
-            "*~"
-
-            # Obsidian
-            ".obsidian/workspace"
-
-            # Claude Code
-            "**/.claude/settings.local.json"
-
-            # GitHub (keep workflows/templates)
-            ".github/*"
-            "!.github/workflows/"
-            "!.github/ISSUE_TEMPLATE/"
-            "!.github/PULL_REQUEST_TEMPLATE.md"
-
-            # Node
-            "node_modules/"
-            "dist/"
-            "build/"
-            "*.log"
-
-            # Python
-            "__pycache__/"
-            "*.py[cod]"
-            "*.egg-info/"
-            ".venv/"
-            ".mypy_cache/"
-
-            # Rust
-            "target/"
-
-            # Nix
-            "result"
-
-            # C / C++
-            "*.o"
-            "*.d"
-            "*.a"
-            "*.so"
-            "*.out"
-
-            # Xcode / Swift
-            "xcuserdata/"
-            "DerivedData/"
-            ".build/"
-        ];
+        # configs/gitignore is the single source: raw-fetched by travel.sh too
+        ignores = lib.filter ( l: l != "" && !lib.hasPrefix "#" l )
+        ( lib.splitString "\n" ( builtins.readFile ../../configs/gitignore ) );
 
         settings = {
             user.name = "darrenkuro";

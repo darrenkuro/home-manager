@@ -27,8 +27,9 @@ Three parameters flow through the entire config, conditionally including modules
 ### Travel kit
 
 For machines that aren't mine (no Nix, no root), `travel.sh` is a self-contained
-portable subset — curated aliases, the dependency-free functions, and a
-`travel-install` helper that drops static binaries into `~/.local/bin`:
+portable subset — curated aliases, the dependency-free functions, my starship
+config and global gitignore, and a `travel-install` helper that persists the
+static binaries to `~/.local/bin` and the configs to `~/.config`:
 
 ```bash
 source <(curl -fsSL tinyurl.com/darrenkuro)

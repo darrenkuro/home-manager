@@ -3,7 +3,8 @@
 #   source <(curl -fsSL tinyurl.com/darrenkuro)
 #   (long form: https://raw.githubusercontent.com/darrenkuro/home-manager/main/travel.sh)
 #
-# One command = aliases + functions + starship with my real config.
+# One command = aliases + functions + starship + global gitignore, all
+# with my real config files.
 # Missing tools are fetched as static builds into a per-user /tmp cache
 # (survives shells, gone on reboot, nothing written to $HOME). Run
 # `travel-install` to persist cache + config to ~/.local/bin instead.
@@ -81,6 +82,17 @@ fi
 [ -s "$_DK_DIR/starship.toml" ] && export STARSHIP_CONFIG="$_DK_DIR/starship.toml"
 export STARSHIP_CACHE="$_DK_DIR/cache" # keep starship's session logs out of $HOME
 
+# ── My global gitignore (same file git.nix installs as ~/.config/git/ignore);
+#    injected via env so nothing is written to ~/.gitconfig
+if [ ! -s "$_DK_DIR/gitignore" ]; then
+    curl -fsSL "$_DK_RAW/configs/gitignore" -o "$_DK_DIR/gitignore" 2> /dev/null
+fi
+if [ -s "$_DK_DIR/gitignore" ]; then
+    export GIT_CONFIG_COUNT=1
+    export GIT_CONFIG_KEY_0=core.excludesFile
+    export GIT_CONFIG_VALUE_0="$_DK_DIR/gitignore"
+fi
+
 # ── travel-install: persist the kit to ~/.local/bin + ~/.config
 travel-install() {
     mkdir -p "$HOME/.local/bin"
@@ -90,7 +102,11 @@ travel-install() {
         mkdir -p "$HOME/.config"
         cp -f "$_DK_DIR/starship.toml" "$HOME/.config/starship.toml"
     fi
-    echo "dk: persisted to ~/.local/bin (add it to PATH in your rc if keeping)"
+    if [ -s "$_DK_DIR/gitignore" ]; then
+        mkdir -p "$HOME/.config/git"
+        cp -f "$_DK_DIR/gitignore" "$HOME/.config/git/ignore" # git's default excludes path
+    fi
+    echo "dk: persisted to ~/.local/bin + ~/.config (add ~/.local/bin to PATH in your rc if keeping)"
 }
 
 # ── Aliases (subset of modules/system/aliases.nix + modules/apps/*.nix
