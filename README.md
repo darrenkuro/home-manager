@@ -28,13 +28,20 @@ Three parameters flow through the entire config, conditionally including modules
 
 For machines that aren't mine (no Nix, no root), `travel.sh` is a self-contained
 portable subset — curated aliases, the dependency-free functions, my starship
-config and global gitignore, and a `travel-install` helper that persists the
-static binaries to `~/.local/bin` and the configs to `~/.config`:
+config and global gitignore, with missing tools fetched as static builds:
 
 ```bash
-source <(curl -fsSL tinyurl.com/darrenkuro)
+source <(curl -fsSL tinyurl.com/darrenkuro)           # this session only, cached in /tmp
+source <(curl -fsSL tinyurl.com/darrenkuro) install   # persist on a no-root workstation
 # long form: source <(curl -fsSL https://raw.githubusercontent.com/darrenkuro/home-manager/main/travel.sh)
 ```
+
+`install` puts the tools in `~/.local/bin` and the configs plus a copy of the script
+in `~/.local/share/dktravel`, then **overwrites** the current shell's rc (`~/.zshrc`
+or `~/.bashrc`) with one line that sources that copy, after a red warning; the
+original is kept as `<rc>.bak`. Later shells start offline. `travel-update`
+re-fetches and reinstalls; `travel-uninstall` restores every original rc and
+removes only what the kit added.
 
 ### macOS profiles
 
