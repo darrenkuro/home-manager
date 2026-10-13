@@ -8,7 +8,7 @@ in
     # ----------- Base Settings (identity comes from the flake's machine map)
     home.username = user;
     home.homeDirectory = homeDir;
-    home.stateVersion = "25.11"; # Version when started using
+    home.stateVersion = "26.05"; # Started on 25.11; raised for darwin man (hm#8723), no other defaults changed
 
     home.packages = with pkgs;
     [
@@ -167,7 +167,6 @@ in
 
     imports = [
         ./modules/system/aliases.nix
-        ./modules/system/man.nix
         ./modules/system/env.nix
 
         ./modules/apps/starship.nix
