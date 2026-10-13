@@ -167,6 +167,7 @@ in
 
     imports = [
         ./modules/system/aliases.nix
+        ./modules/system/man.nix
         ./modules/system/env.nix
 
         ./modules/apps/starship.nix

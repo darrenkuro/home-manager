@@ -66,5 +66,5 @@
             } )
     ];
 
-    imports = [ ./aliases-cp.nix ./aliases-man.nix ];
+    imports = [ ./aliases-cp.nix ];
 }
