@@ -7,14 +7,18 @@
 # user-agent patching in mkStubInstall.
 #
 # No home.nix half — nothing user-scoped to manage.
-{ lib, pkgs, homeDir, ... }: let
+{ lib, pkgs, homeDir, config, ... }: let
     btm = import ../../../lib/launchd-btm.nix { inherit lib pkgs homeDir; };
+
+    # nix-darwin's Nix (nix.package, tracks the locked nixpkgs), as its own
+    # daemon module runs it — not the installer's frozen default profile.
+    nixDaemon = lib.getExe' config.nix.package "nix-daemon";
 
     nixDaemonWrapper = btm.mkWrapper {
         name = "NixDaemonStart";
         text = ''
-      /bin/wait4path /nix/var/nix/profiles/default/bin/nix-daemon
-      exec /nix/var/nix/profiles/default/bin/nix-daemon
+      /bin/wait4path ${nixDaemon}
+      exec ${nixDaemon}
     '';
     };
 
