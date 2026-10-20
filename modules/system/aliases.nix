@@ -38,6 +38,8 @@
                 unhide = "chflags nohidden";
                 # `sync-local`/`sync-cloud` (iCloud) moved to functions/icloud-sync.sh
                 rm = "echo \"☠️$YELLOW DANGEROUS CMD: using trash instread!$RESET\" && trash";
+                # Personal expense ledger: serve the dashboard live with in-browser editing
+                spending = "python3 $DEV/finance/serve.py";
                 # `mdserve` is installed as a real binary via modules/apps/mdserve.nix
                 # `netusage` is installed as a real binary via modules/apps/netusage.nix
                 nu = "netusage"; # short form
