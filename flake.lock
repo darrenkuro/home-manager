@@ -3,11 +3,11 @@
     "claude-config": {
       "flake": false,
       "locked": {
-        "lastModified": 1791827922,
-        "narHash": "sha256-8BD0QZJvs9IB6ah/1Nq/70M9tjv9xLxzqZOM1GweruM=",
+        "lastModified": 1792503456,
+        "narHash": "sha256-0o9UWbYoYfKhP96gz9STPliEo85eU5FplBNLE304Ir0=",
         "ref": "refs/heads/main",
-        "rev": "458a62d972405ae4f513d59d5ffcf1ec2789084f",
-        "revCount": 72,
+        "rev": "c72c8664d0f9a98ec3717e99dc3d91c11b6c0459",
+        "revCount": 73,
         "type": "git",
         "url": "ssh://git@github.com/darrenkuro/claude-config"
       },
