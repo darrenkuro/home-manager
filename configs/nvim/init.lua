@@ -87,7 +87,11 @@ vim.diagnostic.config({
 
 -- ── Completion ───────────────────────────────────────────────────────────
 require("blink.cmp").setup({
-    keymap = { preset = "enter" }, -- helix: <Tab>/<S-Tab> move, <CR> accept, <C-e> dismiss
+    keymap = {
+        preset = "enter", -- <CR> accept, <C-e> close menu, <C-space> open
+        ["<Tab>"] = { "select_next", "snippet_forward", "fallback" },
+        ["<S-Tab>"] = { "select_prev", "snippet_backward", "fallback" },
+    },
     completion = {
         -- nothing preselected: <CR> is a plain newline until you <Tab> onto an item
         list = { selection = { preselect = false } },
