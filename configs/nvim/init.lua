@@ -87,8 +87,12 @@ vim.diagnostic.config({
 
 -- ── Completion ───────────────────────────────────────────────────────────
 require("blink.cmp").setup({
-    keymap = { preset = "default" }, -- <C-space> open, <C-y> accept, <C-n>/<C-p> move
-    completion = { documentation = { auto_show = true } },
+    keymap = { preset = "enter" }, -- helix: <Tab>/<S-Tab> move, <CR> accept, <C-e> dismiss
+    completion = {
+        -- nothing preselected: <CR> is a plain newline until you <Tab> onto an item
+        list = { selection = { preselect = false } },
+        documentation = { auto_show = true },
+    },
     signature = { enabled = true },
 })
 
