@@ -27,15 +27,27 @@ claude-usage() {
         return 1
     fi
 
-    local resp
-    resp=$(curl -sf "https://api.anthropic.com/api/oauth/usage" \
+    # Keep status + headers: -f would collapse 401/429/5xx into one empty string.
+    local hdr resp code
+    hdr=$(mktemp)
+    resp=$(curl -s -D "$hdr" -w '\n%{http_code}' "https://api.anthropic.com/api/oauth/usage" \
         -H "Authorization: Bearer $token" \
         -H "anthropic-beta: oauth-2025-04-20")
+    code=${resp##*$'\n'}
+    resp=${resp%$'\n'*}
 
-    if [ -z "$resp" ]; then
-        echo "Token expired. Use Claude Code to refresh (any prompt will do)."
+    if [ "$code" != "200" ]; then
+        local msg
+        msg=$(printf '%s' "$resp" | python3 -c "import sys,json; print(json.load(sys.stdin)['error']['message'])" 2> /dev/null)
+        echo "HTTP $code: ${msg:-${resp:-no response from api.anthropic.com}}"
+        case "$code" in
+            401) echo "Token expired. Use Claude Code to refresh (any prompt will do)." ;;
+            429) echo "Retry in $(grep -i '^retry-after:' "$hdr" | tr -dc '0-9')s." ;;
+        esac
+        rm -f "$hdr"
         return 1
     fi
+    rm -f "$hdr"
 
     printf '%s' "$resp" | python3 -c "
 import sys, json
