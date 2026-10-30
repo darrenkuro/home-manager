@@ -31,8 +31,12 @@
                 # work profile runs stock nix-darwin daemons, no stubs to patch).
                 # Root borrows the user's ssh agent (SSH_AUTH_SOCK) so it can
                 # fetch the private claude-config input after a bump — root has
-                # no GitHub key of its own (README: work Mac bootstrap).
-                sure = "sudo env SSH_AUTH_SOCK=\"$SSH_AUTH_SOCK\" darwin-rebuild switch --flake $HM#${machine}" +
+                # no GitHub key of its own (README: work Mac bootstrap). The
+                # agent empties on every login, so reload keychain-stored keys
+                # first (no-op when none are stored; `ssh-add --apple-use-keychain
+                # ~/.ssh/<key>` once to store).
+                sure = "ssh-add --apple-load-keychain -q 2>/dev/null; " +
+                "sudo env SSH_AUTH_SOCK=\"$SSH_AUTH_SOCK\" darwin-rebuild switch --flake $HM#${machine}" +
                 lib.optionalString ( profile == "personal" )
                 " && sudo $HM/scripts/btm-patch-nix.sh" + " && exec zsh";
 
