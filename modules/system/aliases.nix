@@ -28,8 +28,11 @@
                 hm = "code $HM";
                 re = "nix run home-manager -- switch --flake $HM#${machine} && exec zsh"; # HM only (no brew, system.defaults, launchd)
                 # full system rebuild; the BTM patch step is personal-only (the
-                # work profile runs stock nix-darwin daemons, no stubs to patch)
-                sure = "sudo darwin-rebuild switch --flake $HM#${machine}" +
+                # work profile runs stock nix-darwin daemons, no stubs to patch).
+                # Root borrows the user's ssh agent (SSH_AUTH_SOCK) so it can
+                # fetch the private claude-config input after a bump — root has
+                # no GitHub key of its own (README: work Mac bootstrap).
+                sure = "sudo env SSH_AUTH_SOCK=\"$SSH_AUTH_SOCK\" darwin-rebuild switch --flake $HM#${machine}" +
                 lib.optionalString ( profile == "personal" )
                 " && sudo $HM/scripts/btm-patch-nix.sh" + " && exec zsh";
 
