@@ -125,3 +125,19 @@ Non-interactively (background Bash, `zsh -ic 're'`) the trailing
 succeeds in seconds but the process hangs forever and buffers all
 output. Run the underlying command directly instead:
 `nix run home-manager -- switch --flake "$HM#mac"`.
+
+## nix-darwin Deletes Daemons a Generation Stops Declaring
+
+nix-darwin's activation removes every `/Library/LaunchDaemons/org.nixos.*`
+plist that the previous generation declared and the new one doesn't. Once
+the BTM takeover module has run on a machine, nix-darwin owns
+`org.nixos.darwin-store` and the installer's original is gone — so gating
+the module off (Sep 25, `enableNixBtm = false` for work) silently deleted
+the volume-unlock daemon on the work iMac at the next `sure` (Oct 5). The
+first reboot after that (Oct 29) left the encrypted Nix Store volume
+locked: /nix empty, every /etc and ~ symlink dangling, shell and sshd dead.
+Every macOS profile must declare a darwin-store daemon
+(`modules/services/nix-daemon/store-mount.nix` is the stub-free one).
+Manual recovery: `security find-generic-password -s <volume UUID> -w
+/Library/Keychains/System.keychain | diskutil apfs unlockVolume <dev>
+-mountpoint /nix -stdinpassphrase`.

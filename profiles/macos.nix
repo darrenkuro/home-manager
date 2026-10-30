@@ -89,9 +89,9 @@
 
         finderStartFolder = "Documents/Work";
         enablePostgresql = false;
-        # Stock nix-darwin daemons — no BTM stubs/codesigning, and no encrypted
-        # Nix Store volume assumption (NixStoreMount needs the personal Mac's
-        # keychain passphrase entry). `sure` skips btm-patch-nix.sh here too.
+        # No BTM stubs/codesigning; `sure` skips btm-patch-nix.sh here too.
+        # The store volume IS encrypted here as well (installer default), so
+        # darwin.nix still declares a plain darwin-store unlock daemon.
         enableNixBtm = false;
     };
 }

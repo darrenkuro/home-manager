@@ -25,8 +25,14 @@ in
         # ./modules/services/polymarket/darwin.nix
     ]
     # BTM takeover of the Nix daemons (named, icon-grouped Login Items).
-    # Work profile stays on stock nix-darwin plists — see profiles/macos.nix.
-     ++ lib.optionals selected.enableNixBtm [ ./modules/services/nix-daemon/darwin.nix ]
+    # Work profile keeps a plain darwin-store daemon instead — nix-darwin
+    # deletes any org.nixos.* plist a generation stops declaring, and the
+    # installer's original is gone once the takeover has run once.
+     ++ ( if selected.enableNixBtm
+        then
+            [ ./modules/services/nix-daemon/darwin.nix ]
+        else
+            [ ./modules/services/nix-daemon/store-mount.nix ] )
     # PostgreSQL's launchd agents run through BTM stubs that btm-patch-nix.sh
     # codesigns with the personal Apple Development identity — the work Mac has
     # neither the cert nor the patch step, so it stays personal-only.

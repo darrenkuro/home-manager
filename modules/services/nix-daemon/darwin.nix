@@ -9,6 +9,7 @@
 # No home.nix half — nothing user-scoped to manage.
 { lib, pkgs, homeDir, config, ... }: let
     btm = import ../../../lib/launchd-btm.nix { inherit lib pkgs homeDir; };
+    spec = import ./spec.nix;
 
     # nix-darwin's Nix (nix.package, tracks the locked nixpkgs), as its own
     # daemon module runs it — not the installer's frozen default profile.
@@ -22,27 +23,12 @@
     '';
     };
 
-    # useSystemBash = true because this runs BEFORE /nix is mounted
+    # useSystemBash = true because this runs BEFORE /nix is mounted.
+    # Script shared with ./store-mount.nix (the non-BTM profiles' daemon).
     nixStoreMountWrapper = btm.mkWrapper {
         name = "NixStoreMount";
         useSystemBash = true;
-        text = ''
-      nixVolumeDev=$(/usr/sbin/diskutil apfs list | \
-        /usr/bin/awk '/Nix Store/ {print prev} {prev=$0}' | \
-        /usr/bin/grep -o 'disk[0-9]*s[0-9]*')
-      if [ -z "$nixVolumeDev" ]; then
-        echo "Error: Could not find Nix Store volume device" >&2
-        exit 1
-      fi
-      nixCryptoUUID=$(/usr/sbin/diskutil apfs listCryptoUsers "$nixVolumeDev" -plist | \
-        /usr/bin/plutil -extract Users.0.APFSCryptoUserUUID raw -)
-      if [ -z "$nixCryptoUUID" ]; then
-        echo "Error: Could not find Nix Store crypto user UUID" >&2
-        exit 1
-      fi
-      /usr/bin/security find-generic-password -s "$nixCryptoUUID" -w | \
-        /usr/sbin/diskutil apfs unlockVolume "$nixVolumeDev" -stdinpassphrase -user "$nixCryptoUUID"
-    '';
+        text = spec.mountScript;
     };
 in
 {
