@@ -242,6 +242,33 @@ tidy() {
         brew autoremove --quiet > /dev/null 2>&1 && _done "brew autoremove complete"
     fi
 
+    # Docker (Colima) — images and build cache are never expired by Docker
+    # itself, so prune anything no container references that is >14d old.
+    # Volumes are deliberately NOT pruned (they hold data). Only acts when the
+    # VM is already up: tidy must not boot a VM. The prune frees space inside
+    # the VM; fstrim (passwordless sudo *inside* the VM, not on the host) hands
+    # the freed blocks back to macOS so the sparse disk image actually shrinks.
+    if ! command -v colima > /dev/null 2>&1; then
+        _skip "colima not installed"
+    elif ! colima status > /dev/null 2>&1; then
+        _skip "colima not running (docker prune skipped)"
+    else
+        _task "docker system prune (unused images >14d, build cache)"
+        if $dry_run; then
+            _item "would run: docker system prune -af --filter until=336h"
+            _item "reclaimable now: $(docker system df --format '{{.Reclaimable}}' 2> /dev/null | head -1)"
+            _item "would run: colima ssh -- sudo fstrim -a"
+        else
+            local pruned trimmed
+            pruned=$(docker system prune -af --filter until=336h 2> /dev/null | grep -i 'reclaimed' | tail -1)
+            _done "docker pruned (${_C_DIM}${pruned:-nothing to reclaim}${_C_RESET})"
+            _task "fstrim colima disk"
+            # sync first: blocks freed moments ago aren't trimmable until ext4 commits
+            trimmed=$(colima ssh -- sh -c 'sync; sudo fstrim -av' 2> /dev/null | grep 'lima-colima' | sed -E 's/.*: ([^(]+) .*/\1/')
+            _done "colima disk trimmed (${_C_DIM}${trimmed:-0 B}${_C_RESET})"
+        fi
+    fi
+
     # ─────────────────────────────────────────────────────────────────────────
     # 5. Nix garbage collection — drop generations older than 7 days.
     #    User + home-manager profiles only (no sudo); these are what `re` creates.
