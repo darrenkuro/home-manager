@@ -74,7 +74,7 @@ Shared BTM logic lives in `lib/launchd-btm.nix` (plain functions, no module opti
 - **`mkStubInstall`** — activation bash that installs one `.app` stub idempotently (manifest-checked to avoid BTM churn) and patches its user agents' `AssociatedBundleIdentifiers`
 - **`stubDir`/`agentDir`** — exported path constants
 
-Each `modules/services/<name>/darwin.nix` calls these for itself and appends to `system.activationScripts.postActivation.text` (type `lines` — contributions concatenate). System-daemon plists (Nix) are patched by `scripts/btm-patch-nix.sh`, which also codesigns all stubs (runs via `sure`).
+Each `modules/services/<name>/darwin.nix` calls these for itself and appends to `system.activationScripts.postActivation.text` (type `lines` — contributions concatenate). System-daemon plists (Nix) are patched by `scripts/btm-patch-nix.sh`, which also codesigns all stubs, unregisters stray `/nix/store/*.app` LaunchServices entries, and regroups third-party helper agents (Dropbox updater, steamclean) under their vendor app (runs via `sure`). Debugging notes + gotchas: `.claude/btm.md`.
 
 **How icons work:** ProgramArguments points to a wrapper binary inside the .app stub. BTM resolves icons by path containment. After icon changes, reboot to refresh BTM.
 

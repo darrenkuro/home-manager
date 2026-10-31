@@ -132,6 +132,50 @@ else
     echo "  no stubs directory found: $STUBS_DIR"
 fi
 
+# Unregister the stubs' /nix/store source copies from LaunchServices. They
+# share the stub's bundle id but are unsigned with no executable; when one is
+# registered (seen after a stub rebuild), BTM resolves the id to it and files
+# the stub's items under the cert's developer name instead of the app.
+echo "BTM: unregistering /nix/store stub copies..."
+LSREGISTER=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
+while IFS= read -r store_app; do
+    [[ -n "$store_app" ]] || continue
+    sudo -u "$real_user" "$LSREGISTER" -u "$store_app" && echo "  unregistered: $store_app"
+done < <(sudo -u "$real_user" "$LSREGISTER" -dump 2> /dev/null |
+    sed -n 's|^path: *\(/nix/store/[^ ]*\.app\) (0x[0-9a-f]*)$|\1|p' | sort -u)
+
+# Third-party user agents: point AssociatedBundleIdentifiers at the vendor's
+# app (same Team ID) so BTM folds the helper into the app's row instead of a
+# separate developer row. Vendors rewrite these plists, so re-apply each run.
+# Login Items reflects the change immediately (sfltool dumpbtm lags until reboot).
+echo "BTM: grouping third-party agents..."
+AGENT_DIR="$real_home/Library/LaunchAgents"
+THIRD_PARTY=(
+    "com.dropbox.DropboxUpdater.wake:com.getdropbox.dropbox"
+    "com.valvesoftware.steamclean:com.valvesoftware.steam"
+)
+for entry in "${THIRD_PARTY[@]}"; do
+    label=${entry%%:*} bundle=${entry#*:}
+    plist="$AGENT_DIR/$label.plist"
+    [[ -f "$plist" ]] || continue
+    current=$(/usr/libexec/PlistBuddy -c "Print :AssociatedBundleIdentifiers:0" "$plist" 2> /dev/null || true)
+    if [[ "$current" == "$bundle" ]]; then
+        echo "  already grouped: $label"
+        continue
+    fi
+    # As the user: PlistBuddy rewrites the file, and root would take ownership.
+    sudo -u "$real_user" /usr/libexec/PlistBuddy -c "Delete :AssociatedBundleIdentifiers" "$plist" 2> /dev/null || true
+    if sudo -u "$real_user" /usr/libexec/PlistBuddy \
+        -c "Add :AssociatedBundleIdentifiers array" \
+        -c "Add :AssociatedBundleIdentifiers:0 string $bundle" \
+        "$plist"; then
+        echo "  grouped: $label -> $bundle"
+    else
+        echo "  error: failed to group $label" >&2
+        failures=$((failures + 1))
+    fi
+done
+
 if [[ $failures -gt 0 ]]; then
     echo "BTM: done with $failures error(s)" >&2
     exit 1
