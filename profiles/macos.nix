@@ -55,9 +55,6 @@
         ];
 
         finderStartFolder = "Dropbox";
-        # Parked 2026-10-31: data moved to SQLite (knowledge-base/data,
-        # _archive/grindstone/data); dumps in Dropbox/backups/postgres-2026-10-31.
-        enablePostgresql = false;
         enableNixBtm = true;
     };
 
@@ -90,7 +87,6 @@
         ];
 
         finderStartFolder = "Documents/Work";
-        enablePostgresql = false;
         # No BTM stubs/codesigning; `sure` skips btm-patch-nix.sh here too.
         # The store volume IS encrypted here as well (installer default), so
         # darwin.nix still declares a plain darwin-store unlock daemon.

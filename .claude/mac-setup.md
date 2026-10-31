@@ -45,7 +45,6 @@ After this, `re` (fast) and `sure` (full) aliases are available.
 - Node: nodejs_22, typescript, typescript-language-server, pnpm, bun
 - Python: python313, pip, virtualenv, flake8
 - Mac: trash, ffmpeg, poppler-utils, yt-dlp, pandoc, colima, docker-\*
-- Services: postgresql_17 + pgvector (via `modules/services/postgresql/home.nix`)
 
 ### System Defaults (darwin.nix)
 
@@ -167,14 +166,14 @@ Install NordVPN from App Store, sign in
 sure
 
 # Check services (polymarket only appears if its import is uncommented)
-launchctl list | grep -E "postgresql|polymarket|nix"
+launchctl list | grep -E "polymarket|nix"
 
 # Verify env vars in GUI apps
 # Open Claude Desktop > Settings > check CLAUDE_CONFIG_DIR is set
 
 # After reboot, check BTM
 # System Settings > General > Login Items > Background Task Management
-# Should show Postgres and Nix (+ Polymarket if enabled) with correct icons
+# Should show Nix (+ Polymarket if enabled) with correct icons
 ```
 
 ---

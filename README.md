@@ -49,8 +49,8 @@ removes only what the kit added.
 profile: it retains the managed shell, Git, SSH, Helix, Claude, Ghostty,
 VS Code, Brave, Slack, Notion, Alfred and the JavaScript/Python/Docker
 toolchain. It deliberately excludes personal media, gaming, study, Dropbox,
-local PostgreSQL, App Store apps, specialist Rust/assembly/C++ toolchains, and
-media-download tools.
+App Store apps, specialist Rust/assembly/C++ toolchains, and media-download
+tools.
 
 The exact app and Dock inventories live in `profiles/macos.nix`, making those
 choices easy to review without touching system defaults or dotfiles.

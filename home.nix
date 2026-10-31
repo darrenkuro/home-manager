@@ -1,6 +1,5 @@
 { pkgs, config, tag, profile, user, homeDir, machine, lib, ... }: let
     isMac = tag == "mac";
-    isWork = profile == "work";
     # Headless box: shell backbone + a hand-picked allowlist, no dev toolchains
     isServer = profile == "server";
 in
@@ -186,11 +185,5 @@ in
         ./modules/apps/mdserve.nix
         ./modules/apps/ghostty.nix
         ./modules/apps/app-icons.nix
-    ] ++
-    lib.optionals ( isMac && !isWork ) [
-        # PostgreSQL is personal-only: its launchd half needs codesigned BTM
-        # stubs (see root darwin.nix). Parked 2026-10-31 together with
-        # enablePostgresql in profiles/macos.nix; uncomment both to bring it back.
-        # ./modules/services/postgresql/home.nix
     ] ++ lib.optionals ( machine == "ft" ) [ ./modules/system/linux-ft.nix ];
 }

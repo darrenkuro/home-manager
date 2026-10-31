@@ -32,11 +32,7 @@ in
         then
             [ ./modules/services/nix-daemon/darwin.nix ]
         else
-            [ ./modules/services/nix-daemon/store-mount.nix ] )
-    # PostgreSQL's launchd agents run through BTM stubs that btm-patch-nix.sh
-    # codesigns with the personal Apple Development identity — the work Mac has
-    # neither the cert nor the patch step, so it stays personal-only.
-     ++ lib.optionals selected.enablePostgresql [ ./modules/services/postgresql/darwin.nix ];
+            [ ./modules/services/nix-daemon/store-mount.nix ] );
 
     # Nix settings
     nix.settings.experimental-features = [ "nix-command" "flakes" ];
