@@ -22,7 +22,7 @@ This file: `~/.config/home-manager/configs/claude/CLAUDE.md` (edit, then `re` to
 
 **Git**: Global gitignore at `~/.config/git/ignore` covers common patterns. Don't create per-repo `.gitignore` unless project-specific ignores are needed.
 
-**Backups**: Any backup file/snapshot (pre-edit undo dumps, exports, etc.) goes in `~/Library/CloudStorage/Dropbox/backups`, never scattered in the cwd or project dirs. Create the dir if missing.
+**Backups**: Any backup file/snapshot (pre-edit undo dumps, exports, etc.) goes in `~/Library/CloudStorage/Dropbox/_backup`, never scattered in the cwd or project dirs. Create the dir if missing.
 
 **Skills**: Live in `~/Documents/dev/claude-config`. Any skill creation or edit — including via `/skill-creator` — follows that repo's `STANDARDS.md` and must pass `python3 tools/lint-skills.py` (design rationale: its `ARCHITECTURE.md`). Edit there, commit/push, then `nix flake update claude-config && re` in hm.
 

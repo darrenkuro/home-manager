@@ -3,8 +3,8 @@ REQUIRED_TOOLS=()
 _check_preamble || return 0
 
 # ─────────────────────────────────────────────────────────────────────────────
-# archive — Finder-hide personal scratch/stage folders (_archive _processing
-# _trash), split out of `tidy`. NOTE: chflags hidden is a FINDER-ONLY hide —
+# archive — Finder-hide personal scratch/stage folders (_archive _backup
+# _processing _trash), split out of `tidy`. NOTE: chflags hidden is a FINDER-ONLY hide —
 # it sets the UF_HIDDEN inode flag, which Dropbox web + mobile ignore. To hide
 # something in Dropbox's own UI you'd need the com.dropbox.ignored xattr (which
 # also stops it syncing), not this.
@@ -36,7 +36,7 @@ archive() {
 
     # Folder names to hide. Kept explicit rather than a '_*' glob so it never
     # catches _-prefixed SOURCE dirs like Jekyll's _posts/_sass or __pycache__.
-    local hide_patterns=(_archive _processing _trash)
+    local hide_patterns=(_archive _backup _processing _trash)
 
     # ── Scanner A: Spotlight index lookup (instant, whole $HOME, any depth) ──
     _scan_mdfind() {
@@ -54,7 +54,8 @@ archive() {
     # fd skips hidden (dot) dirs by default; --no-ignore because _archive dirs
     # are often gitignored and must still be found.
     _scan_fd() {
-        local spec root depth
+        local spec root depth re
+        re=$(IFS='|' && printf '^(%s)$' "${hide_patterns[*]}")
         for spec in "$HOME:3" "$HOME/Library/CloudStorage/Dropbox:6" "$HOME/Documents/dev:5"; do
             root="${spec%:*}" depth="${spec##*:}"
             [[ -d "$root" ]] || continue
@@ -62,7 +63,7 @@ archive() {
                 --exclude node_modules --exclude '__*' --exclude venv \
                 --exclude target --exclude build --exclude dist \
                 --exclude Caches --exclude Library \
-                '^(_archive|_processing|_trash)$' "$root" 2> /dev/null
+                "$re" "$root" 2> /dev/null
         done
     }
 
