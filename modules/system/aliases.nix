@@ -1,4 +1,14 @@
-{ tag, profile, machine, lib, ... }: {
+{ tag, profile, machine, lib, ... }: let
+    # Bump my own flake inputs to their latest pushed commit before a rebuild
+    # (upstream inputs stay manual `nix flake update`). Non-fatal: offline or
+    # no ssh key → warn and build the current lock. A changed flake.lock is
+    # committed on its own (pathspec), since flakes only see committed state.
+    bumpOwn = "nix flake update claude-config netusage --flake $HM" +
+    " || echo '⚠ own-input bump failed — building current lock'; " +
+    "git -C $HM diff --quiet flake.lock" +
+    " || git -C $HM commit -q -m 'flake: bump own inputs (claude-config, netusage)' flake.lock; ";
+in
+{
     programs.zsh.shellAliases = lib.mkMerge [
         # ---- common aliases (always enabled)
         {
@@ -26,7 +36,8 @@
             lib.mkIf ( tag == "mac" ) {
                 p = "hx $HM/darwin.nix";
                 hm = "code $HM";
-                re = "nix run home-manager -- switch --flake $HM#${machine} && exec zsh"; # HM only (no brew, system.defaults, launchd)
+                re = "ssh-add --apple-load-keychain -q 2>/dev/null; " + bumpOwn +
+                "nix run home-manager -- switch --flake $HM#${machine} && exec zsh"; # HM only (no brew, system.defaults, launchd)
                 # full system rebuild; the BTM patch step is personal-only (the
                 # work profile runs stock nix-darwin daemons, no stubs to patch).
                 # Root borrows the user's ssh agent (SSH_AUTH_SOCK) so it can
@@ -35,7 +46,7 @@
                 # agent empties on every login, so reload keychain-stored keys
                 # first (no-op when none are stored; `ssh-add --apple-use-keychain
                 # ~/.ssh/<key>` once to store).
-                sure = "ssh-add --apple-load-keychain -q 2>/dev/null; " +
+                sure = "ssh-add --apple-load-keychain -q 2>/dev/null; " + bumpOwn +
                 "sudo env SSH_AUTH_SOCK=\"$SSH_AUTH_SOCK\" darwin-rebuild switch --flake $HM#${machine}" +
                 lib.optionalString ( profile == "personal" )
                 " && sudo $HM/scripts/btm-patch-nix.sh" + " && exec zsh";
