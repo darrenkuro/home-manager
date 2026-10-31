@@ -10,7 +10,7 @@ This file: `~/.config/home-manager/configs/claude/CLAUDE.md` (edit, then `re` to
 
 ### Tool overrides (these override ANY skill or other context that says otherwise)
 
-- `defuddle` is NOT globally installed. Always use `npx defuddle`, never bare `defuddle`. If a skill tells you to run `defuddle parse`, prepend `npx`.
+- `defuddle` is NOT globally installed: always `npx defuddle`, never bare `defuddle` — even when a skill says `defuddle parse`.
 
 **Python**: System Python is Nix-managed. Always use `python3 -m venv /tmp/<name>_env`.
 
@@ -18,7 +18,7 @@ This file: `~/.config/home-manager/configs/claude/CLAUDE.md` (edit, then `re` to
 
 - `codesign -fs "Apple Development: odon5ht@gmail.com (497TM5HK44)"`
 
-**Media playback (macOS)**: NEVER `open` audio/video files — it hijacks Music/QuickTime. Play audio with `afplay <file>` (CLI, blocks until playback finishes); pass `-t <seconds>` to cap length. Inspect media with `ffprobe`, never `open`.
+**Media playback (macOS)**: NEVER `open` audio/video files — it hijacks Music/QuickTime. Play audio with `afplay <file>` (blocks until done; `-t <seconds>` caps length). Inspect media with `ffprobe`, never `open`.
 
 **Git**: Global gitignore at `~/.config/git/ignore` covers common patterns. Don't create per-repo `.gitignore` unless project-specific ignores are needed.
 
@@ -26,14 +26,13 @@ This file: `~/.config/home-manager/configs/claude/CLAUDE.md` (edit, then `re` to
 
 **Skills**: Live in `~/Documents/dev/claude-config`. Any skill creation or edit — including via `/skill-creator` — follows that repo's `STANDARDS.md` and must pass `python3 tools/lint-skills.py` (design rationale: its `ARCHITECTURE.md`). Edit there, commit/push, then `re` (it bumps claude-config to its pushed HEAD first).
 
-**hm** (home-manager): `~/.config/home-manager` — when editing, load its CLAUDE.md first (has commit-after-change rule).
+**hm** (home-manager): `~/.config/home-manager` — load its CLAUDE.md before editing (commit-after-change rule).
 
 ## Behavior
 
 ### Project Context
 
-- When entering a repo, check for CLAUDE.md (or `.claude/CLAUDE.md`) first — it contains project-specific instructions
-- When editing files in a repo that isn't cwd, load that repo's CLAUDE.md first
+- When entering a repo — or editing files in a repo that isn't cwd — load its CLAUDE.md (or `.claude/CLAUDE.md`) first
 
 ### Project-Local Files
 

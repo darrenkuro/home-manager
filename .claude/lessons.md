@@ -1,152 +1,49 @@
 # Lessons Learned
 
-Patterns and fixes discovered while working on this repo.
+Non-obvious failures hit in this repo. BTM-specific gotchas live in `btm.md`.
 
-## Nix Store Mount (darwin-store LaunchDaemon)
+## Nix Store mount (darwin-store daemon, `modules/services/nix-daemon/spec.nix`)
 
-### Problem: Wrapper script can't run before /nix is mounted
+- It runs BEFORE /nix is mounted, so its wrapper can't use Nix's bash → `mkWrapper { useSystemBash = true; }` (`/bin/bash`).
+- `diskutil apfs unlockVolume` needs BOTH the device (`disk3s7`) AND `-user <crypto user UUID>`; the same UUID is the keychain item name (`security find-generic-password -s`).
+- In `diskutil apfs list`, "Nix Store" is on the line AFTER the device id → `awk '/Nix Store/ {print prev} {prev=$0}'`.
 
-- `writeShellApplication` uses Nix's bash: `#!/nix/store/.../bash`
-- The darwin-store mount script runs BEFORE /nix is mounted
-- Chicken-and-egg: script needs bash from /nix, but /nix doesn't exist yet
+## nix-darwin deletes daemons a generation stops declaring
 
-**Fix:** Added `useSystemBash = true` option to `mkWrapper` in `lib/launchd-btm.nix`.
-This uses `/bin/bash` instead of Nix's bash for pre-mount scripts.
+Activation removes every `/Library/LaunchDaemons/org.nixos.*` plist the previous generation declared and the new one doesn't. Once the BTM module has run, nix-darwin owns `org.nixos.darwin-store` (the installer's original is gone) — so gating it off (`enableNixBtm = false` for work) silently deleted the volume-unlock daemon on the work iMac; the next reboot left the encrypted Nix Store locked (/nix empty, every /etc and ~ symlink dangling, shell and sshd dead). **Every macOS profile must declare a darwin-store daemon** (`modules/services/nix-daemon/store-mount.nix` is the stub-free one). Manual recovery: `security find-generic-password -s <volume UUID> -w /Library/Keychains/System.keychain | diskutil apfs unlockVolume <dev> -mountpoint /nix -stdinpassphrase`.
 
-### Problem: diskutil apfs unlockVolume requires -user flag
+## nix-darwin leaves user agents a generation stops declaring
 
-- The encrypted APFS volume has a crypto user UUID
-- `diskutil apfs unlockVolume` requires BOTH:
-  - Device identifier (e.g., `disk3s7`)
-  - `-user $UUID` flag with the crypto user UUID
-- The UUID is used for both `security find-generic-password -s` AND `diskutil -user`
+Unlike daemons, removed `launchd.user.agents` stay loaded with their plists in place (seen removing postgresql). When deleting a service with user agents: after the rebuild, `launchctl bootout gui/$UID/<label>`, `rm` the plist, and remove its stub + `.stub-manifest-<Name>` from `~/.local/share/app-stubs`.
 
-**Correct unlock command:**
+## nix-darwin launchd facts
 
-```bash
-# Get device and UUID
-nixVolumeDev=$(diskutil apfs list | awk '/Nix Store/ {print prev} {prev=$0}' | grep -o 'disk[0-9]*s[0-9]*')
-nixCryptoUUID=$(diskutil apfs listCryptoUsers "$nixVolumeDev" -plist | plutil -extract Users.0.APFSCryptoUserUUID raw -)
+- nix-darwin passes `ProgramArguments` as-is (no `/bin/sh -c` wrapper, unlike HM's `launchd.agents`) — what makes BTM naming work.
+- It never adds `AssociatedBundleIdentifiers`; `mkStubInstall` patches it in.
+- `system.primaryUser` is required for `launchd.user.agents`, `system.defaults.dock`, etc.
+- GUI apps (Dock/Spotlight) only see env from `launchd.user.envVariables`.
 
-# Unlock
-security find-generic-password -s "$nixCryptoUUID" -w | \
-  diskutil apfs unlockVolume "$nixVolumeDev" -stdinpassphrase -user "$nixCryptoUUID"
-```
+## writeTextFile wrappers need `destination = "/bin/${name}"`
 
-### Problem: Parsing diskutil apfs list output
-
-- "Nix Store" appears on the line AFTER the device identifier line
-- Need to print the PREVIOUS line when "Nix Store" is found:
-  ```bash
-  awk '/Nix Store/ {print prev} {prev=$0}'
-  ```
-
-## BTM (Background Task Management)
-
-- Wrapper binaries must be INSIDE the .app bundle for BTM icon resolution
-- After icon changes, REBOOT to refresh BTM (don't use `sfltool resetbtm`)
-- `sfltool resetbtm` wipes ALL login items system-wide — never use it
-
-## Nix Derivation Output Structures
-
-### writeShellApplication vs writeTextFile
-
-- `writeShellApplication` outputs to `$out/bin/<name>`
-- `writeTextFile` outputs to `$out` directly (just the file)
-- `lib/launchd-btm.nix` (`mkStubInstall`) expects `${drv}/bin/${name}` structure for all wrappers
-
-**Fix:** When using `writeTextFile`, set `destination = "/bin/${name}"` to match the expected structure:
-
-```nix
-pkgs.writeTextFile {
-  inherit name;
-  destination = "/bin/${name}";  # <-- critical!
-  executable = true;
-  text = "...";
-}
-```
-
-## nix-darwin Migration (Complete)
-
-- LaunchAgents migrated to darwin.nix (`launchd.user.agents`)
-- BTM patching moved to darwin.nix post-activation script
-- Removed env-setter (replaced by `launchd.user.envVariables`)
-- Simplified btm.nix (removed agent logic, ~120 lines deleted)
-- Added system.defaults from audit (NSGlobalDomain, dock, finder, trackpad, menuExtraClock)
-
-## dprint Nix Plugin Instability
-
-`dprint fmt` errors on `flake.nix` and `lib/launchd-btm.nix` with
-"Formatting succeeded initially, but failed when ensuring a stable format"
-— a dprint-plugin-nix bug triggered by certain constructs (it leaves the
-file untouched, so it's safe but noisy). Hand-format those two files in
-repo style; everything else formats normally. The plugin is Darren's own
-(github.com/darrenkuro/dprint-plugin-nix v0.1.0) — fixable at the source.
-
-## dprint VSCode extension only formats under the discovered config's folder
-
-The extension searches the workspace for dprint.json and registers its
-formatter scoped to that file's FOLDER (see the dprint Output channel:
-"Folder: …"). It never falls back to ~/.config/dprint/dprint.json (the
-CLI does, for single files). Hence dprint.json lives at the repo ROOT —
-moving it under configs/ would silently kill format-on-save for the rest
-of the repo. Projects without their own dprint.json get no formatter at
-all in VSCode.
+`mkStubInstall` expects `${drv}/bin/${name}` (the `writeShellApplication` layout); bare `writeTextFile` outputs to `$out` directly.
 
 ## brew bundle cleanup DOES uninstall Mac App Store apps
 
-`sure` runs `brew bundle --zap --force-cleanup`; with current Homebrew that
-uninstalls mas apps missing from `masApps` (observed Sep 2026: removing 4
-entries from profiles/macos.nix deleted Pages, Numbers, Trello, OmniFocus
-from /Applications on the next sure). Don't assume cleanup is cask-only —
-treat any masApps removal as a destructive change. Restore = re-add the id
-and rerun sure (mas reinstalls free/purchased apps).
+`sure` runs `brew bundle --zap --force-cleanup`, which uninstalls mas apps missing from `masApps` (Sep 2026: removing 4 entries from `profiles/macos.nix` deleted Pages, Numbers, Trello, OmniFocus). Treat any masApps removal as destructive. Restore = re-add the id and `sure`.
 
-## zsh Alias-in-Alias Expansion (why functions use /bin/rm)
+## dprint
 
-zsh re-expands aliases in an alias's expansion text, AND expands aliases
-inside function bodies at definition (source) time. With `rm` aliased to
-trash on mac, any `rm` in an alias string or sourced function silently
-becomes `trash`. That's why `functions/*.sh` call `/bin/rm` explicitly —
-follow that convention in new functions.
+- **Nix plugin instability:** `flake.nix` and `lib/launchd-btm.nix` fail with "Formatting succeeded initially, but failed when ensuring a stable format" (file left untouched — safe but noisy). Hand-format them. The plugin is Darren's own (github.com/darrenkuro/dprint-plugin-nix v0.1.0) — fixable at the source.
+- **VSCode extension only formats under the discovered config's folder** — it never falls back to `~/.config/dprint/dprint.json` (the CLI does). Hence `dprint.json` lives at the repo ROOT; moving it under `configs/` silently kills format-on-save repo-wide.
 
-## git checkout -- <file> Reverts ALL Uncommitted Edits
+## zsh alias-in-alias expansion (why functions use /bin/rm)
 
-When testing a temporary tweak (e.g. uncommenting a toggle with sed),
-don't restore with `git checkout -- <file>` unless the file's real
-changes are already committed/staged — it reverts to HEAD and eats them.
-Stage first, or undo the tweak with a second sed.
+zsh re-expands aliases inside alias text AND inside function bodies at source time. With `rm` aliased to trash on mac, any `rm` there silently becomes `trash` — so `functions/*.sh` call `/bin/rm` explicitly.
 
-## Never Run the `re` Alias from a Script — It Ends in `exec zsh`
+## `git checkout -- <file>` reverts ALL uncommitted edits
 
-`re` = `nix run home-manager -- switch --flake $HM#mac && exec zsh`.
-Non-interactively (background Bash, `zsh -ic 're'`) the trailing
-`exec zsh` becomes an interactive shell idling on a pipe — the switch
-succeeds in seconds but the process hangs forever and buffers all
-output. Run the underlying command directly instead:
-`nix run home-manager -- switch --flake "$HM#mac"`.
+When undoing a temporary tweak (e.g. a sed-uncommented toggle), stage the file's real changes first or undo with a second sed — checkout reverts to HEAD.
 
-## nix-darwin Deletes Daemons a Generation Stops Declaring
+## `re` hangs non-interactively
 
-nix-darwin's activation removes every `/Library/LaunchDaemons/org.nixos.*`
-plist that the previous generation declared and the new one doesn't. Once
-the BTM takeover module has run on a machine, nix-darwin owns
-`org.nixos.darwin-store` and the installer's original is gone — so gating
-the module off (Sep 25, `enableNixBtm = false` for work) silently deleted
-the volume-unlock daemon on the work iMac at the next `sure` (Oct 5). The
-first reboot after that (Oct 29) left the encrypted Nix Store volume
-locked: /nix empty, every /etc and ~ symlink dangling, shell and sshd dead.
-Every macOS profile must declare a darwin-store daemon
-(`modules/services/nix-daemon/store-mount.nix` is the stub-free one).
-Manual recovery: `security find-generic-password -s <volume UUID> -w
-/Library/Keychains/System.keychain | diskutil apfs unlockVolume <dev>
--mountpoint /nix -stdinpassphrase`.
-
-## nix-darwin Leaves User Agents a Generation Stops Declaring
-
-The LaunchDaemons lesson above does not apply to `launchd.user.agents`:
-removing the postgresql module (Oct 31) and running `sure` left both
-`~/Library/LaunchAgents/org.postgresql.*.plist` in place and the server
-running. When deleting a service with user agents, `launchctl bootout
-gui/$UID/<label>` and `rm` the plist by hand after the rebuild, then remove
-its stub + `.stub-manifest-<Name>` from `~/.local/share/app-stubs`.
+`re` ends in `exec zsh`; from a script/background shell that becomes an interactive shell idling on a pipe — the switch succeeds but the process never exits. (Moot while rebuilds are manual-only.)

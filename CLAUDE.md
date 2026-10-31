@@ -1,43 +1,31 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guidance for Claude Code in this repository.
 
 ## What This Is
 
-Nix Home Manager flake for declaratively managing user environments across four targets:
+Nix Home Manager flake for four targets:
 
 - **mac** (`aarch64-darwin`) — personal macOS
 - **mac-work** (`aarch64-darwin`) — work iMac: same toolchain as personal, smaller app list, no BTM
 - **ft** (`x86_64-linux`) — 42 school rootless Linux
 - **hetzner** (`x86_64-linux`) — personal server (Ubuntu, user `deploy`): minimal profile — shell backbone + allowlist (eza/fd/fzf/bat/jq, neovim), no dev toolchains, no helix/claude/vscode
 
-Machine identity (system, tag, profile, user — homeDir derived) lives in the `machines` map in `flake.nix`; `specialArgs` carry those values into every module, plus `machine` (the machine's map key — never call it `name`, which shadows the HM submodule's username arg). Three dimensions flow through the config: `tag` (`"mac"`/`"linux"`, OS), `profile` (`"personal"`/`"work"`/`"server"`, purpose — macOS app/service choices per profile live in `profiles/macos.nix`; `server` trims packages/modules to a headless allowlist in `home.nix`), and `machine` for one-machine quirks (e.g. ft's chroot-nix plumbing gates on `machine == "ft"`; shell-side it's `$HM_NAME`).
+Machine identity (system, tag, profile, user — homeDir derived) lives in the `machines` map in `flake.nix`; `specialArgs` carry those values into every module, plus `machine` (the machine's map key — never call it `name`, which shadows the HM submodule's username arg). Three dimensions: `tag` (`"mac"`/`"linux"`, OS), `profile` (`"personal"`/`"work"`/`"server"`, purpose — macOS app/service choices per profile live in `profiles/macos.nix`; `server` trims packages/modules to a headless allowlist in `home.nix`), and `machine` for one-machine quirks (e.g. ft's chroot-nix plumbing gates on `machine == "ft"`; shell-side it's `$HM_NAME`).
 
 ## Commands
 
-> **Always `git commit` before `re`/`sure`.** Nix flakes evaluate from the git tree — uncommitted or untracked files cause "path does not exist" errors. Stage only your files (`git add <specific files>`), never `git add -A`.
-
 ```bash
-# On mac — two rebuild modes:
-re      # home-manager only (no sudo, no brew/system changes)
-sure    # full darwin-rebuild + BTM patching (with sudo)
+re      # mac: home-manager only (no sudo, brew, system.defaults, launchd); linux: home-manager switch
+sure    # mac: full darwin-rebuild (sudo) + btm-patch-nix.sh (personal only)
+# Both first bump claude-config to its pushed HEAD and commit flake.lock (`bumpOwn`, modules/system/aliases.nix)
 
-# On ft (home-manager only):
-re      # runs home-manager switch
-
-# First-time install (mac only):
+# First-time install (mac; use #mac-work on the work iMac):
 sudo -v && sudo nix --extra-experimental-features "nix-command flakes" run nix-darwin -- switch --flake ~/.config/home-manager#mac && sudo ~/.config/home-manager/scripts/btm-patch-nix.sh && exec zsh
 
-# Update flake inputs (nixpkgs, home-manager, nix-darwin)
-nix flake update
-
-# Format all supported files (Nix, JS/TS, JSON, Markdown, TOML, Python)
-dprint fmt
-
-# Lint shell scripts
+nix flake update                          # bump upstream inputs (manual)
+dprint fmt <files>                        # Nix, JS/TS, JSON, Markdown, TOML, Python
 shellcheck functions/*.sh scripts/*.sh
-
-# Garbage collect old nix generations
 nix-collect-garbage -d
 ```
 
@@ -45,92 +33,71 @@ nix-collect-garbage -d
 
 ### Entry Points
 
-- `flake.nix` — defines configurations:
-  - `machines` map → `darwinConfigurations.{mac,mac-work}` (nix-darwin + embedded HM, `sure`) and `homeConfigurations.{mac,mac-work,ft}` (standalone HM, `re`)
-- `darwin.nix` — nix-darwin system-level config (LaunchDaemons, system settings, BTM, Homebrew)
+- `flake.nix` — `machines` map → `darwinConfigurations.{mac,mac-work}` (nix-darwin + embedded HM with `useUserPackages = false`, so `re` and `sure` share `~/.nix-profile`; `sure`) and `homeConfigurations.<every machine>` (standalone HM, `re`)
+- `darwin.nix` — nix-darwin system config (Homebrew, system.defaults, GUI env, nix gc/optimise, service imports)
 - `home.nix` — main module: packages, shell config, zsh init chain, XDG config files
 
 ### Module Organization
 
-- `modules/system/` — aliases, env vars
-- `modules/apps/` — per-app config: `git.nix`, `helix.nix`, `starship.nix`, `claude.nix`, `ssh.nix`, `netusage.nix` (+ `netusage/` source, like `mdserve`)
-- `modules/services/<name>/` — self-contained services. Each has:
+- `modules/system/` — aliases, env vars, OS/machine-specific bits (linux-ft, tiling hotkeys, wallpaper)
+- `modules/apps/` — per-app config; `mdserve` and `netusage` keep their source in-repo (`modules/apps/<name>/`)
+- `modules/services/<name>/` — self-contained services:
   - `spec.nix` — shared facts (paths, port, package); imported by both halves
   - `darwin.nix` — system half: wrappers, launchd agents/daemons, BTM stub
-  - `home.nix` — user half: package, activation, env vars, aliases (omitted if nothing user-scoped)
+  - `home.nix` — user half (omitted if nothing user-scoped)
   - `<Name>.app/` — static BTM stub bundle (`Info.plist`, `PkgInfo`, `icon.icns`)
 
 ### Toggles — disabled ≠ deleted
 
-- **Services**: comment out the import line in root `darwin.nix` (and root `home.nix` if the service has a user half), then `sure`. No `enableXxx` bools. Polymarket is the parked exemplar.
+- **Services**: comment out the import line in root `darwin.nix` (and root `home.nix` if it has a user half), then `sure`. No `enableXxx` bools / `mkIf cfg.enable` gating. Polymarket is the parked exemplar.
 - **Shell functions**: set `INSTALL_TAG=()` in the function file (e.g. `functions/icon.sh`).
 - Never delete toggled-off code in an audit — it's deliberately parked.
 
-### BTM (Background Task Management) — macOS Launch Agents
+### BTM (Background Task Management) — macOS Login Items
 
-Shared BTM logic lives in `lib/launchd-btm.nix` (plain functions, no module options):
+Shared logic in `lib/launchd-btm.nix` (plain functions, no module options):
 
-- **`mkWrapper`** — named wrapper binary so BTM shows a real name (use `useSystemBash = true` for pre-/nix-mount scripts)
+- **`mkWrapper`** — named wrapper binary so BTM shows a real name (`useSystemBash = true` for pre-/nix-mount scripts)
 - **`mkStubInstall`** — activation bash that installs one `.app` stub idempotently (manifest-checked to avoid BTM churn) and patches its user agents' `AssociatedBundleIdentifiers`
-- **`stubDir`/`agentDir`** — exported path constants
+- **`stubDir`/`agentDir`** — path constants
 
-Each `modules/services/<name>/darwin.nix` calls these for itself and appends to `system.activationScripts.postActivation.text` (type `lines` — contributions concatenate). System-daemon plists (Nix) are patched by `scripts/btm-patch-nix.sh`, which also codesigns all stubs, unregisters stray `/nix/store/*.app` LaunchServices entries, and regroups third-party helper agents (Dropbox updater, steamclean) under their vendor app (runs via `sure`). Debugging notes + gotchas: `.claude/btm.md`.
+Each `modules/services/<name>/darwin.nix` calls these and appends to `system.activationScripts.postActivation.text` (type `lines`). `scripts/btm-patch-nix.sh` (via `sure`) patches the Nix system-daemon plists, codesigns all stubs, unregisters stray `/nix/store/*.app` LaunchServices entries, and regroups third-party helper agents under their vendor app. Icons resolve by path containment: ProgramArguments points to a wrapper inside the stub. Gotchas + new-service template: `.claude/btm.md`.
 
-**How icons work:** ProgramArguments points to a wrapper binary inside the .app stub. BTM resolves icons by path containment. After icon changes, reboot to refresh BTM.
-
-**Rebuild aliases:**
-
-- `re` — home-manager only (no BTM, no sudo, no brew)
-- `sure` — full darwin-rebuild + `btm-patch-nix.sh` (with sudo)
-
-### Nix Store Volume UUID Handling
-
-The darwin-store wrapper dynamically looks up the Nix Store volume UUID by name at runtime instead of hardcoding it. This prevents issues after Nix reinstalls when the volume UUID changes. The wrapper uses `diskutil apfs list` to find the UUID of the volume named "Nix Store".
+The darwin-store daemon (`modules/services/nix-daemon/spec.nix`) looks up the Nix Store volume by name via `diskutil apfs list` at runtime — never hardcode its UUID (changes on Nix reinstall).
 
 ### Shell Functions
 
-`functions/*.sh` — each file has a preamble pattern:
-
-1. `INSTALL_TAG` array — which tags should source this function
-2. Dependency check — skips if required tools are missing
-3. Function definition
-
-Sourced at shell init via `scripts/source.sh` which iterates `$HM/functions/*.sh`.
+`functions/*.sh`, sourced by `scripts/source.sh` (skips `_*.sh` helpers). Each file: `INSTALL_TAG` array (+ optional `INSTALL_PROFILE`) → dependency check via `_preamble.sh` → function definition.
 
 ### Config Files — Two Strategies
 
-1. **Nix-managed symlinks** (`xdg.configFile`) — for read-only configs (dprint, starship, claude hooks/CLAUDE.md, skills merged from flake inputs)
-2. **Copy-in-place** (`scripts/copy-files.sh`) — for configs that need to be writable at runtime (VSCode settings, tmux; alacritty + tmux-nix on ft)
-
-`copy-files.sh` runs during `home.activation` after `writeBoundary` and uses `envsubst` for templating.
+1. **Nix-managed symlinks** (`xdg.configFile`) — read-only configs (dprint, starship, claude hooks/CLAUDE.md, skills)
+2. **Copy-in-place** (`scripts/copy-files.sh`, `home.activation` after `writeBoundary`, `envsubst` templating) — configs writable at runtime (VSCode settings, tmux; alacritty + tmux-nix on ft)
 
 ### Claude Code Config
 
-All Claude config is owned by `modules/apps/claude.nix`:
+Owned by `modules/apps/claude.nix`:
 
-- `CLAUDE.md` — symlinked from `configs/claude/` (read-only, Nix-managed)
-- `skills/`, `hooks/` — merged/sourced from flake inputs (`claude-config`, `claude-plugins-official`, `obsidian-skills`) via `symlinkJoin`
-- `settings.json` — owned by Claude Code (writable); hm injects the `hooks` key and `env.DISABLE_AUTOUPDATER` via an idempotent `jq` merge in its activation block, and warns about plugin drift
+- `CLAUDE.md` — symlinked from `configs/claude/`
+- `skills/`, `hooks/` — merged from flake inputs (`claude-config`, `claude-plugins-official`, `obsidian-skills`) via `symlinkJoin`
+- `settings.json` — Claude-owned (writable); activation `jq`-merges hm's `hooks`, `env.DISABLE_AUTOUPDATER`, `cleanupPeriodDays`, auto-installs required plugins and warns about plugin drift
 
-### Key Environment Variables
+### Key Environment Variables (`modules/system/env.nix`)
 
-Defined in `modules/system/env.nix`:
-
-- `$HM` → `~/.config/home-manager` (this repo)
-- `$HM_TAG` → `"MAC"` or `"FT"`; `$HM_PROFILE` → `"PERSONAL"` or `"WORK"` (uppercase, used by the `INSTALL_TAG`/`INSTALL_PROFILE` gates in shell function preambles)
-- `$DEV` → `~/Documents/dev`
+- `$HM` → `~/.config/home-manager`; `$DEV` → `~/Documents/dev`
+- `$HM_TAG` / `$HM_PROFILE` / `$HM_NAME` — uppercased `tag` / `profile` / `machine` (`MAC`/`LINUX`, `PERSONAL`/`WORK`/`SERVER`); used by the `INSTALL_TAG`/`INSTALL_PROFILE` gates
 - XDG dirs are explicitly set to keep `$HOME` clean
 
 ## Nix Conventions
 
-- Use `lib.mkMerge` + `lib.mkIf (tag == "...")` for conditional attribute sets within a single file
-- Use `lib.optionals (tag == "...")` for conditional list items (packages, imports)
-- Same attribute defined across different files merges automatically (home-manager behavior)
-- Format with `dprint fmt <changed files>` before committing (config at repo root; not `alejandra` or `nixfmt`). Known formatter failures — hand-format these to match surroundings: `flake.nix`, `lib/launchd-btm.nix` (dprint-plugin-nix stability bug), `functions/{tidy,noise}.sh`, `scripts/nix-prepend-path.sh` (zsh syntax shfmt can't parse)
+- `lib.mkMerge` + `lib.mkIf (tag == "...")` for conditional attrsets in one file; `lib.optionals` for conditional list items
+- Same attribute across files merges automatically
+- Format with `dprint fmt <changed files>` (config at repo root; not `alejandra`/`nixfmt`). Known failures — hand-format to match surroundings: `flake.nix`, `lib/launchd-btm.nix` (dprint-plugin-nix stability bug), `functions/{tidy,noise}.sh`, `scripts/nix-prepend-path.sh` (zsh syntax shfmt can't parse)
 
 ## Workflow
 
-- **Never run `re` / `sure` / `home-manager switch` / `darwin-rebuild switch` yourself** — rebuilds are manual-only (a PreToolUse hook, `block-rebuild.sh`, enforces it). Commit, then ask the user to run `! re` or `! sure`. Each build bakes its flake target into the aliases, so one wrong target (e.g. `.#mac` on the work iMac, which is `mac-work`) sticks
-- Always `git commit` before running `re` or `sure` — flakes only see committed files, and new files need `git add` first
-- Stage only files you changed (`git add <file> ...`), not `git add -A` — the working tree may have unrelated dirty files
-- **Live on `main`.** Routine config changes commit directly to main; short-lived branches + small PRs for refactors/experiments only. Never let daily work accumulate on a side branch (flakes build whatever is checked out, so a stale main means the repo lies about the machine).
+- **Never run `re` / `sure` / `home-manager switch` / `darwin-rebuild switch` yourself** — manual-only, enforced by the `block-rebuild.sh` PreToolUse hook. Commit, then ask the user to run `! re` or `! sure`. Each build bakes its flake target into the aliases, so one wrong target (e.g. `.#mac` on the work iMac, which is `mac-work`) sticks
+- **Always `git commit` before `re`/`sure`** — flakes only see committed files (uncommitted/untracked → "path does not exist"); new files need `git add` first
+- Stage only your files (`git add <file> ...`), never `git add -A` — the tree may have unrelated dirty files
+- **Live on `main`.** Routine changes commit directly to main; short-lived branches + small PRs for refactors/experiments only. Never let daily work accumulate on a side branch (flakes build whatever is checked out, so a stale main means the repo lies about the machine)
+- Refactors: small, comprehensible steps — one logical change per PR (a plan phase with 5 sub-steps = 5 PRs); confirm scope before writing a batch of files and explain new structure in prose first — the user must be able to read every PR end-to-end. Base every PR on `main` (the user merges via the GitHub UI; stacked bases don't retarget and strand commits)
