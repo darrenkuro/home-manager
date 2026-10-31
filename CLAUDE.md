@@ -80,7 +80,7 @@ Owned by `modules/apps/claude.nix`:
 
 - `CLAUDE.md` — symlinked from `configs/claude/`
 - `skills/`, `hooks/` — merged from flake inputs (`claude-config`, `claude-plugins-official`, `obsidian-skills`) via `symlinkJoin`
-- `settings.json` — Claude-owned (writable); activation `jq`-merges hm's `hooks`, `env.DISABLE_AUTOUPDATER`, `cleanupPeriodDays`, auto-installs required plugins and warns about plugin drift
+- `settings.json` — Claude-owned (writable); activation `jq`-merges hm's `hooks`, `env.DISABLE_AUTOUPDATER` (binary only — `env.FORCE_AUTOUPDATE_PLUGINS` keeps plugins updating), `cleanupPeriodDays`, auto-installs required plugins and warns about plugin drift
 
 ### Key Environment Variables (`modules/system/env.nix`)
 

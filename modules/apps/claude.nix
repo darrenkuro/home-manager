@@ -135,7 +135,9 @@ in
 
     # settings.json — owned by Claude Code (writable, never symlinked); hm injects
     # env.DISABLE_AUTOUPDATER (binary self-updates were flaky over the 215MB native
-    # download; update manually via `claude update`) and cleanupPeriodDays=36500
+    # download; update manually via `claude update`), env.FORCE_AUTOUPDATE_PLUGINS
+    # (DISABLE_AUTOUPDATER also turns off plugin auto-update; this re-enables just
+    # plugins, which froze from June to October) and cleanupPeriodDays=36500
     # (~100y — the 30-day default silently deletes session transcripts under
     # ~/.config/claude/projects at startup; we keep them), and reconciles its own
     # hook entries per event (matched by hook command path) while preserving all other
@@ -151,7 +153,7 @@ in
     if [[ ! -f "$settings" ]]; then
       echo '{}' > "$settings"
     fi
-    ${pkgs.jq}/bin/jq '. * {"cleanupPeriodDays":36500,"env":{"DISABLE_AUTOUPDATER":"1"}}
+    ${pkgs.jq}/bin/jq '. * {"cleanupPeriodDays":36500,"env":{"DISABLE_AUTOUPDATER":"1","FORCE_AUTOUPDATE_PLUGINS":"1"}}
       | ${mergeHmHooks}' \
       "$settings" > "$settings.tmp" \
       && mv "$settings.tmp" "$settings"
