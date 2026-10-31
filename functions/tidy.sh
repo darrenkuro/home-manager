@@ -39,6 +39,7 @@ tidy() {
         # nix / home-manager managed dotfiles + infra
         .bash_profile .bashrc .profile .zshenv .nix-defexpr .nix-profile
         .clang-format # global fallback style — clang-format only does ancestor search; -style=file:<path> would kill per-project configs
+        .terminfo # Ghostty terminfo compiled by home.nix so SSH sessions get xterm-ghostty
         # XDG base dirs
         .cache .config .local
         # macOS standard home
@@ -68,7 +69,7 @@ tidy() {
         .rbenv             RBENV_ROOT
         .android           ANDROID_USER_HOME
         .docker            DOCKER_CONFIG
-        .npm               NPM_CONFIG_CACHE
+        .npm               npm_config_cache
         .npmrc             NPM_CONFIG_USERCONFIG
         .copilot           COPILOT_HOME
         .cups              LPDEST # not a relocation — LPDEST obviates the lpoptions default-printer line; reappearance means real per-printer options were written

@@ -19,7 +19,7 @@
     CLAUDE_CONFIG_DIR = "${home}/.config/claude";
     TELEGRAM_STATE_DIR = "${home}/.config/claude/channels/telegram"; # channel plugin ignores CLAUDE_CONFIG_DIR — pin state here to keep it out of ~/.claude
     NPM_CONFIG_USERCONFIG = "${home}/.config/npm/npmrc";
-    NPM_CONFIG_CACHE = "${home}/.cache/npm";
+    npm_config_cache = "${home}/.cache/npm"; # lowercase: npm reads npm_config_* case-insensitively, but prebuild-install (native-module binaries under pnpm) only checks this exact spelling
     CARGO_HOME = "${home}/.local/share/cargo";
     RUSTUP_HOME = "${home}/.local/share/rustup"; # unused (Rust via Nix); set so a future rustup install can't scatter ~/.rustup
     # uv: cache/config honor XDG_CACHE_HOME/XDG_CONFIG_HOME, but the data dir ignores
