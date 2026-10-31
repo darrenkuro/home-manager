@@ -147,10 +147,31 @@ done < <(sudo -u "$real_user" "$LSREGISTER" -dump 2> /dev/null |
 # Third-party user agents: point AssociatedBundleIdentifiers at the vendor's
 # app (same Team ID) so BTM folds the helper into the app's row instead of a
 # separate developer row. Vendors rewrite these plists, so re-apply each run.
-# BTM does not pick the change up on agent reload; check `sfltool dumpbtm`
-# after a reboot (see .claude/btm.md gotcha 6).
+# BTM fixes an item's parent row when it first records the item; a later
+# plist edit updates the stored association but never moves the row (not even
+# across a reboot). So after editing, unload the agent and keep its plist out
+# of the way until BTM forgets the item, then load it again so BTM records it
+# fresh under the app (see .claude/btm.md gotcha 6).
 echo "BTM: grouping third-party agents..."
 AGENT_DIR="$real_home/Library/LaunchAgents"
+real_uid=$(id -u "$real_user")
+
+reregister_agent() {
+    local label=$1 plist=$2 parked="$2.btm-regroup" n=0
+    launchctl bootout "gui/$real_uid/$label" 2> /dev/null || true
+    mv "$plist" "$parked"
+    # BTM drops the record within a minute or two of the plist vanishing.
+    until ! sfltool dumpbtm 2> /dev/null | grep -q "Identifier: 8.$label\$" || [[ $n -ge 40 ]]; do
+        sleep 3
+        n=$((n + 1))
+    done
+    mv "$parked" "$plist"
+    launchctl bootstrap "gui/$real_uid" "$plist" 2> /dev/null || true
+    if [[ $n -ge 40 ]]; then
+        echo "  warning: BTM still lists $label after 120s; it may stay under the developer row" >&2
+        return 1
+    fi
+}
 THIRD_PARTY=(
     "com.dropbox.DropboxUpdater.wake:com.getdropbox.dropbox"
     "com.valvesoftware.steamclean:com.valvesoftware.steam"
@@ -171,6 +192,7 @@ for entry in "${THIRD_PARTY[@]}"; do
         -c "Add :AssociatedBundleIdentifiers:0 string $bundle" \
         "$plist"; then
         echo "  grouped: $label -> $bundle"
+        reregister_agent "$label" "$plist" && echo "  re-registered with BTM: $label"
     else
         echo "  error: failed to group $label" >&2
         failures=$((failures + 1))
