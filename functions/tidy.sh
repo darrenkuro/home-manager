@@ -193,6 +193,21 @@ tidy() {
         else
             xcrun simctl delete unavailable > /dev/null 2>&1 && _done "Unavailable simulators removed"
         fi
+
+        # Per-macOS-build pre-linked simulator libraries (root-owned, but simctl
+        # removes them without sudo). Rebuilt in a few minutes on next sim boot.
+        local dyld_dir="/Library/Developer/CoreSimulator/Caches/dyld" kb
+        if [[ -d "$dyld_dir" ]]; then
+            kb=$(du -sk "$dyld_dir" 2> /dev/null | cut -f1)
+            total_freed=$((total_freed + kb))
+            _task "Simulator dyld shared caches"
+            if $dry_run; then
+                _item "would free ~$((kb / 1024))MB"
+            else
+                xcrun simctl runtime dyld_shared_cache remove --all > /dev/null 2>&1 \
+                    && _done "Simulator dyld caches (${_C_DIM}~$((kb / 1024))MB${_C_RESET})"
+            fi
+        fi
     fi
 
     if $dry_run; then
