@@ -92,7 +92,7 @@ Owned by `modules/apps/claude.nix`:
 
 - `lib.mkMerge` + `lib.mkIf (tag == "...")` for conditional attrsets in one file; `lib.optionals` for conditional list items
 - Same attribute across files merges automatically
-- Format with `dprint fmt <changed files>` (config at repo root; not `alejandra`/`nixfmt`). Known failures — hand-format to match surroundings: `flake.nix`, `lib/launchd-btm.nix` (dprint-plugin-nix stability bug), `functions/{tidy,noise}.sh`, `scripts/nix-prepend-path.sh` (zsh syntax shfmt can't parse)
+- Format with `dprint fmt <changed files>` (config at repo root; not `alejandra`/`nixfmt`). Known failures — hand-format to match surroundings: `flake.nix`, `lib/launchd-btm.nix`, `modules/apps/claude.nix` (dprint-plugin-nix bug: arg set longer than lineWidth — issue #1), `functions/{tidy,noise}.sh`, `scripts/nix-prepend-path.sh` (zsh syntax shfmt can't parse)
 
 ## Workflow
 
