@@ -53,7 +53,7 @@ nix-collect-garbage -d
 ### Module Organization
 
 - `modules/system/` — aliases, env vars
-- `modules/apps/` — per-app config: `git.nix`, `helix.nix`, `starship.nix`, `claude.nix`, `ssh.nix`, `netusage.nix`
+- `modules/apps/` — per-app config: `git.nix`, `helix.nix`, `starship.nix`, `claude.nix`, `ssh.nix`, `netusage.nix` (+ `netusage/` source, like `mdserve`)
 - `modules/services/<name>/` — self-contained services. Each has:
   - `spec.nix` — shared facts (paths, port, package); imported by both halves
   - `darwin.nix` — system half: wrappers, launchd agents/daemons, BTM stub

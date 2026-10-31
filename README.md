@@ -181,18 +181,12 @@ as your normal user. Do not add a private key to `/var/root/.ssh`.
 
 ### Updating an external flake input
 
-Tools/configs installed via `flake = false` inputs (`netusage`, `claude-config`, `obsidian-skills`, etc.) are pinned to a specific commit in `flake.lock`. To bump just one to its latest:
+Tools/configs installed via `flake = false` inputs (`claude-config`, `obsidian-skills`, etc.) are pinned to a specific commit in `flake.lock`. `re`/`sure` bump `claude-config` automatically (and commit `flake.lock`); to bump an upstream one to its latest:
 
 ```bash
-# 1. Push the upstream change first (e.g., in ~/Documents/dev/netusage)
-git push
-
-# 2. In this repo, refresh just that input
-nix flake lock --update-input netusage
-
-# 3. Commit the new flake.lock and rebuild
+nix flake update obsidian-skills
 git add flake.lock
-git commit -m "Bump netusage to latest"
+git commit -m "Bump obsidian-skills to latest"
 re   # or sure, depending on what changed
 ```
 

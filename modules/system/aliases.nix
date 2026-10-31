@@ -3,10 +3,10 @@
     # (upstream inputs stay manual `nix flake update`). Non-fatal: offline or
     # no ssh key → warn and build the current lock. A changed flake.lock is
     # committed on its own (pathspec), since flakes only see committed state.
-    bumpOwn = "nix flake update claude-config netusage --flake $HM" +
-    " || echo '⚠ own-input bump failed — building current lock'; " +
+    bumpOwn = "nix flake update claude-config --flake $HM" +
+    " || echo '⚠ claude-config bump failed — building current lock'; " +
     "git -C $HM diff --quiet flake.lock" +
-    " || git -C $HM commit -q -m 'flake: bump own inputs (claude-config, netusage)' flake.lock; ";
+    " || git -C $HM commit -q -m 'flake: bump claude-config' flake.lock; ";
 in
 {
     programs.zsh.shellAliases = lib.mkMerge [

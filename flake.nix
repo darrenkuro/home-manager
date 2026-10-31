@@ -19,10 +19,6 @@
       url = "git+ssh://git@github.com/darrenkuro/claude-config";
       flake = false;
     };
-    netusage = {
-      url = "github:darrenkuro/netusage";
-      flake = false;
-    };
   };
 
   outputs = {
@@ -32,12 +28,11 @@
     claude-plugins-official,
     obsidian-skills,
     claude-config,
-    netusage,
     ...
   }: let
     lib = nixpkgs.lib;
     hmExtraArgs = {
-      inherit claude-plugins-official obsidian-skills claude-config netusage;
+      inherit claude-plugins-official obsidian-skills claude-config;
     };
 
     # Machine identity — the single source of truth. Every target below and
