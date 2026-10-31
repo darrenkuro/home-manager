@@ -230,7 +230,9 @@ tidy() {
     # ─────────────────────────────────────────────────────────────────────────
     # 5. Nix garbage collection — drop generations older than 7 days.
     #    User + home-manager profiles only (no sudo); these are what `re` creates.
-    #    The root-owned nix-darwin system profile is GC'd via nix.gc in darwin.nix.
+    #    The root-owned nix-darwin system profile (what `sure` creates) is skipped
+    #    silently here — it's pruned weekly by nix.gc in darwin.nix, or by hand
+    #    with `sudo nix-collect-garbage --delete-older-than 14d`.
     # ─────────────────────────────────────────────────────────────────────────
     _header "Nix garbage collection"
 

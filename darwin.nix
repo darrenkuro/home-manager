@@ -41,6 +41,12 @@ in
     # Nix settings
     nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
+    # Root-owned store maintenance (launchd, default schedule: Sun 03:15 / 04:15).
+    # `sure` creates root-owned system generations that `tidy`'s unprivileged
+    # nix-collect-garbage silently skips — this GC is the only thing that prunes them.
+    nix.gc = { automatic = true; options = "--delete-older-than 14d"; };
+    nix.optimise.automatic = true; # hardlink duplicate store files (nix.settings.auto-optimise-store is known to corrupt the store)
+
     # ── Homebrew ──
     homebrew = {
         enable = true;
