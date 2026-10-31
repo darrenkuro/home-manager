@@ -28,7 +28,6 @@
         ];
 
         masApps = {
-            "CleanMyMac" = 1339170533;
             "Developer" = 640199958;
             "Final Cut Pro" = 424389933;
             "iA Writer" = 775737590;
