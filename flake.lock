@@ -104,6 +104,22 @@
         "type": "github"
       }
     },
+    "remotion-skills": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1793014654,
+        "narHash": "sha256-JMp9uPj4hfKGhAzD6TMrPt2knEp3AoxUW1SVzTdWF28=",
+        "owner": "remotion-dev",
+        "repo": "skills",
+        "rev": "30d4553ecd46fbc5212fd0ff006ae43af522158b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "remotion-dev",
+        "repo": "skills",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "claude-config": "claude-config",
@@ -111,7 +127,8 @@
         "home-manager": "home-manager",
         "nix-darwin": "nix-darwin",
         "nixpkgs": "nixpkgs",
-        "obsidian-skills": "obsidian-skills"
+        "obsidian-skills": "obsidian-skills",
+        "remotion-skills": "remotion-skills"
       }
     }
   },

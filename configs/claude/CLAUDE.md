@@ -90,7 +90,7 @@ Make ALL changes in a single atomic pass — move files, update imports, verify 
 
 - Create in `~/Documents/dev/`
 - `git init && gh repo create --private`
-- Add LICENSE (MIT, "Darren Kuro") and README (use `/readme-style`)
+- Add LICENSE (MIT, "Darren Kuro") and README (use `/repo-style`)
 
 ### Docker
 

@@ -1,7 +1,7 @@
 # Claude Code configuration — skills, hooks, CLAUDE.md
 #
 # Cross-platform: imported on both macOS and Linux.
-{ config, lib, pkgs, claude-plugins-official, obsidian-skills, claude-config, ... }: let
+{ config, lib, pkgs, claude-plugins-official, obsidian-skills, remotion-skills, claude-config, ... }: let
     claudeConfigDir = ../../configs/claude;
 
     # Plugins extracted as hm-managed skills (disable these in Claude Code)
@@ -97,18 +97,17 @@
       '' ) commandPlugins}
   '';
 
-    # obsidian-skills minus `defuddle`: ours lives in claude-config's `web-read`
-    # (npx variant), so it no longer shadows upstream's by name — drop upstream's
-    # copy or both would fire on the same URL.
-    obsidianSkills = pkgs.runCommand "obsidian-skills-filtered" { } ''
-    mkdir -p $out
-    cp -r ${obsidian-skills}/skills/* $out/
-    rm -rf $out/defuddle
-  '';
-
+    # Upstream skill sets are consumed as-is (flake inputs, bumped by `nix flake
+    # update`); anything we'd customise is a separate skill in claude-config,
+    # never a vendored fork. A same-named dir in claude-config still shadows.
     mergedSkills = pkgs.symlinkJoin {
         name = "claude-config-skills-merged";
-        paths = [ ( claude-config + "/skills" ) officialSkills obsidianSkills ];
+        paths = [
+            ( claude-config + "/skills" )
+            officialSkills
+            ( obsidian-skills + "/skills" )
+            ( remotion-skills + "/skills" )
+        ];
     };
 in
 {

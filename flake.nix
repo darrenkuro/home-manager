@@ -15,6 +15,10 @@
       url = "github:kepano/obsidian-skills";
       flake = false;
     };
+    remotion-skills = {
+      url = "github:remotion-dev/skills";
+      flake = false;
+    };
     claude-config = {
       url = "git+ssh://git@github.com/darrenkuro/claude-config";
       flake = false;
@@ -27,12 +31,13 @@
     home-manager,
     claude-plugins-official,
     obsidian-skills,
+    remotion-skills,
     claude-config,
     ...
   }: let
     lib = nixpkgs.lib;
     hmExtraArgs = {
-      inherit claude-plugins-official obsidian-skills claude-config;
+      inherit claude-plugins-official obsidian-skills remotion-skills claude-config;
     };
 
     # Machine identity — the single source of truth. Every target below and
