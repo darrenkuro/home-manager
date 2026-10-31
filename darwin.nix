@@ -118,6 +118,7 @@ in
         trackpad = {
             Clicking = true; # Tap to click
             TrackpadThreeFingerDrag = false;
+            TrackpadThreeFingerTapGesture = 2; # Look up & data detectors
         };
 
         # ── Screenshots ──

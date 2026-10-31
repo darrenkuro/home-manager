@@ -11,11 +11,13 @@
             "anki"
             "brave-browser"
             "claude"
+            "daisydisk"
             "discord"
             "dropbox"
             "font-carlito" # Google's metric-compatible substitute for Microsoft's Calibri
             "font-hack-nerd-font" # editor.fontFamily in configs/vscode-settings.jsonc
             "ghostty"
+            "nordvpn"
             "notion"
             "obsidian"
             "sf-symbols"
