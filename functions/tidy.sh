@@ -28,7 +28,7 @@ tidy() {
     local dry_run=false
     [[ "${1:-}" == "--dry-run" || "${1:-}" == "-n" ]] && dry_run=true
 
-    local total_freed=0 # kB, accumulated across cache clears
+    local total_freed=0 # kB, pre-delete du sum — only reported in dry-run; live runs print per-section host deltas
 
     # ── Home-audit config (edit as your setup evolves) ────────────────────────
     # Approved top-level $HOME entries. Anything present but NOT listed here is
@@ -90,6 +90,33 @@ tidy() {
     local free_before
     free_before=$(_free_bytes)
 
+    # Per-section reclaim. Host free space is the one ground-truth measure:
+    # du-before-delete overstates partial removals, brew/pnpm/simctl report
+    # nothing, and docker/fstrim measure inside the Colima VM, not the host
+    # disk. So snapshot free bytes at every section boundary and print the
+    # delta (noise from concurrent writes is possible, but it always sums to
+    # the final ♻ line). Dry runs delete nothing, so they print no deltas.
+    local section_free=""
+    _human() { # bytes → "1.2 GB" / "285 MB"
+        if (($1 >= 1000000000)); then awk -v b="$1" 'BEGIN{printf "%.1f GB", b/1e9}'
+        else awk -v b="$1" 'BEGIN{printf "%d MB", b/1e6}'; fi
+    }
+    _section_end() {
+        [[ -n "$section_free" ]] || return 0
+        local delta=$(($(_free_bytes) - section_free))
+        if ((delta > 0)); then
+            printf '  %b↳ %s reclaimed%b\n' "$_C_DIM" "$(_human "$delta")" "$_C_RESET"
+        else
+            printf '  %b↳ nothing reclaimed%b\n' "$_C_DIM" "$_C_RESET"
+        fi
+        section_free=""
+    }
+    _section() { # _header that measures: closes the previous section, snapshots this one
+        _section_end
+        _header "$1"
+        $dry_run || section_free=$(_free_bytes)
+    }
+
     # Remove one regenerable $HOME entry (file or dir). Refuses nix-store symlinks.
     _safe_rm() {
         local p="$1"
@@ -127,7 +154,7 @@ tidy() {
     # ─────────────────────────────────────────────────────────────────────────
     # 1. Scrub $HOME — dead dotfile scatter (absorbed from the old `clean`)
     # ─────────────────────────────────────────────────────────────────────────
-    _header "Scrubbing \$HOME"
+    _section "Scrubbing \$HOME"
 
     # Regenerable caches/artifacts that keep reappearing in $HOME despite XDG.
     # (.docker is safe here because DOCKER_CONFIG points at $XDG_CONFIG_HOME/docker,
@@ -157,7 +184,7 @@ tidy() {
     # ─────────────────────────────────────────────────────────────────────────
     # 2. Clear caches (contents only; every entry regenerates on demand)
     # ─────────────────────────────────────────────────────────────────────────
-    _header "Clearing caches"
+    _section "Clearing caches"
 
     local dir
     local cache_dirs=(
@@ -177,7 +204,7 @@ tidy() {
     #    a given iOS version — NOT every plug-in, and only for versions you
     #    actually connect again. DerivedData rebuilds. Archives are left alone.
     # ─────────────────────────────────────────────────────────────────────────
-    _header "Clearing Xcode caches"
+    _section "Clearing Xcode caches"
 
     local xcode_dirs=(
         "$HOME/Library/Developer/Xcode/DerivedData"
@@ -213,17 +240,13 @@ tidy() {
         fi
     fi
 
-    if $dry_run; then
-        printf '  %bWould free: ~%dMB%b\n' "$_C_DIM" "$((total_freed / 1024))" "$_C_RESET"
-    else
-        printf '  %bTotal freed: ~%dMB%b\n' "$_C_DIM" "$((total_freed / 1024))" "$_C_RESET"
-    fi
+    $dry_run && printf '  %bWould free: ~%dMB (caches + Xcode)%b\n' "$_C_DIM" "$((total_freed / 1024))" "$_C_RESET"
 
     # ─────────────────────────────────────────────────────────────────────────
     # 4. Prune package stores (safe: only unreferenced/outdated content removed;
     #    updating/upgrading packages lives in `upgrade`, not here)
     # ─────────────────────────────────────────────────────────────────────────
-    _header "Pruning package stores"
+    _section "Pruning package stores"
 
     if command -v pnpm > /dev/null 2>&1; then
         _task "pnpm store prune"
@@ -279,7 +302,7 @@ tidy() {
     #    silently here — it's pruned weekly by nix.gc in darwin.nix, or by hand
     #    with `sudo nix-collect-garbage --delete-older-than 14d`.
     # ─────────────────────────────────────────────────────────────────────────
-    _header "Nix garbage collection"
+    _section "Nix garbage collection"
 
     if ! command -v nix-collect-garbage > /dev/null 2>&1; then
         _skip "nix not installed"
@@ -303,6 +326,7 @@ tidy() {
     #    (b) Unlisted   — a top-level entry absent from home_approved above.
     #    Nothing is deleted here; this is the "is my $HOME still correct?" report.
     # ─────────────────────────────────────────────────────────────────────────
+    _section_end
     _header "Auditing \$HOME"
 
     # (a) XDG drift — legacy path present despite its relocation var being set.
