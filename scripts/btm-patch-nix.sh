@@ -147,7 +147,8 @@ done < <(sudo -u "$real_user" "$LSREGISTER" -dump 2> /dev/null |
 # Third-party user agents: point AssociatedBundleIdentifiers at the vendor's
 # app (same Team ID) so BTM folds the helper into the app's row instead of a
 # separate developer row. Vendors rewrite these plists, so re-apply each run.
-# Login Items reflects the change immediately (sfltool dumpbtm lags until reboot).
+# BTM does not pick the change up on agent reload; check `sfltool dumpbtm`
+# after a reboot (see .claude/btm.md gotcha 6).
 echo "BTM: grouping third-party agents..."
 AGENT_DIR="$real_home/Library/LaunchAgents"
 THIRD_PARTY=(
