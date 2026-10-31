@@ -33,7 +33,7 @@ Unlike daemons, removed `launchd.user.agents` stay loaded with their plists in p
 
 ## dprint
 
-- **Nix plugin instability:** `flake.nix`, `lib/launchd-btm.nix` and `modules/apps/claude.nix` fail with "Formatting succeeded initially, but failed when ensuring a stable format" (file left untouched — safe but noisy). Hand-format them. Root cause (bisected 2026-10-31): a function arg set `{ a, b, … }:` longer than `lineWidth` is wrapped into text the plugin cannot re-parse; multi-line arg sets fail outright. Darren.s plugin, github.com/darrenkuro/dprint-plugin-nix issue #1.
+- **Nix plugin instability (fixed in dprint-plugin-nix v0.1.1, 2026-10-31):** v0.1.0 dropped commas when wrapping a function arg set `{ a, b, … }:` longer than `lineWidth`, so the output re-parsed as an attrset → "failed when ensuring a stable format" (issue #1; also silently dropped `args@`). `claude.nix` now formats cleanly. `flake.nix` and `lib/launchd-btm.nix` no longer error but stay hand-formatted: indent mismatch and uglier `if`-body / `let … in` layouts respectively (plugin follow-ups, not filed yet).
 - **VSCode extension only formats under the discovered config's folder** — it never falls back to `~/.config/dprint/dprint.json` (the CLI does). Hence `dprint.json` lives at the repo ROOT; moving it under `configs/` silently kills format-on-save repo-wide.
 
 ## zsh alias-in-alias expansion (why functions use /bin/rm)

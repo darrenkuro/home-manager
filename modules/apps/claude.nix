@@ -1,7 +1,16 @@
 # Claude Code configuration — skills, hooks, CLAUDE.md
 #
 # Cross-platform: imported on both macOS and Linux.
-{ config, lib, pkgs, claude-plugins-official, obsidian-skills, remotion-skills, claude-config, ... }: let
+{
+    config,
+    lib,
+    pkgs,
+    claude-plugins-official,
+    obsidian-skills,
+    remotion-skills,
+    claude-config,
+    ...
+}: let
     claudeConfigDir = ../../configs/claude;
 
     # Plugins extracted as hm-managed skills (disable these in Claude Code)
