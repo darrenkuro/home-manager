@@ -7,11 +7,12 @@ Bootstrap is in `README.md`; the canonical manual-step checklist (with `doctor` 
 - Trackpad: Point & Click → Look up & data detectors → "Tap with three fingers"
 - Safari: View → Show Favorites Bar
 - Email: System Settings → Internet Accounts
-- VPN: NordVPN from the App Store, sign in
+- VPN: NordVPN (cask in `profiles/macos.nix`), sign in
 
 ## Accounts / licenses
 
-- Alfred license, Scrivener 3 license — 1Password
+- Alfred license — Apple Passwords
+- Scrivener 3 license — 1Password (unverified)
 - OmniFocus — Omni account `darrenlu0416`
 
 ## Install on demand
