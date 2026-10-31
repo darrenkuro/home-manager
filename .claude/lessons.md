@@ -141,3 +141,12 @@ Every macOS profile must declare a darwin-store daemon
 Manual recovery: `security find-generic-password -s <volume UUID> -w
 /Library/Keychains/System.keychain | diskutil apfs unlockVolume <dev>
 -mountpoint /nix -stdinpassphrase`.
+
+## nix-darwin Leaves User Agents a Generation Stops Declaring
+
+The LaunchDaemons lesson above does not apply to `launchd.user.agents`:
+removing the postgresql module (Oct 31) and running `sure` left both
+`~/Library/LaunchAgents/org.postgresql.*.plist` in place and the server
+running. When deleting a service with user agents, `launchctl bootout
+gui/$UID/<label>` and `rm` the plist by hand after the rebuild, then remove
+its stub + `.stub-manifest-<Name>` from `~/.local/share/app-stubs`.
