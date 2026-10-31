@@ -117,7 +117,9 @@ tidy() {
         if $dry_run; then
             _item "would free ~$((kb / 1024))MB"
         else
-            /bin/rm -rf "${dir:?}"/* 2> /dev/null
+            # (ND): include dotfiles, and expand to nothing on an empty dir instead of
+            # aborting with zsh's "no matches found" (a glob error, not an rm error)
+            /bin/rm -rf "${dir:?}"/*(ND) 2> /dev/null
             _done "$(_tilde "$dir") (${_C_DIM}~$((kb / 1024))MB${_C_RESET})"
         fi
     }
