@@ -55,7 +55,9 @@
         ];
 
         finderStartFolder = "Dropbox";
-        enablePostgresql = true;
+        # Parked 2026-10-31: data moved to SQLite (knowledge-base/data,
+        # _archive/grindstone/data); dumps in Dropbox/backups/postgres-2026-10-31.
+        enablePostgresql = false;
         enableNixBtm = true;
     };
 

@@ -189,7 +189,8 @@ in
     ] ++
     lib.optionals ( isMac && !isWork ) [
         # PostgreSQL is personal-only: its launchd half needs codesigned BTM
-        # stubs (see root darwin.nix). The only tooling the work profile lacks.
-        ./modules/services/postgresql/home.nix
+        # stubs (see root darwin.nix). Parked 2026-10-31 together with
+        # enablePostgresql in profiles/macos.nix; uncomment both to bring it back.
+        # ./modules/services/postgresql/home.nix
     ] ++ lib.optionals ( machine == "ft" ) [ ./modules/system/linux-ft.nix ];
 }
