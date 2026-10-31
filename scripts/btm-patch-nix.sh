@@ -21,6 +21,8 @@ ACTIVATE_PLIST="/Library/LaunchDaemons/org.nixos.activate-system.plist"
 PLISTS=(
     "/Library/LaunchDaemons/org.nixos.nix-daemon.plist"
     "/Library/LaunchDaemons/org.nixos.darwin-store.plist"
+    "/Library/LaunchDaemons/org.nixos.nix-gc.plist"
+    "/Library/LaunchDaemons/org.nixos.nix-optimise.plist"
 )
 
 # Failures are reported loudly but don't stop the remaining plists/stubs;

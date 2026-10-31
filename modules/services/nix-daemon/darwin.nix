@@ -30,6 +30,23 @@
         useSystemBash = true;
         text = spec.mountScript;
     };
+
+    # nix.gc / nix.optimise (darwin.nix) use nix-darwin's `command =`, which
+    # emits `/bin/sh -c …` — BTM then lists a bare "sh". Same binary + options,
+    # just launched from inside the stub so they group under Nix.
+    nixGcWrapper = btm.mkWrapper {
+        name = "NixGC";
+        text = ''
+      exec ${lib.getExe' config.nix.package "nix-collect-garbage"} ${config.nix.gc.options}
+    '';
+    };
+
+    nixOptimiseWrapper = btm.mkWrapper {
+        name = "NixOptimise";
+        text = ''
+      exec ${lib.getExe' config.nix.package "nix-store"} --optimise
+    '';
+    };
 in
 {
     # Take over Nix daemon management from installer for BTM integration
@@ -59,12 +76,26 @@ in
         };
     };
 
+    launchd.daemons.nix-gc = lib.mkIf config.nix.gc.automatic {
+        serviceConfig.ProgramArguments = lib.mkForce [
+            "${btm.stubDir}/Nix.app/Contents/MacOS/NixGC"
+        ];
+    };
+
+    launchd.daemons.nix-optimise = lib.mkIf config.nix.optimise.automatic {
+        serviceConfig.ProgramArguments = lib.mkForce [
+            "${btm.stubDir}/Nix.app/Contents/MacOS/NixOptimise"
+        ];
+    };
+
     system.activationScripts.postActivation.text = btm.mkStubInstall {
         name = "Nix";
         app = ./Nix.app;
         wrappers = [
             { drv = nixDaemonWrapper; bin = "NixDaemonStart"; }
             { drv = nixStoreMountWrapper; bin = "NixStoreMount"; }
+            { drv = nixGcWrapper; bin = "NixGC"; }
+            { drv = nixOptimiseWrapper; bin = "NixOptimise"; }
         ];
     };
 }
