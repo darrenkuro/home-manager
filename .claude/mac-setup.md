@@ -12,7 +12,7 @@ Bootstrap is in `README.md`; the canonical manual-step checklist (with `doctor` 
 ## Accounts / licenses
 
 - Alfred license — Apple Passwords
-- Scrivener 3 license — 1Password (unverified)
+- Scrivener 3 — Mac App Store purchase (Apple ID), no license key; not installed, re-download from Purchased when needed
 - OmniFocus — Omni account `darrenlu0416`
 
 ## Install on demand
