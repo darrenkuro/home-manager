@@ -162,6 +162,8 @@ tidy() {
         "$HOME/.cache"                                      # XDG caches: npm, pnpm, nix, typescript
         "$HOME/Library/Application Support/Caches"          # shared app cache bucket
         "$HOME/Library/Application Support/Code/CachedData" # VS Code compiled-code cache
+        "$HOME/Library/Application Support/Claude/Cache"      # Claude desktop (Electron) HTTP cache
+        "$HOME/Library/Application Support/Claude/Code Cache" # Claude desktop V8 compiled-JS cache
     )
     for dir in "${cache_dirs[@]}"; do _clear_contents "$dir"; done
 
