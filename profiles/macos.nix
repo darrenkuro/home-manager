@@ -21,7 +21,7 @@
             "sf-symbols"
             "slack"
             "spotify"
-            "steam"
+            # "steam" # parked 2026-10-31 (no games installed); uncomment + `sure` to play again. cleanup = "zap" removes the client, ~/Library/Application Support/Steam and the steamclean agent when unlisted.
             "tailscale-app" # mesh VPN joining personal+work Macs into one tailnet; route git through the work Mac to satisfy GitHub's IP allowlist
             "visual-studio-code"
             # "pearcleaner"
