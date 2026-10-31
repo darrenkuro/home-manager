@@ -3,7 +3,7 @@ REQUIRED_TOOLS=(afplay)
 _check_preamble || return 0
 
 noise() {
-    local AUDIO_PATH="$DBOX/audio/ambience-noise-30m.aiff"
+    local AUDIO_PATH="$HOME/.local/share/audio/ambience-noise.m4a"
     local PID_FILE="/tmp/loop_audio.pid"
 
     # Ensure the audio file exists
