@@ -30,6 +30,7 @@
         "explanatory-output-style"
         "learning-output-style"
         "telegram"
+        "dropbox"
     ];
 
     # hm-managed hooks by event — reconciled into settings.json by claudeSettings
