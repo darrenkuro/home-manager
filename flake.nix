@@ -70,7 +70,11 @@
           {
             nixpkgs.config.allowUnfree = true;
             home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
+            # false = install into ~/.nix-profile, same as standalone `re`. With
+            # true, packages go to /etc/profiles/per-user and every `sure`
+            # uninstalls them from ~/.nix-profile while every `re` reinstalls
+            # them — paths cached by apps (VS Code's shell) break on each flip.
+            home-manager.useUserPackages = false;
             home-manager.extraSpecialArgs = specialArgsFor m;
             home-manager.users.${m.user} = import ./home.nix;
           }
