@@ -340,6 +340,11 @@ Stubs are only rewritten when a wrapper derivation changes (script edits or a
 nixpkgs bump), so this is rare. Don't use `sfltool resetbtm` — it wipes all
 BTM approvals system-wide.
 
+If it survives a reboot, LaunchServices has a second bundle registered under
+the stub's id (the unsigned `/nix/store/*-<Name>.app` source copy) and BTM is
+resolving to that one. `sure` unregisters those via `btm-patch-nix.sh`; see
+`.claude/btm.md` gotcha 5 for the manual check.
+
 ---
 
 <details>
