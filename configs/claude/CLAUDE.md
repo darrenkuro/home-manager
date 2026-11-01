@@ -20,6 +20,8 @@ This file: `~/.config/home-manager/configs/claude/CLAUDE.md` (edit, then `re` to
 
 **Media playback (macOS)**: NEVER `open` audio/video files — it hijacks Music/QuickTime. Play audio with `afplay <file>` (blocks until done; `-t <seconds>` caps length). Inspect media with `ffprobe`, never `open`.
 
+**GitHub accounts**: `gh` default is **darrenkuro**: use it for everything, including all personal repos, issues, PRs, comments. The work account **pedago42tirana** is only for the `42pedago` and `42learners` orgs and for pulling/cloning (e.g. `42learners/<repo>`). Never create issues, PRs, comments, pushes, or repos with it elsewhere. If you switch to it (`gh auth switch -u pedago42tirana`), switch back to darrenkuro right after. Check `gh auth status` before any write.
+
 **Git**: Global gitignore at `~/.config/git/ignore` covers common patterns. Don't create per-repo `.gitignore` unless project-specific ignores are needed.
 
 **Backups**: Any backup file/snapshot (pre-edit undo dumps, exports, etc.) goes in `~/Library/CloudStorage/Dropbox/_backup/claude`, never scattered in the cwd or project dirs. Create the dir if missing.
