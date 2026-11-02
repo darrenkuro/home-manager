@@ -14,7 +14,7 @@
             user.signingKey = "~/.ssh/${sshKey}.pub"; # per machine, from flake.nix `machines`
             gpg.format = "ssh";
             commit.gpgsign = "true";
-            core.editor = "hx";
+            core.editor = "nvim";
             color.ui = "auto";
             init.defaultBranch = "main";
             # github.com auth follows gh's active account (`gh auth switch`); "" drops osxkeychain
