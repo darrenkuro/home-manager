@@ -5,6 +5,7 @@
     config,
     lib,
     pkgs,
+    profile,
     claude-plugins-official,
     obsidian-skills,
     remotion-skills,
@@ -39,8 +40,9 @@
         "explanatory-output-style"
         "learning-output-style"
         "telegram"
-        "dropbox"
-    ];
+    ]
+    # The work iMac has no Dropbox
+     ++ lib.optionals ( profile != "work" ) [ "dropbox" ];
 
     # hm-managed hooks by event — reconciled into settings.json by claudeSettings
     # below, keyed by command path so user-added hooks survive every rebuild
