@@ -57,6 +57,7 @@
 
         finderStartFolder = "Dropbox";
         enableNixBtm = true;
+        alwaysOn = false;
     };
 
     # Same tooling as personal (home.nix ships the full toolchain to every
@@ -92,5 +93,8 @@
         # The store volume IS encrypted here as well (installer default), so
         # darwin.nix still declares a plain darwin-store unlock daemon.
         enableNixBtm = false;
+        # Desk Mac that stays on: no system sleep, wake for network, restart
+        # after a power cut — it runs scheduled jobs (cal.com notice agent).
+        alwaysOn = true;
     };
 }

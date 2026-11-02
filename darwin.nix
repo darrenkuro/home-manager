@@ -85,6 +85,15 @@ in
     # per-machine (Secure Enclave); see docs/manual-setup.md.
     security.pam.services.sudo_local.touchIdAuth = true;
 
+    # ── Power — always-on profiles never sleep the system (display still sleeps
+    # and locks). Each option runs `systemsetup` with its output discarded, so
+    # check `pmset -g` (sleep 0, womp 1, autorestart 1) after `sure` ──
+    power = lib.mkIf selected.alwaysOn {
+        sleep.computer = "never";
+        restartAfterPowerFailure = true;
+    };
+    networking.wakeOnLan.enable = lib.mkIf selected.alwaysOn true;
+
     # macOS system defaults (declarative)
     system.defaults = {
         # ── NSGlobalDomain ──
