@@ -23,6 +23,14 @@ Unlike daemons, removed `launchd.user.agents` stay loaded with their plists in p
 - `system.primaryUser` is required for `launchd.user.agents`, `system.defaults.dock`, etc.
 - GUI apps (Dock/Spotlight) only see env from `launchd.user.envVariables`.
 
+## New user agent whose program is an HM-linked path fails its first load
+
+`sure` loads `launchd.user.agents` _before_ home-manager activates, so a new agent pointing into the HM tree (e.g. `~/.config/claude/skills/42admin/scripts/locations`) finds no program at `RunAtLoad` → launchd `access(X_OK) … errno 2`, exit 78, empty log, job stuck in "could not initialize" (2026-11-02, locations-archive). BTM is _not_ involved (disposition stays `[enabled, allowed, notified]`). Never `kickstart` it — that hangs. Fix: `launchctl bootout gui/$(id -u)/<label>` then `launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/<label>.plist`. Only bites the first install; diagnose with `/usr/bin/log show --predicate 'process == "launchd" AND eventMessage CONTAINS "<label>"'`.
+
+## Universal Clipboard: never `killall pboard`
+
+Killing `pboard` mid-transfer wedges the local `useractivityd`: it stops hearing the other Mac's "pboard available" advertisements and stops advertising local copies, while Handoff itself keeps working (2026-11-02, both directions dead for 25 min). Fix: `killall useractivityd` on the broken Mac (it respawns; ~10 s to recover). Diagnose: `/usr/bin/log show --last 30m --predicate 'process == "useractivityd" AND category == "pasteboard-server"'` — healthy shows `Received pboard available advertisement` / `Types Requested from remote`. sharingd's `Unable to decrypt activity level … -6727` is unrelated noise.
+
 ## writeTextFile wrappers need `destination = "/bin/${name}"`
 
 `mkStubInstall` expects `${drv}/bin/${name}` (the `writeShellApplication` layout); bare `writeTextFile` outputs to `$out` directly.
