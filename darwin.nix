@@ -32,7 +32,10 @@ in
         then
             [ ./modules/services/nix-daemon/darwin.nix ]
         else
-            [ ./modules/services/nix-daemon/store-mount.nix ] );
+            [ ./modules/services/nix-daemon/store-mount.nix ] )
+    # ⚠ TEMPORARY — cal.com notice agent on the always-on iMac; remove with its
+    # directory once the station booking moves to one link per slot.
+     ++ lib.optional selected.alwaysOn ./modules/services/cal-notice/darwin.nix;
 
     # Nix settings
     nix.settings.experimental-features = [ "nix-command" "flakes" ];
