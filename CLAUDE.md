@@ -101,3 +101,15 @@ Owned by `modules/apps/claude.nix`:
 - Stage only your files (`git add <file> ...`), never `git add -A` — the tree may have unrelated dirty files
 - **Live on `main`.** Routine changes commit directly to main; short-lived branches + small PRs for refactors/experiments only. Never let daily work accumulate on a side branch (flakes build whatever is checked out, so a stale main means the repo lies about the machine)
 - Refactors: small, comprehensible steps — one logical change per PR (a plan phase with 5 sub-steps = 5 PRs); confirm scope before writing a batch of files and explain new structure in prose first — the user must be able to read every PR end-to-end. Base every PR on `main` (the user merges via the GitHub UI; stacked bases don't retarget and strand commits)
+
+## Temporary items — remind the user
+
+Stopgaps meant to be deleted. **At the start of every session in this repo, and again before
+any commit, list them to the user in one short line each with its removal condition** and ask
+whether it can go yet. Mark new ones `⚠ TEMPORARY (added <date>)` in the code and add a row here;
+when one is removed, delete its row. `rg '⚠ TEMPORARY'` finds the in-repo ones.
+
+| Item                                                                                | Where                                                                                        | Remove when                                                                                                                                                      |
+| ----------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| cal.com notice agent (added 2026-11-02)                                             | `modules/services/cal-notice/` + its `lib.optional selected.alwaysOn` import in `darwin.nix` | the cal.com station booking moves to one link per slot (or same-day booking is dropped)                                                                          |
+| hand-made copy of that agent on the personal Mac (added 2026-11-02, not hm-managed) | `~/Library/LaunchAgents/com.darrenkuro.cal-notice.plist`                                     | the iMac's `~/Library/Logs/cal-notice.log` shows a few correct weekday switches: `launchctl bootout gui/$(id -u)/com.darrenkuro.cal-notice` and delete the plist |

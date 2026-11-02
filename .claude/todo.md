@@ -1,5 +1,6 @@
 # TODO
 
+- [ ] BTM on the work iMac (named Login Items) — plan + risks in `.claude/architecture-btm-work.md`; boot-critical (Nix store mount daemon), needs a signing-cert decision first
 - [ ] Suppress BTM "App Background Activity" notifications — `.mobileconfig` profile targeting `com.apple.btmnotificationagent` (only confirmed method; no `defaults write` exists)
 - [ ] Dedup stale entries in Notification Settings — surgical dedup of `com.apple.ncprefs.plist` by `bundle-id` (keeps per-app prefs; `killall cfprefsd` after)
 - [ ] Declare the remaining global keyboard shortcuts (see below)
