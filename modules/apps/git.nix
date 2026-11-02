@@ -17,6 +17,11 @@
             core.editor = "hx";
             color.ui = "auto";
             init.defaultBranch = "main";
+            # github.com auth follows gh's active account (`gh auth switch`); "" drops osxkeychain
+            credential."https://github.com".helper = [
+                ""
+                "!${pkgs.gh}/bin/gh auth git-credential"
+            ];
         };
     };
 
