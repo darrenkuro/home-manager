@@ -35,7 +35,9 @@ in
             [ ./modules/services/nix-daemon/store-mount.nix ] )
     # ⚠ TEMPORARY — cal.com notice agent on the always-on iMac; remove with its
     # directory once the station booking moves to one link per slot.
-     ++ lib.optional selected.alwaysOn ./modules/services/cal-notice/darwin.nix;
+     ++ lib.optional selected.alwaysOn ./modules/services/cal-notice/darwin.nix
+    # Locations API → sheet archive (the API keeps only days of history).
+     ++ lib.optional selected.alwaysOn ./modules/services/locations-archive/darwin.nix;
 
     # Nix settings
     nix.settings.experimental-features = [ "nix-command" "flakes" ];
