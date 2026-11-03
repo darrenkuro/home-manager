@@ -110,6 +110,7 @@ in
     };
 
     programs.home-manager.enable = true;
+    news.display = "silent"; # read with `home-manager news`
     programs.bash = {
         enable = true;
         historyFile = "${config.home.homeDirectory}/.local/state/bash/history";
