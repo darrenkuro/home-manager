@@ -1,5 +1,21 @@
 {
   "nodes": {
+    "admin42": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1793902714,
+        "narHash": "sha256-DPtNY9vX6qn8gmtTkVuA+w4gosIYVIISFGGnTay56YM=",
+        "ref": "refs/heads/main",
+        "rev": "d1fe57d9f34e63f95d1b1d406757469bb4f6541f",
+        "revCount": 34,
+        "type": "git",
+        "url": "ssh://git@github.com/darrenkuro/42admin"
+      },
+      "original": {
+        "type": "git",
+        "url": "ssh://git@github.com/darrenkuro/42admin"
+      }
+    },
     "claude-config": {
       "flake": false,
       "locked": {
@@ -122,6 +138,7 @@
     },
     "root": {
       "inputs": {
+        "admin42": "admin42",
         "claude-config": "claude-config",
         "claude-plugins-official": "claude-plugins-official",
         "home-manager": "home-manager",

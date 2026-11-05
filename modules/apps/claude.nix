@@ -10,6 +10,7 @@
     obsidian-skills,
     remotion-skills,
     claude-config,
+    admin42,
     ...
 }: let
     claudeConfigDir = ../../configs/claude;
@@ -112,10 +113,12 @@
     # Upstream skill sets are consumed as-is (flake inputs, bumped by `nix flake
     # update`); anything we'd customise is a separate skill in claude-config,
     # never a vendored fork. A same-named dir in claude-config still shadows.
+    # admin42 is the 42 team skill in its own (private, hand-over-able) repo.
     mergedSkills = pkgs.symlinkJoin {
         name = "claude-config-skills-merged";
         paths = [
             ( claude-config + "/skills" )
+            ( admin42 + "/skills" )
             officialSkills
             ( obsidian-skills + "/skills" )
             ( remotion-skills + "/skills" )

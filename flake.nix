@@ -23,6 +23,11 @@
       url = "git+ssh://git@github.com/darrenkuro/claude-config";
       flake = false;
     };
+    # The 42 pedagogical-team skill — its own repo so it can be handed over
+    admin42 = {
+      url = "git+ssh://git@github.com/darrenkuro/42admin";
+      flake = false;
+    };
   };
 
   outputs = {
@@ -33,11 +38,12 @@
     obsidian-skills,
     remotion-skills,
     claude-config,
+    admin42,
     ...
   }: let
     lib = nixpkgs.lib;
     hmExtraArgs = {
-      inherit claude-plugins-official obsidian-skills remotion-skills claude-config;
+      inherit claude-plugins-official obsidian-skills remotion-skills claude-config admin42;
     };
 
     # Machine identity — the single source of truth. Every target below and
