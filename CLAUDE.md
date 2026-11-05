@@ -109,6 +109,5 @@ any commit, list them to the user in one short line each with its removal condit
 whether it can go yet. Mark new ones `⚠ TEMPORARY (added <date>)` in the code and add a row here;
 when one is removed, delete its row. `rg '⚠ TEMPORARY'` finds the in-repo ones.
 
-| Item                                    | Where                                                                                        | Remove when                                                                             |
-| --------------------------------------- | -------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| cal.com notice agent (added 2026-11-02) | `modules/services/cal-notice/` + its `lib.optional selected.alwaysOn` import in `darwin.nix` | the cal.com station booking moves to one link per slot (or same-day booking is dropped) |
+| Item | Where | Remove when |
+| ---- | ----- | ----------- |

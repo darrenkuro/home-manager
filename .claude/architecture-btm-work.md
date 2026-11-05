@@ -29,8 +29,6 @@ works differently once it is on, so do it only when the risks below are handled.
      (then `CODESIGN_ID` must become per-machine, not a constant).
      Either way the personal Apple ID's signing key lives on a work machine — a policy call.
 4. `docs/manual-setup.md`: the cert row says `mac personal` only; update it.
-5. Optional: give the temporary `cal-notice` agent a stub `.app` so it gets a name too (only
-   if it is still around — it is meant to be deleted).
 
 ## Steps
 
