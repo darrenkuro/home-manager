@@ -60,10 +60,10 @@ vim.api.nvim_create_autocmd("BufWinEnter", {
 })
 
 -- transparent: leave Normal/gutter unset so Ghostty's background-opacity shows through;
--- highlights clears the floats/statusline too (onedark keeps those on bg1/bg2 by default)
+-- floats/cursorline are cleared too, while statusline/diagnostic bgs keep onedark's
+-- bg1/bg2 and are faded by Ghostty's background-opacity-cells instead
 require("onedark").setup({
     transparent = true,
-    diagnostics = { background = false }, -- no dark pill behind virtual text
     highlights = {
         NormalFloat = { bg = "none" },
         FloatBorder = { bg = "none" },
