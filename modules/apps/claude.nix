@@ -118,7 +118,7 @@
         name = "claude-config-skills-merged";
         paths = [
             ( claude-config + "/skills" )
-            ( admin42 + "/skills" )
+            ( admin42 + "/.claude/skills" )
             officialSkills
             ( obsidian-skills + "/skills" )
             ( remotion-skills + "/skills" )
