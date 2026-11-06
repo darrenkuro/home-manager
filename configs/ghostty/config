@@ -37,6 +37,8 @@ font-feature = -liga, -calt
 background-opacity = 0.84
 # frosted-glass behind the transparency
 background-blur = true
+# also fade cells that set their own bg (nvim statusline/pickers, tmux bars)
+background-opacity-cells = true
 # reclaim vertical space (keeps rounded corners)
 # macos-titlebar-style = hidden
 
