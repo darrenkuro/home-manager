@@ -3,11 +3,11 @@
     "bocal": {
       "flake": false,
       "locked": {
-        "lastModified": 1793954376,
-        "narHash": "sha256-yC7Cuu0IpTL1IPheH6mKmMU+CS8T9eblekK+BvsXVEc=",
+        "lastModified": 1793972277,
+        "narHash": "sha256-MX49xqoa8SnwILRr5aPl1CguqrRVKg0H8MvgBfVXHEs=",
         "ref": "refs/heads/main",
-        "rev": "1091b7e320afb0751ef2e9f52ab612baa389e8c6",
-        "revCount": 37,
+        "rev": "b3ff6821d7ae4dba33cd46104109c1d0b91e610e",
+        "revCount": 104,
         "type": "git",
         "url": "ssh://git@github.com/darrenkuro/42tirana-bocal"
       },
