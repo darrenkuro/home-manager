@@ -63,15 +63,11 @@ vim.api.nvim_create_autocmd("BufWinEnter", {
 -- highlights clears the floats/statusline too (onedark keeps those on bg1/bg2 by default)
 require("onedark").setup({
     transparent = true,
+    diagnostics = { background = false }, -- no dark pill behind virtual text
     highlights = {
         NormalFloat = { bg = "none" },
         FloatBorder = { bg = "none" },
         Pmenu = { bg = "none" },
-        StatusLine = { bg = "none" },
-        StatusLineNC = { bg = "none" },
-        MiniStatuslineFilename = { bg = "none" },
-        MiniStatuslineDevinfo = { bg = "none" },
-        MiniStatuslineFileinfo = { bg = "none" },
         CursorLine = { bg = "none", fmt = "underline" },
     },
 })
