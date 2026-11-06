@@ -23,9 +23,10 @@
       url = "git+ssh://git@github.com/darrenkuro/claude-config";
       flake = false;
     };
-    # The 42 pedagogical-team skill — its own repo so it can be handed over
-    admin42 = {
-      url = "git+ssh://git@github.com/darrenkuro/42admin";
+    # 42 Tirana staff toolkit (the 42admin skill lives in its .claude/skills) — its own
+    # repo so it can be handed over
+    bocal = {
+      url = "git+ssh://git@github.com/darrenkuro/42tirana-bocal";
       flake = false;
     };
   };
@@ -38,12 +39,12 @@
     obsidian-skills,
     remotion-skills,
     claude-config,
-    admin42,
+    bocal,
     ...
   }: let
     lib = nixpkgs.lib;
     hmExtraArgs = {
-      inherit claude-plugins-official obsidian-skills remotion-skills claude-config admin42;
+      inherit claude-plugins-official obsidian-skills remotion-skills claude-config bocal;
     };
 
     # Machine identity — the single source of truth. Every target below and

@@ -6,10 +6,10 @@
     # subshell's trap turns the signal into 130. A changed flake.lock is
     # committed on its own (pathspec), since flakes only see committed state.
     # Ends in `&& `: the rebuild appended after it runs only if this passed.
-    bumpOwn = "{ ( trap 'exit 130' INT; nix flake update claude-config admin42 --flake $HM )" +
+    bumpOwn = "{ ( trap 'exit 130' INT; nix flake update claude-config bocal --flake $HM )" +
     " || { [ $? -ne 130 ] && echo '⚠ own-input bump failed — building current lock'; }; } && " +
     "{ git -C $HM diff --quiet flake.lock" +
-    " || git -C $HM commit -q -m 'flake: bump claude-config, admin42' flake.lock; true; } && ";
+    " || git -C $HM commit -q -m 'flake: bump claude-config, bocal' flake.lock; true; } && ";
 in
 {
     programs.zsh.shellAliases = lib.mkMerge [

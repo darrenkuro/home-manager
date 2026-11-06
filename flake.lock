@@ -1,6 +1,6 @@
 {
   "nodes": {
-    "admin42": {
+    "bocal": {
       "flake": false,
       "locked": {
         "lastModified": 1793954376,
@@ -9,11 +9,11 @@
         "rev": "1091b7e320afb0751ef2e9f52ab612baa389e8c6",
         "revCount": 37,
         "type": "git",
-        "url": "ssh://git@github.com/darrenkuro/42admin"
+        "url": "ssh://git@github.com/darrenkuro/42tirana-bocal"
       },
       "original": {
         "type": "git",
-        "url": "ssh://git@github.com/darrenkuro/42admin"
+        "url": "ssh://git@github.com/darrenkuro/42tirana-bocal"
       }
     },
     "claude-config": {
@@ -138,7 +138,7 @@
     },
     "root": {
       "inputs": {
-        "admin42": "admin42",
+        "bocal": "bocal",
         "claude-config": "claude-config",
         "claude-plugins-official": "claude-plugins-official",
         "home-manager": "home-manager",
