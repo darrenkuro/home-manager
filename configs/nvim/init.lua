@@ -59,6 +59,8 @@ vim.api.nvim_create_autocmd("BufWinEnter", {
     end,
 })
 
+-- transparent: leave Normal/gutter unset so Ghostty's background-opacity shows through
+require("onedark").setup({ transparent = true })
 require("onedark").load()
 
 -- ── Tree-sitter (nvim-treesitter main branch: parsers are on the runtimepath,
