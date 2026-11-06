@@ -59,8 +59,22 @@ vim.api.nvim_create_autocmd("BufWinEnter", {
     end,
 })
 
--- transparent: leave Normal/gutter unset so Ghostty's background-opacity shows through
-require("onedark").setup({ transparent = true })
+-- transparent: leave Normal/gutter unset so Ghostty's background-opacity shows through;
+-- highlights clears the floats/statusline too (onedark keeps those on bg1/bg2 by default)
+require("onedark").setup({
+    transparent = true,
+    highlights = {
+        NormalFloat = { bg = "none" },
+        FloatBorder = { bg = "none" },
+        Pmenu = { bg = "none" },
+        StatusLine = { bg = "none" },
+        StatusLineNC = { bg = "none" },
+        MiniStatuslineFilename = { bg = "none" },
+        MiniStatuslineDevinfo = { bg = "none" },
+        MiniStatuslineFileinfo = { bg = "none" },
+        CursorLine = { bg = "none", fmt = "underline" },
+    },
+})
 require("onedark").load()
 
 -- ── Tree-sitter (nvim-treesitter main branch: parsers are on the runtimepath,
