@@ -3,11 +3,11 @@
     "admin42": {
       "flake": false,
       "locked": {
-        "lastModified": 1793902714,
-        "narHash": "sha256-DPtNY9vX6qn8gmtTkVuA+w4gosIYVIISFGGnTay56YM=",
+        "lastModified": 1793954376,
+        "narHash": "sha256-yC7Cuu0IpTL1IPheH6mKmMU+CS8T9eblekK+BvsXVEc=",
         "ref": "refs/heads/main",
-        "rev": "d1fe57d9f34e63f95d1b1d406757469bb4f6541f",
-        "revCount": 34,
+        "rev": "1091b7e320afb0751ef2e9f52ab612baa389e8c6",
+        "revCount": 37,
         "type": "git",
         "url": "ssh://git@github.com/darrenkuro/42admin"
       },
@@ -19,11 +19,11 @@
     "claude-config": {
       "flake": false,
       "locked": {
-        "lastModified": 1793902801,
-        "narHash": "sha256-cAANG9uR/BmglPSdrcHoHVSIAl1I5Dg1Ahj/0WZ95Ow=",
+        "lastModified": 1793954382,
+        "narHash": "sha256-imk1olYMw1qFJt6t7/Q8uG2O6TgmHBBCStPShn7/r7Y=",
         "ref": "refs/heads/main",
-        "rev": "d32d76b1183a0450266dfd780de6ed70e039f317",
-        "revCount": 139,
+        "rev": "bffe24fe440d56849663d203c55f32dc6c99311b",
+        "revCount": 140,
         "type": "git",
         "url": "ssh://git@github.com/darrenkuro/claude-config"
       },
