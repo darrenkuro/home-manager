@@ -46,7 +46,6 @@
             "/System/Applications/Calendar.app"
             "/System/Cryptexes/App/System/Applications/Safari.app"
             "/Applications/Brave Browser.app"
-            "/Applications/Claude.app"
             "/Applications/OmniFocus.app"
             "/Applications/Obsidian.app"
             "/Applications/Ghostty.app"
