@@ -64,6 +64,9 @@ in
                 # `mdserve` is installed as a real binary via modules/apps/mdserve.nix
                 # `netusage` is installed as a real binary via modules/apps/netusage.nix
                 nu = "netusage"; # short form
+                # Keep display + system awake (Amphetamine replacement); args append:
+                # `awake -t 3600`, `awake -w PID`, `awake <cmd>`. `s` is AC-only.
+                awake = "caffeinate -dims";
                 remoteon = "sudo systemsetup -setremotelogin on";
                 remoteoff = "sudo systemsetup -setremotelogin off";
                 ytd = "yt-dlp -t mp4 --cookies-from-browser brave";
