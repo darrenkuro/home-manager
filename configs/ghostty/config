@@ -37,8 +37,9 @@ font-feature = -liga, -calt
 background-opacity = 0.84
 # frosted-glass behind the transparency
 background-blur = true
-# also fade cells that set their own bg (nvim statusline/pickers, tmux bars)
-background-opacity-cells = true
+# keep cells that set their own bg solid (prompt segments, nvim statusline, tmux bars):
+# opacity never applies to glyphs, so with this on, powerline arrows outshine their blocks
+background-opacity-cells = false
 # reclaim vertical space (keeps rounded corners)
 # macos-titlebar-style = hidden
 
