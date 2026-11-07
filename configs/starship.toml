@@ -11,6 +11,7 @@ $directory\
 $git_branch\
 $git_status\
 $git_metrics\
+(\
 [](fg:bg3 bg:blue)\
 $git_state\
 $c\
@@ -18,11 +19,11 @@ $rust\
 $nodejs\
 $python\
 [](fg:blue bg:bg3)\
+)\
 $docker_context\
 $jobs\
-[](fg:bg3 bg:orange)\
 $cmd_duration\
-[](fg:orange bg:aqua)\
+[](fg:bg3 bg:aqua)\
 $time\
 [ ](fg:aqua)\
 $line_break\
@@ -171,8 +172,8 @@ format = '[[ $symbol ](fg:fg1 bg:bg3)]($style)'
 
 [cmd_duration]
 min_time = 500
-style = "bg:orange"
-format = '[[ 󰔟$duration ](fg:fg1 bg:orange)]($style)'
+style = "bg:bg3"
+format = '[[ 󰔟$duration ](fg:orange_b bg:bg3)]($style)'
 
 [time]
 disabled = false
