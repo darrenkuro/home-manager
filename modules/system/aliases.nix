@@ -61,6 +61,9 @@ in
                 rm = "echo \"☠️$YELLOW DANGEROUS CMD: using trash instread!$RESET\" && trash";
                 # Personal expense ledger: serve the dashboard live with in-browser editing
                 spending = "python3 $DEV/finance/serve.py";
+                # Campus Slack bot (42admin skill, from bocal): `slack lookup <login>`,
+                # `slack send --to <login> --text - < msg.txt [--dry-run]`
+                slack = "$HOME/.config/claude/skills/42admin/scripts/slack";
                 # `mdserve` is installed as a real binary via modules/apps/mdserve.nix
                 # `netusage` is installed as a real binary via modules/apps/netusage.nix
                 nu = "netusage"; # short form
