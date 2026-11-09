@@ -11,6 +11,12 @@
         DBOX = "$HOME/Dropbox";
         DEV = "$HOME/Documents/dev";
         HM = "$HOME/.config/home-manager";
+    } //
+    lib.optionalAttrs ( tag == "mac" ) {
+        # ── 42 Tirana ── the staff folder; bocal scripts and the deployed 42admin
+        # skill find the hub database under it (resources/data/42tirana.sqlite)
+        TIRANA_ROOT = "$HOME/Documents/42tirana";
+    } // {
 
         # ── Terminal Colors ──
         RED = "\\u001b[31m";

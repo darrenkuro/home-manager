@@ -62,6 +62,13 @@
                 ];
             }
             {
+                # Slack bot messages are sent by the user only — agents preview (--dry-run)
+                matcher = "Bash";
+                hooks = [
+                    { type = "command"; command = "~/.config/claude/hooks/block-slack-send.sh"; }
+                ];
+            }
+            {
                 matcher = "Skill";
                 hooks = [
                     {
