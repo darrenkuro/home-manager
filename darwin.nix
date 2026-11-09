@@ -89,12 +89,19 @@ in
 
     # ── Power — always-on profiles never sleep the system (display still sleeps
     # and locks). Each option runs `systemsetup` with its output discarded, so
-    # check `pmset -g` (sleep 0, womp 1, autorestart 1) after `sure` ──
+    # check `pmset -g` (sleep 0, disksleep 0, womp 1, autorestart 1) and
+    # `systemsetup -getrestartfreeze` after `sure` ──
     power = lib.mkIf selected.alwaysOn {
         sleep.computer = "never";
+        sleep.harddisk = "never";
+        sleep.allowSleepByPowerButton = false; # a stray press can't park it
         restartAfterPowerFailure = true;
+        restartAfterFreeze = true;
     };
     networking.wakeOnLan.enable = lib.mkIf selected.alwaysOn true;
+    # No unattended macOS-update reboots — they'd kill long-lived sessions
+    system.defaults.SoftwareUpdate.AutomaticallyInstallMacOSUpdates = lib.mkIf selected.alwaysOn
+    false;
 
     # macOS system defaults (declarative)
     system.defaults = {
