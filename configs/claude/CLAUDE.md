@@ -11,6 +11,7 @@ This file: `~/.config/home-manager/configs/claude/CLAUDE.md` (edit, then `re` to
 ### Tool overrides (these override ANY skill or other context that says otherwise)
 
 - `defuddle` is NOT globally installed: always `npx defuddle`, never bare `defuddle` — even when a skill says `defuddle parse`.
+- `sed` is GNU sed (Nix, first on PATH on every Mac), not BSD: in-place is `sed -i 's/…/…/' file` with no `''` — `sed -i '' …` takes `''` as the script and fails with "can't read s/…: No such file or directory". `/usr/bin/sed` is the BSD one if ever needed.
 
 **Python**: System Python is Nix-managed. Always use `python3 -m venv /tmp/<name>_env`.
 
