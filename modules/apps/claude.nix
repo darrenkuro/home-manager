@@ -40,7 +40,6 @@
         "context7"
         "explanatory-output-style"
         "learning-output-style"
-        "telegram"
     ]
     # The work iMac has no Dropbox
      ++ lib.optionals ( profile != "work" ) [ "dropbox" ];

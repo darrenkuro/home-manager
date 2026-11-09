@@ -71,9 +71,6 @@ in
                 remoteoff = "sudo systemsetup -setremotelogin off";
                 ytd = "yt-dlp -t mp4 --cookies-from-browser brave";
                 kotr = "nix-shell -p whisper-cpp --run 'whisper-stream -m $HOME/.local/share/whisper-cpp/ggml-large-v3-turbo.bin -l ko -tr'";
-                # cc telegram — phone→this Mac via Telegram channel.
-                # ⚠ --dangerously-skip-permissions: allowlisted texters run commands with NO prompts.
-                cct = "claude --channels plugin:telegram@claude-plugins-official --dangerously-skip-permissions";
             } )
 
         # ---- linux-only aliases (ft + hetzner)

@@ -17,7 +17,6 @@
     # ── XDG Overrides (keep $HOME clean) ──
     WAKATIME_HOME = "${home}/.local/state/wakatime";
     CLAUDE_CONFIG_DIR = "${home}/.config/claude";
-    TELEGRAM_STATE_DIR = "${home}/.config/claude/channels/telegram"; # channel plugin ignores CLAUDE_CONFIG_DIR — pin state here to keep it out of ~/.claude
     NPM_CONFIG_USERCONFIG = "${home}/.config/npm/npmrc";
     npm_config_cache = "${home}/.cache/npm"; # lowercase: npm reads npm_config_* case-insensitively, but prebuild-install (native-module binaries under pnpm) only checks this exact spelling
     CARGO_HOME = "${home}/.local/share/cargo";

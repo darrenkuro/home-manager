@@ -4,7 +4,6 @@
 - [ ] Suppress BTM "App Background Activity" notifications — `.mobileconfig` profile targeting `com.apple.btmnotificationagent` (only confirmed method; no `defaults write` exists)
 - [ ] Dedup stale entries in Notification Settings — surgical dedup of `com.apple.ncprefs.plist` by `bundle-id` (keeps per-app prefs; `killall cfprefsd` after)
 - [ ] Declare the remaining global keyboard shortcuts (see below)
-- [ ] Telegram channel config in `claude.nix` activation — create `~/.claude/channels/telegram/`, seed `access.json` (pairing mode) + placeholder `.env` for the bot token. Open: secret management (placeholder vs agenix/sops-nix)
 - [ ] Anki add-ons declaratively in hm + note-type CSS source of truth out of `german-anki` (see below)
 - [ ] `tidy`: optional recursive `.DS_Store` sweep — `find "$DEV" "$DBOX" -name .DS_Store -type f -delete` (plain `find` is fine on local dirs; only the CloudStorage walk hung)
 
