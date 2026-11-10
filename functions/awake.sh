@@ -2,7 +2,7 @@ INSTALL_TAG=(MAC)
 REQUIRED_TOOLS=(caffeinate)
 _check_preamble || return 0
 
-# awake [-t SECS | -w PID | <cmd> …]
+# awake [off | -t SECS | -w PID | <cmd> …]
 # Keep display + system awake (Amphetamine replacement). `s` is AC-only.
 # Bare `awake` toggles a detached caffeinate: run it again to let the Mac sleep.
 # `-t`/`-w` also detach (they end on their own); `awake <cmd>` stays in the
@@ -10,10 +10,18 @@ _check_preamble || return 0
 #
 # Examples:
 #   awake             # on until `awake` again
+#   awake off         # off (never turns it on, unlike the bare toggle)
 #   awake -t 3600     # one hour, in the background
 #   awake make re     # only while the build runs
 awake() {
     local PID_FILE="/tmp/awake.pid"
+
+    if [ "$1" = off ]; then
+        [ -f "$PID_FILE" ] && kill "$(cat "$PID_FILE")" 2> /dev/null
+        /bin/rm -f "$PID_FILE"
+        echo "😴 awake off"
+        return 0
+    fi
 
     if [ $# -gt 0 ] && [ "${1#-}" = "$1" ]; then
         caffeinate -dims "$@"
