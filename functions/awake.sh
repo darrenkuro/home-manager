@@ -4,45 +4,35 @@ _check_preamble || return 0
 
 # awake [off | -t SECS | -w PID | <cmd> …]
 # Keep display + system awake (Amphetamine replacement). `s` is AC-only.
-# Bare `awake` toggles a detached caffeinate: run it again to let the Mac sleep.
-# `-t`/`-w` also detach (they end on their own); `awake <cmd>` stays in the
+# Runs detached so the shell is free; `awake off` lets the Mac sleep again.
+# A new `awake`/`-t`/`-w` replaces the running one. `awake <cmd>` stays in the
 # foreground, since caffeinate lives exactly as long as the command.
 #
 # Examples:
-#   awake             # on until `awake` again
-#   awake off         # off (never turns it on, unlike the bare toggle)
+#   awake             # on until `awake off`
+#   awake off
 #   awake -t 3600     # one hour, in the background
 #   awake make re     # only while the build runs
 awake() {
     local PID_FILE="/tmp/awake.pid"
 
-    if [ "$1" = off ]; then
-        [ -f "$PID_FILE" ] && kill "$(cat "$PID_FILE")" 2> /dev/null
-        /bin/rm -f "$PID_FILE"
-        echo "😴 awake off"
-        return 0
-    fi
-
-    if [ $# -gt 0 ] && [ "${1#-}" = "$1" ]; then
+    if [ $# -gt 0 ] && [ "$1" != off ] && [ "${1#-}" = "$1" ]; then
         caffeinate -dims "$@"
         return
     fi
 
-    # Already on: toggle off
+    # Stop the running one: `off`, or about to be replaced
     if [ -f "$PID_FILE" ]; then
-        local PID
-        PID=$(cat "$PID_FILE")
+        kill "$(cat "$PID_FILE")" 2> /dev/null
         /bin/rm "$PID_FILE"
-        if kill -0 "$PID" 2> /dev/null && [ $# -eq 0 ]; then
-            kill "$PID"
-            echo "😴 awake off"
-            return 0
-        fi
-        kill "$PID" 2> /dev/null # replaced by a new -t/-w run
+    fi
+    if [ "$1" = off ]; then
+        echo "😴 awake off"
+        return 0
     fi
 
     caffeinate -dims "$@" &
     disown
     echo $! > "$PID_FILE"
-    echo "☕ awake on (pid $!) — \`awake\` again to stop"
+    echo "☕ awake on (pid $!) — \`awake off\` to stop"
 }
