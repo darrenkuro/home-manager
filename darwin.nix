@@ -113,6 +113,8 @@ in
             KeyRepeat = 2; # Default 6
             "com.apple.trackpad.scaling" = 3.0;
             NSAutomaticPeriodSubstitutionEnabled = false;
+            NSAutomaticQuoteSubstitutionEnabled = false; # Keep "" straight
+            NSAutomaticDashSubstitutionEnabled = false; # Keep -- as typed
         };
 
         # ── Dock ──
