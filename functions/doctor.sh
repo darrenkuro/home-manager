@@ -41,22 +41,22 @@ doctor() {
         _issues=$((_issues + 1))
     fi
 
-    # --- Alfred: prefs folder = the private alfred-workflows git repo
-    local _alfred_dir="$HOME/Documents/Alfred.alfredpreferences"
+    # --- Alfred: prefs folder = the private alfred-workflows git repo (modules/apps/alfred.nix)
+    local _alfred_dir="${XDG_CONFIG_HOME:-$HOME/.config}/alfred/Alfred.alfredpreferences"
     local _alfred_prefs
     _alfred_prefs=$(jq -r '.current // empty' "$HOME/Library/Application Support/Alfred/prefs.json" 2> /dev/null)
     if [ ! -d "$_alfred_dir/.git" ]; then
         _skip "Alfred prefs repo missing"
-        _item "run: git clone git@github.com:darrenkuro/alfred-workflows.git '$_alfred_dir'"
+        _item "run: re (activation clones it; quit Alfred first if it is running)"
         _issues=$((_issues + 1))
     elif [ "$_alfred_prefs" != "$_alfred_dir" ]; then
         _skip "Alfred prefs folder (${_alfred_prefs:-unset})"
-        _item "Alfred → Advanced → Syncing → Set preferences folder → ~/Documents/Alfred.alfredpreferences"
+        _item "quit Alfred, run: re (activation points prefs.json at ~/.config/alfred)"
         _issues=$((_issues + 1))
     elif [ -n "$(git -C "$_alfred_dir" status --porcelain 2> /dev/null | head -1)" ] ||
         [ -n "$(git -C "$_alfred_dir" log --oneline @{upstream}.. 2> /dev/null | head -1)" ]; then
         _skip "Alfred prefs repo has unsynced changes"
-        _item "commit/push in ~/Documents/Alfred.alfredpreferences (and pull on the other Mac)"
+        _item "commit/push in ~/.config/alfred/Alfred.alfredpreferences (\`upgrade\` pulls on the other Mac)"
         _issues=$((_issues + 1))
     else
         _done "Alfred prefs repo (git-synced, clean)"
