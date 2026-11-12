@@ -3,10 +3,11 @@ INSTALL_PROFILE=(PERSONAL)
 REQUIRED_TOOLS=(unison sqlite3 ssh)
 _check_preamble || return 0
 
-# tsync [unison options…]
-# Two-way sync with the work iMac: ~/Documents/42tirana and the Claude session
-# state (profiles 42tirana + claude in ~/.config/unison, modules/apps/unison.nix),
-# plus the Alfred prefs bundle, which is a git repo (modules/apps/alfred.nix)
+# tsync [-claude] [unison options…]
+# Two-way sync with the work iMac: ~/Documents/42tirana (Unison profile
+# 42tirana in ~/.config/unison, modules/apps/unison.nix), plus, with -claude,
+# the Claude session state (profile claude: projects/ incl. memory, plans,
+# todos), plus the Alfred prefs bundle, which is a git repo (modules/apps/alfred.nix)
 # and goes by git, not Unison: each side commits what Alfred wrote, pulls with
 # rebase and pushes — iMac first over ssh, then here, then the iMac catches up.
 # Each Mac only rewrites its own preferences/local/<hash>/, so that never
@@ -24,6 +25,7 @@ _check_preamble || return 0
 #
 # Examples:
 #   tsync             # review and confirm
+#   tsync -claude     # also the Claude session state
 #   tsync -batch      # unattended, conflicts skipped
 #   tsync -batch -silent
 # _tsync_alfred [host] — commit, pull --rebase, push the Alfred bundle on this
@@ -82,12 +84,18 @@ tsync() {
         return 3
     fi
 
+    local claude=0 arg
+    local -a opts=()
+    for arg in "$@"; do
+        if [ "$arg" = -claude ]; then claude=1; else opts+=("$arg"); fi
+    done
+
     # -auto: one-sided changes (new, edited, deleted) go without a per-item
     # prompt; only conflicts are asked, then one "Proceed?" for the lot.
     # unison exit codes: 0 all done, 1 some items skipped, 2 non-fatal errors, 3 fatal
     local rc1=0 rc2=0
-    unison 42tirana -auto "$@" || rc1=$?
-    unison claude -auto "$@" || rc2=$?
+    unison 42tirana -auto "${opts[@]}" || rc1=$?
+    [ "$claude" -eq 1 ] && { unison claude -auto "${opts[@]}" || rc2=$?; }
     [ "$rc1" -gt "$rc" ] && rc=$rc1
     [ "$rc2" -gt "$rc" ] && rc=$rc2
     return "$rc"
