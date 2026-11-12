@@ -28,6 +28,9 @@ in
         UNISONBACKUPDIR = "$HOME/.local/state/unison/backup";
     };
 
+    # Unison refuses to run when the backup dir (or its parent) is missing
+    home.file.".local/state/unison/backup/.keep".text = "";
+
     xdg.configFile = lib.mkIf ( profile == "personal" ) {
         # The staff folder. Build output, venvs and scratch stay local; the SQLite
         # side files are excluded because tsync checkpoints the WAL first. Backups
