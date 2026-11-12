@@ -28,6 +28,14 @@ _check_preamble || return 0
 #   tsync -claude     # also the Claude session state
 #   tsync -batch      # unattended, conflicts skipped
 #   tsync -batch -silent
+#
+# Output: Unison runs -terse, its change list and prompts reach the terminal
+# untouched (stdout); its stderr (one [BGN]/[END]/Shortcut line per file, the
+# summary) goes through _tsync_summary, which keeps one line per profile plus
+# the skipped/failed items. The full detail stays in the log.
+
+_tsync_warn() { printf '  %b▲%b %s\n' "$_C_YELLOW" "$_C_RESET" "$1"; }
+
 # _tsync_alfred [host] — commit, pull --rebase, push the Alfred bundle on this
 # Mac, or on <host> over ssh. Prints one line; returns 1 on a conflict or a
 # failed push (the caller carries on with Unison).
@@ -51,8 +59,63 @@ _tsync_alfred() {
     else
         out=$(sh -c "$round" 2>&1) || rc=1
     fi
-    printf 'tsync: alfred (%s): %s\n' "$label" "$out"
+    if [ "$rc" -ne 0 ]; then
+        _tsync_warn "alfred ($label): $out"
+    elif [ "$out" = "committed 0, pulled 0, pushed 0" ]; then
+        _done "alfred ($label): in sync"
+    else
+        _done "alfred ($label): $out"
+    fi
     return "$rc"
+}
+
+# Unison's stderr → one summary line, the skipped/failed items, and any error
+# text; the per-file [BGN]/[END]/Shortcut lines, the conflict notes (repeated in
+# the skipped list) and, with -batch, a second copy of the change list (9-char
+# status column, 5-char arrow) are dropped. Nothing at all means nothing changed.
+# $1 = 1 when Unison asks "Proceed?": the answer leaves no newline, so the
+# first line printed starts with one.
+_tsync_summary() {
+    awk -v nl="${1:-0}" -v g="$_C_GREEN" -v y="$_C_YELLOW" -v d="$_C_DIM" -v r="$_C_RESET" '
+        function out(s) { if (nl) { printf "\n"; nl = 0 } print s }
+        /^\[(BGN|END)\] |^Shortcut: |^No updates to propagate/ { next }
+        /^.........[<>=?M-][<>=?M-][<>=?M-][<>=?M-][<>=?M-] / { next }
+        /^\[CONFLICT\] / { conflict = 1; next }
+        conflict && /^  / { next }
+        { conflict = 0 }
+        /^Synchronization (complete|incomplete) / {
+            seen = 1
+            n = $0; sub(/.*\(/, "", n); sub(/\).*/, "", n)    # "7 items transferred, 0 skipped, 0 failed"
+            split(n, f, ", "); t = f[1] + 0; s = f[2] + 0; x = f[3] + 0
+            line = t " synced"
+            if (s) line = line ", " s " skipped"
+            if (x) line = line ", " x " failed"
+            out(sprintf("  %s%s %s", ((s || x) ? y "▲" : g "●"), r, line))
+            next
+        }
+        /^  (skipped|failed): / { sub(/^  /, ""); out(sprintf("    %s→%s %s", d, r, $0)); next }
+        NF { seen = 1; out($0) }
+        END { if (!seen) out(sprintf("  %s●%s up to date", g, r)) }
+    '
+}
+
+# _tsync_run <profile> [unison options…] — one Unison profile, -auto -terse,
+# stderr through _tsync_summary; returns Unison's exit code.
+_tsync_run() {
+    local name="$1" urc ask=0
+    shift
+    [ -t 0 ] && case " $* " in *" -batch "* | *" -silent "*) ;; *) ask=1 ;; esac
+    _header "$name"
+    printf '  %bscanning both Macs…%b\n' "$_C_DIM" "$_C_RESET"
+    # fd 3 keeps stdout on the terminal while stderr alone goes down the pipe.
+    # The ( ) matters in zsh: with MULTIOS, `cmd 1>&3 | …` would tee stdout
+    # into the pipe as well.
+    # shellcheck disable=SC2154  # pipestatus is zsh's PIPESTATUS (1-based)
+    {
+        (unison "$name" -auto -terse "$@" 2>&1 1>&3 3>&-) | _tsync_summary "$ask"
+        urc=${pipestatus[1]:-${PIPESTATUS[0]}}
+    } 3>&1
+    return "$urc"
 }
 
 tsync() {
@@ -62,9 +125,12 @@ tsync() {
     local rc=0
 
     if ! ssh -o BatchMode=yes -o ConnectTimeout=10 "$peer" true 2> /dev/null; then
-        printf '%s tsync: %s unreachable, skipped\n' "$(date '+%F %T')" "$peer" | tee -a "$log" >&2
+        printf '%s tsync: %s unreachable, skipped\n' "$(date '+%F %T')" "$peer" >> "$log"
+        _tsync_warn "$peer unreachable, nothing synced"
         return 1
     fi
+
+    _header "tsync ⇄ $peer"
 
     # Alfred bundle by git: iMac → here → iMac, so both end on the same commit.
     _tsync_alfred "$peer" || rc=2
@@ -75,14 +141,15 @@ tsync() {
     # propagate a corrupt file like any other change.
     local check="[ ! -f '$db' ] || { sqlite3 '$db' 'PRAGMA wal_checkpoint(TRUNCATE);' > /dev/null && [ \"\$(sqlite3 -readonly '$db' 'PRAGMA quick_check;')\" = ok ]; }"
     if ! sh -c "$check" 2> /dev/null; then
-        printf 'tsync: hub DB fails quick_check here (laptop), nothing synced\n' >&2
+        _tsync_warn "hub DB fails quick_check here (laptop), nothing synced"
         return 3
     fi
     # shellcheck disable=SC2029  # $check expands here on purpose: same path on both Macs
     if ! ssh "$peer" "$check" 2> /dev/null; then
-        printf 'tsync: hub DB fails quick_check on %s, nothing synced\n' "$peer" >&2
+        _tsync_warn "hub DB fails quick_check on $peer, nothing synced"
         return 3
     fi
+    _done "hub DB checked on both Macs"
 
     local claude=0 arg
     local -a opts=()
@@ -94,8 +161,8 @@ tsync() {
     # prompt; only conflicts are asked, then one "Proceed?" for the lot.
     # unison exit codes: 0 all done, 1 some items skipped, 2 non-fatal errors, 3 fatal
     local rc1=0 rc2=0
-    unison 42tirana -auto "${opts[@]}" || rc1=$?
-    [ "$claude" -eq 1 ] && { unison claude -auto "${opts[@]}" || rc2=$?; }
+    _tsync_run 42tirana "${opts[@]}" || rc1=$?
+    [ "$claude" -eq 1 ] && { _tsync_run claude "${opts[@]}" || rc2=$?; }
     [ "$rc1" -gt "$rc" ] && rc=$rc1
     [ "$rc2" -gt "$rc" ] && rc=$rc2
     return "$rc"
