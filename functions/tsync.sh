@@ -12,13 +12,15 @@ _check_preamble || return 0
 # Each Mac only rewrites its own preferences/local/<hash>/, so that never
 # conflicts; a conflict on a shared file (a workflow edited on both) is left
 # for you with a warning and the Unison part still runs.
-# Interactive by default: non-conflicting changes are listed and go through on
-# confirmation, conflicts (changed on both sides) are asked one by one.
+# Interactive by default (-auto): non-conflicting changes are listed and go
+# through on one confirmation, conflicts (changed on both sides) are asked one
+# by one — left column is this Mac, right the iMac; `?` lists the keys.
 # `tsync -batch` propagates the non-conflicting changes unattended and leaves the
 # conflicts for the next plain run. Run it before switching Macs and after a long
 # session; keep one writer between syncs for the hub DB and bocal/.git.
 # Checkpoints the hub DB's WAL on both sides first so the .sqlite file alone is
-# complete. Skips with a log line when the iMac is not reachable.
+# complete, and stops if either copy fails quick_check. Skips with a log line
+# when the iMac is not reachable.
 #
 # Examples:
 #   tsync             # review and confirm
@@ -67,14 +69,25 @@ tsync() {
     _tsync_alfred || rc=2
     [ "$rc" -eq 0 ] && _tsync_alfred "$peer" > /dev/null
 
-    [ -f "$db" ] && sqlite3 "$db" 'PRAGMA wal_checkpoint(TRUNCATE);' > /dev/null
-    # shellcheck disable=SC2029  # $db expands here on purpose: same path on both Macs
-    ssh "$peer" "[ -f '$db' ] && sqlite3 '$db' 'PRAGMA wal_checkpoint(TRUNCATE);'" > /dev/null
+    # Checkpoint, then refuse to sync a DB that fails quick_check: Unison would
+    # propagate a corrupt file like any other change.
+    local check="[ ! -f '$db' ] || { sqlite3 '$db' 'PRAGMA wal_checkpoint(TRUNCATE);' > /dev/null && [ \"\$(sqlite3 -readonly '$db' 'PRAGMA quick_check;')\" = ok ]; }"
+    if ! sh -c "$check" 2> /dev/null; then
+        printf 'tsync: hub DB fails quick_check here (laptop), nothing synced\n' >&2
+        return 3
+    fi
+    # shellcheck disable=SC2029  # $check expands here on purpose: same path on both Macs
+    if ! ssh "$peer" "$check" 2> /dev/null; then
+        printf 'tsync: hub DB fails quick_check on %s, nothing synced\n' "$peer" >&2
+        return 3
+    fi
 
+    # -auto: one-sided changes (new, edited, deleted) go without a per-item
+    # prompt; only conflicts are asked, then one "Proceed?" for the lot.
     # unison exit codes: 0 all done, 1 some items skipped, 2 non-fatal errors, 3 fatal
     local rc1=0 rc2=0
-    unison 42tirana "$@" || rc1=$?
-    unison claude "$@" || rc2=$?
+    unison 42tirana -auto "$@" || rc1=$?
+    unison claude -auto "$@" || rc2=$?
     [ "$rc1" -gt "$rc" ] && rc=$rc1
     [ "$rc2" -gt "$rc" ] && rc=$rc2
     return "$rc"
