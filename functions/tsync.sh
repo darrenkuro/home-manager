@@ -19,9 +19,10 @@ _check_preamble || return 0
 # `tsync -batch` propagates the non-conflicting changes unattended and leaves the
 # conflicts for the next plain run. Run it before switching Macs and after a long
 # session; keep one writer between syncs for the hub DB and bocal/.git.
-# Checkpoints the hub DB's WAL on both sides first so the .sqlite file alone is
-# complete, and stops if either copy fails quick_check. Skips with a log line
-# when the iMac is not reachable.
+# Before Unison, on both Macs, it stops (nothing synced) if anything holds a
+# file Unison could replace (_tsync_busy_script) or if the hub DB fails
+# quick_check; it checks the DB again afterwards. Skips with a log line when
+# the iMac is not reachable.
 #
 # Examples:
 #   tsync             # review and confirm
@@ -118,11 +119,53 @@ _tsync_run() {
     return "$urc"
 }
 
+# _tsync_busy_script — a sh script (arg: 1 with -claude) that prints one line
+# per process that could be writing into what Unison is about to replace, on
+# the Mac it runs on; nothing means safe. Unison renames a new file over the
+# old one, so a process holding the old one keeps writing to a ghost, and an
+# SQLite connection keeps a -shm index that no longer matches the file (how
+# the hub DB got corrupted on 2026-11-12). Flags any SQLite file open in any
+# mode, and any file open for writing, under ~/Documents/42tirana (minus what
+# the profile ignores); with -claude, any running Claude Code, since it
+# appends to its transcripts without holding them open.
+_tsync_busy_script() {
+    cat << 'EOF'
+root="$HOME/Documents/42tirana/"
+lsof -nP -w -F pcan 2> /dev/null | awk -v root="$root" -v home="$HOME/" '
+    /^p/ { pid = substr($0, 2) }
+    /^c/ { cmd = substr($0, 2) }
+    /^f/ { mode = "" }
+    /^a/ { mode = substr($0, 2) }
+    /^n/ {
+        p = substr($0, 2)
+        if (index(p, root) != 1 || index(p, root "tmp/") == 1 || p ~ /\/(node_modules|\.next|\.venv)\//) next
+        if (mode !~ /[wu]/ && p !~ /\.(sqlite|db)(-wal|-shm|-journal)?$/) next
+        if (pid in seen) next
+        seen[pid] = 1
+        print cmd " (pid " pid ") has ~/" substr(p, length(home) + 1) " open"
+    }'
+[ "$1" = 1 ] && ps -axo pid=,comm= | awk '{ n = $2; sub(/.*\//, "", n) } n == "claude" { print "Claude Code (pid " $1 ") is running" }'
+exit 0
+EOF
+}
+
+# _tsync_db_ok [host] — checkpoint the hub DB's WAL (so the .sqlite file alone
+# is complete) and quick_check it, here or on <host>. True when fine or absent.
+_tsync_db_ok() {
+    local db="${TIRANA_ROOT:-$HOME/Documents/42tirana}/resources/data/42tirana.sqlite"
+    local check="[ ! -f '$db' ] || { sqlite3 '$db' 'PRAGMA wal_checkpoint(TRUNCATE);' > /dev/null && [ \"\$(sqlite3 -readonly '$db' 'PRAGMA quick_check;')\" = ok ]; }"
+    # shellcheck disable=SC2029  # $check expands here on purpose: same path on both Macs
+    if [ -n "${1:-}" ]; then ssh "$1" "$check"; else sh -c "$check"; fi 2> /dev/null
+}
+
 tsync() {
     local peer=work
-    local db="${TIRANA_ROOT:-$HOME/Documents/42tirana}/resources/data/42tirana.sqlite"
     local log="$HOME/Library/Logs/unison.log"
-    local rc=0
+    local rc=0 claude=0 arg
+    local -a opts=()
+    for arg in "$@"; do
+        if [ "$arg" = -claude ]; then claude=1; else opts+=("$arg"); fi
+    done
 
     if ! ssh -o BatchMode=yes -o ConnectTimeout=10 "$peer" true 2> /dev/null; then
         printf '%s tsync: %s unreachable, skipped\n' "$(date '+%F %T')" "$peer" >> "$log"
@@ -137,31 +180,40 @@ tsync() {
     _tsync_alfred || rc=2
     [ "$rc" -eq 0 ] && _tsync_alfred "$peer" > /dev/null
 
-    # Checkpoint, then refuse to sync a DB that fails quick_check: Unison would
-    # propagate a corrupt file like any other change.
-    local check="[ ! -f '$db' ] || { sqlite3 '$db' 'PRAGMA wal_checkpoint(TRUNCATE);' > /dev/null && [ \"\$(sqlite3 -readonly '$db' 'PRAGMA quick_check;')\" = ok ]; }"
-    if ! sh -c "$check" 2> /dev/null; then
+    # Nothing may hold what Unison replaces, on either Mac.
+    local busy line
+    busy=$(
+        _tsync_busy_script | sh -s -- "$claude" | sed 's/^/laptop: /'
+        _tsync_busy_script | ssh -o BatchMode=yes "$peer" sh -s -- "$claude" | sed "s/^/$peer: /"
+    )
+    if [ -n "$busy" ]; then
+        _tsync_warn "in use, nothing synced — close these, then rerun:"
+        while IFS= read -r line; do _item "$line"; done <<< "$busy"
+        return 3
+    fi
+    _done "nothing open in the synced folders"
+
+    # A corrupt DB would be propagated like any other change.
+    if ! _tsync_db_ok; then
         _tsync_warn "hub DB fails quick_check here (laptop), nothing synced"
         return 3
     fi
-    # shellcheck disable=SC2029  # $check expands here on purpose: same path on both Macs
-    if ! ssh "$peer" "$check" 2> /dev/null; then
+    if ! _tsync_db_ok "$peer"; then
         _tsync_warn "hub DB fails quick_check on $peer, nothing synced"
         return 3
     fi
     _done "hub DB checked on both Macs"
-
-    local claude=0 arg
-    local -a opts=()
-    for arg in "$@"; do
-        if [ "$arg" = -claude ]; then claude=1; else opts+=("$arg"); fi
-    done
 
     # -auto: one-sided changes (new, edited, deleted) go without a per-item
     # prompt; only conflicts are asked, then one "Proceed?" for the lot.
     # unison exit codes: 0 all done, 1 some items skipped, 2 non-fatal errors, 3 fatal
     local rc1=0 rc2=0
     _tsync_run 42tirana "${opts[@]}" || rc1=$?
+    # Should never fire after the checks above; the replaced copy is in the backup.
+    if ! _tsync_db_ok || ! _tsync_db_ok "$peer"; then
+        _tsync_warn "hub DB fails quick_check after the sync — the previous copy is in ~/.local/state/unison/backup"
+        rc1=3
+    fi
     [ "$claude" -eq 1 ] && { _tsync_run claude "${opts[@]}" || rc2=$?; }
     [ "$rc1" -gt "$rc" ] && rc=$rc1
     [ "$rc2" -gt "$rc" ] && rc=$rc2
