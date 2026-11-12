@@ -33,8 +33,12 @@ in
             lib.mkIf ( tag == "mac" ) {
                 p = "hx $HM/darwin.nix";
                 hm = "code $HM";
+                # The trailing exec drops __HM_SESS_VARS_SOURCED: hm-session-vars.sh
+                # is sourced once per process tree, so a plain `exec zsh` would keep
+                # the old environment and new home.sessionVariables only show up in
+                # a fresh terminal window.
                 re = "ssh-add --apple-load-keychain -q 2>/dev/null; " + bumpOwn +
-                "nix run home-manager -- switch --flake $HM#${machine} && exec zsh"; # HM only (no brew, system.defaults, launchd)
+                "nix run home-manager -- switch --flake $HM#${machine} && exec env -u __HM_SESS_VARS_SOURCED zsh"; # HM only (no brew, system.defaults, launchd)
                 # full system rebuild; the BTM patch step is personal-only (the
                 # work profile runs stock nix-darwin daemons, no stubs to patch).
                 # Root borrows the user's ssh agent (SSH_AUTH_SOCK) so it can
@@ -46,7 +50,8 @@ in
                 sure = "ssh-add --apple-load-keychain -q 2>/dev/null; " + bumpOwn +
                 "sudo env SSH_AUTH_SOCK=\"$SSH_AUTH_SOCK\" darwin-rebuild switch --flake $HM#${machine}" +
                 lib.optionalString ( profile == "personal" )
-                " && sudo $HM/scripts/btm-patch-nix.sh" + " && exec zsh";
+                " && sudo $HM/scripts/btm-patch-nix.sh" +
+                " && exec env -u __HM_SESS_VARS_SOURCED zsh";
 
                 dbox = "cd $DBOX";
                 hide = "chflags hidden";
@@ -71,7 +76,7 @@ in
         # ---- linux-only aliases (ft + hetzner)
         (
             lib.mkIf ( tag == "linux" ) {
-                re = "home-manager switch --flake $HM#${machine} && exec zsh";
+                re = "home-manager switch --flake $HM#${machine} && exec env -u __HM_SESS_VARS_SOURCED zsh";
             } )
 
         # ---- ft-only quirks (42 school box)
