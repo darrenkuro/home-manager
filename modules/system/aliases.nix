@@ -1,15 +1,9 @@
 { tag, profile, machine, lib, ... }: let
-    # Bump my own flake inputs to their latest pushed commit before a rebuild
-    # (upstream inputs stay manual `nix flake update`). Non-fatal: offline or
-    # no ssh key → warn and build the current lock. Ctrl-C aborts the whole
-    # chain: nix exits 1 on SIGINT (indistinguishable from offline), so the
-    # subshell's trap turns the signal into 130. A changed flake.lock is
-    # committed on its own (pathspec), since flakes only see committed state.
-    # Ends in `&& `: the rebuild appended after it runs only if this passed.
-    bumpOwn = "{ ( trap 'exit 130' INT; nix flake update claude-config bocal --flake $HM )" +
-    " || { [ $? -ne 130 ] && echo '⚠ own-input bump failed — building current lock'; }; } && " +
-    "{ git -C $HM diff --quiet flake.lock" +
-    " || git -C $HM commit -q -m 'flake: bump claude-config, bocal' flake.lock; true; } && ";
+    # Before a rebuild: pull --rebase, bump my own flake inputs (claude-config,
+    # bocal) to their pushed HEAD, commit flake.lock, push — scripts/bump-own.sh.
+    # Keeps the two Macs' lock commits in one line instead of racing. Fail-soft
+    # except Ctrl-C (130). Ends in `&& `: the rebuild runs only if this passed.
+    bumpOwn = "$HM/scripts/bump-own.sh && ";
 in
 {
     programs.zsh.shellAliases = lib.mkMerge [

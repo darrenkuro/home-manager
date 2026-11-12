@@ -18,7 +18,7 @@ Machine identity (system, tag, profile, user — homeDir derived) lives in the `
 ```bash
 re      # mac: home-manager only (no sudo, brew, system.defaults, launchd); linux: home-manager switch
 sure    # mac: full darwin-rebuild (sudo) + btm-patch-nix.sh (personal only)
-# Both first bump claude-config to its pushed HEAD and commit flake.lock (`bumpOwn`, modules/system/aliases.nix)
+# Both first run scripts/bump-own.sh: pull --rebase, bump claude-config + bocal, commit flake.lock, push (`bumpOwn`, modules/system/aliases.nix)
 
 # First-time install (mac; use #mac-work on the work iMac):
 sudo -v && sudo nix --extra-experimental-features "nix-command flakes" run nix-darwin -- switch --flake ~/.config/home-manager#mac && sudo ~/.config/home-manager/scripts/btm-patch-nix.sh && exec zsh
