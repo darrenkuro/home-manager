@@ -186,5 +186,7 @@ in
         ./modules/apps/mdserve.nix
         ./modules/apps/ghostty.nix
         ./modules/apps/app-icons.nix
-    ] ++ lib.optionals ( machine == "ft" ) [ ./modules/system/linux-ft.nix ];
+    ] ++
+    lib.optionals isMac [ ./modules/apps/unison.nix ] ++
+    lib.optionals ( machine == "ft" ) [ ./modules/system/linux-ft.nix ];
 }
