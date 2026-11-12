@@ -6,7 +6,8 @@
 # `current` key of ~/Library/Application Support/Alfred/prefs.json, the only
 # pointer Alfred has. Both steps are skipped with a warning while Alfred is
 # running, because Alfred holds the folder open and rewrites prefs.json itself.
-# Between Macs the bundle syncs by git: `upgrade` pulls, `doctor` warns on drift.
+# Between Macs the bundle syncs by git inside `tsync` (functions/tsync.sh):
+# commit, pull --rebase, push on both Macs. `doctor` warns on drift.
 { config, lib, pkgs, homeDir, ... }: let
     alfredDir = "${config.xdg.configHome}/alfred/Alfred.alfredpreferences";
     oldDir = "${homeDir}/Documents/Alfred.alfredpreferences";

@@ -1,12 +1,12 @@
 INSTALL_TAG=(MAC)
-REQUIRED_TOOLS=(brew git)
+REQUIRED_TOOLS=(brew)
 _check_preamble || return 0
 
 # ─────────────────────────────────────────────────────────────────────────────
-# upgrade — the network half split out of `tidy`: brew update + upgrade, a
-# fast-forward pull of the Alfred prefs repo, plus a report-only Nix inputs
-# reminder. Never mutates the hm repo (nix flake update changes flake.lock,
-# which needs a commit — that stays manual).
+# upgrade — the network half split out of `tidy`: brew update + upgrade, plus
+# a report-only Nix inputs reminder. Never mutates the hm repo (nix flake
+# update changes flake.lock, which needs a commit — that stays manual). The
+# Alfred prefs repo is synced by `tsync`, not here.
 #
 #   upgrade            update + upgrade everything
 #   upgrade --dry-run  (or -n) show what would be upgraded, change nothing
@@ -50,41 +50,7 @@ upgrade() {
     fi
 
     # ─────────────────────────────────────────────────────────────────────────
-    # 2. Alfred prefs repo — the other Mac's commits (modules/apps/alfred.nix).
-    #    Fast-forward only; a dirty tree is left alone (doctor nags about it).
-    # ─────────────────────────────────────────────────────────────────────────
-    _header "Alfred prefs repo"
-
-    local alfred_dir="${XDG_CONFIG_HOME:-$HOME/.config}/alfred/Alfred.alfredpreferences"
-    if [[ ! -d "$alfred_dir/.git" ]]; then
-        _skip "Alfred prefs repo not cloned (run: re)"
-    elif [[ -n "$(git -C "$alfred_dir" status --porcelain 2> /dev/null)" ]]; then
-        _skip "Alfred prefs repo is dirty — commit first, then pull"
-        git -C "$alfred_dir" status --short | while read -r line; do _item "$line"; done
-    else
-        _task "Fetching..."
-        if ! git -C "$alfred_dir" fetch --quiet 2> /dev/null; then
-            _skip "Alfred prefs fetch failed (offline?)"
-        else
-            local behind ahead
-            behind=$(git -C "$alfred_dir" rev-list --count 'HEAD..@{upstream}' 2> /dev/null || echo 0)
-            ahead=$(git -C "$alfred_dir" rev-list --count '@{upstream}..HEAD' 2> /dev/null || echo 0)
-            if [[ "$behind" == 0 ]]; then
-                _skip "Alfred prefs up to date"
-            elif $dry_run; then
-                _done "Alfred prefs: $behind commit(s) to pull"
-                _item "would run: git pull --ff-only"
-            elif git -C "$alfred_dir" pull --ff-only --quiet 2> /dev/null; then
-                _done "Alfred prefs: pulled $behind commit(s)"
-            else
-                _skip "Alfred prefs: not fast-forwardable — rebase by hand"
-            fi
-            [[ "$ahead" != 0 ]] && _item "$ahead local commit(s) not pushed"
-        fi
-    fi
-
-    # ─────────────────────────────────────────────────────────────────────────
-    # 3. Nix inputs — report-only. `nix flake update` rewrites flake.lock in
+    # 2. Nix inputs — report-only. `nix flake update` rewrites flake.lock in
     #    the hm repo and needs a commit before `re`, so it stays a manual step;
     #    this just surfaces how stale the inputs are.
     # ─────────────────────────────────────────────────────────────────────────

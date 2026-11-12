@@ -56,7 +56,7 @@ doctor() {
     elif [ -n "$(git -C "$_alfred_dir" status --porcelain 2> /dev/null | head -1)" ] ||
         [ -n "$(git -C "$_alfred_dir" log --oneline @{upstream}.. 2> /dev/null | head -1)" ]; then
         _skip "Alfred prefs repo has unsynced changes"
-        _item "commit/push in ~/.config/alfred/Alfred.alfredpreferences (\`upgrade\` pulls on the other Mac)"
+        _item "run: tsync (commits, pulls and pushes it on both Macs)"
         _issues=$((_issues + 1))
     else
         _done "Alfred prefs repo (git-synced, clean)"
