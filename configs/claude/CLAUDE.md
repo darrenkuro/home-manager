@@ -55,6 +55,12 @@ Use global `~/.config/claude/` only when not in a project context.
 - **No laziness**: Find root causes, no temporary fixes
 - **Research before guessing**: Verify uncertain claims online
 
+### Spelling (everything)
+
+- **US English spelling, always**: docs, Google Docs, sheets, reports, commit messages, code comments, chat
+  ("analyze", "organization", "program", "behavior", "among"; never "analyse", "programme", "amongst").
+  When editing someone else's text, convert any UK spellings you touch.
+
 ### Formatting (all projects)
 
 - While editing, match the file's existing style exactly
