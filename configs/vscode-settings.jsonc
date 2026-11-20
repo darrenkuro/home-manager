@@ -2,6 +2,7 @@
     "workbench.colorTheme": "GitHub Dark",
     "terminal.integrated.minimumContrastRatio": 1, // So terminal stick to original colors
     "workbench.iconTheme": "material-icon-theme",
+    "chat.disableAIFeatures": true, // built-in Copilot (chat + inline completions); on by GitHub sign-in otherwise
     //
     "editor.fontFamily": "Hack Nerd Font Mono, monospace",
     "editor.fontSize": 14,
