@@ -19,6 +19,7 @@
             "ghostty"
             "nordvpn"
             "notion"
+            "obs"
             "obsidian"
             "sf-symbols"
             "slack"
