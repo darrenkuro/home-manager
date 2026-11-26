@@ -79,7 +79,7 @@ The darwin-store daemon (`modules/services/nix-daemon/spec.nix`) looks up the Ni
 Owned by `modules/apps/claude.nix`:
 
 - `CLAUDE.md` — symlinked from `configs/claude/`
-- `skills/`, `hooks/` — merged from flake inputs (`claude-config`, `claude-plugins-official`, `obsidian-skills`) via `symlinkJoin`
+- `skills/`, `hooks/` — merged from flake inputs (`claude-config`, `bocal` (42admin), `claude-plugins-official`, `obsidian-skills`, `remotion-skills`) via `symlinkJoin`
 - `settings.json` — Claude-owned (writable); activation `jq`-merges hm's `hooks`, `env.DISABLE_AUTOUPDATER` (binary only — `env.FORCE_AUTOUPDATE_PLUGINS` keeps plugins updating), `cleanupPeriodDays`, auto-installs required plugins and warns about plugin drift
 
 ### Key Environment Variables (`modules/system/env.nix`)

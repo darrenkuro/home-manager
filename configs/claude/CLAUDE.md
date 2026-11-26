@@ -46,7 +46,9 @@ Keep plans, tasks, lessons **local to the project** in `.claude/`:
 - `.claude/architecture-*.md` — plans
 - `.claude/settings.local.json` — local settings (if needed)
 
-Plans from plan mode go here too — never write plans to `~/.config/claude/plans/`.
+Plan mode writes to `~/.config/claude/plans/`, which is disposable: a plan worth keeping is copied to the
+project's `.claude/architecture-<topic>.md` with a `Status:` line. File shapes (`todo.md` template,
+`_archive/` rules): the organize skill's taxonomy § Working notes.
 Use global `~/.config/claude/` only when not in a project context.
 
 ### Core Principles
