@@ -1,5 +1,5 @@
 #!/bin/bash
-# Bump my own flake inputs (claude-config, bocal) to their pushed HEAD and keep
+# Bump my own flake inputs (claude-config, bocal, drill) to their pushed HEAD and keep
 # flake.lock in step with origin, so the two Macs never race on lock commits.
 # Run by the `re` / `sure` aliases (modules/system/aliases.nix) right before the
 # rebuild. Upstream inputs stay a manual `nix flake update`.
@@ -17,8 +17,8 @@
 set -u
 
 HM="${HM:-$HOME/.config/home-manager}"
-INPUTS=(claude-config bocal)
-MSG="flake: bump ${INPUTS[0]}, ${INPUTS[1]}"
+INPUTS=(claude-config bocal drill)
+MSG="flake: bump ${INPUTS[0]}, ${INPUTS[1]}, ${INPUTS[2]}"
 
 warn() { printf '\033[1;33m⚠ %s\033[0m\n' "$1" >&2; }
 g() { git -C "$HM" "$@"; }

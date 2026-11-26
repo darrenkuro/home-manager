@@ -48,6 +48,22 @@
         "type": "github"
       }
     },
+    "drill": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1795714324,
+        "narHash": "sha256-EHV5zhQ1mcPEX0SpRgCbV91s9Hf2T114LwSJ11Upp2A=",
+        "ref": "refs/heads/main",
+        "rev": "29aa919b3e4251e5dd04eb00e543abf2fa191503",
+        "revCount": 5,
+        "type": "git",
+        "url": "ssh://git@github.com/darrenkuro/drill"
+      },
+      "original": {
+        "type": "git",
+        "url": "ssh://git@github.com/darrenkuro/drill"
+      }
+    },
     "home-manager": {
       "inputs": {
         "nixpkgs": [
@@ -141,6 +157,7 @@
         "bocal": "bocal",
         "claude-config": "claude-config",
         "claude-plugins-official": "claude-plugins-official",
+        "drill": "drill",
         "home-manager": "home-manager",
         "nix-darwin": "nix-darwin",
         "nixpkgs": "nixpkgs",

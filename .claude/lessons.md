@@ -55,3 +55,5 @@ When undoing a temporary tweak (e.g. a sed-uncommented toggle), stage the file's
 ## `re` hangs non-interactively
 
 `re` ends in `exec zsh`; from a script/background shell that becomes an interactive shell idling on a pipe — the switch succeeds but the process never exits. (Moot while rebuilds are manual-only.)
+
+- 2026-11-26: the PostToolUse format hook re-indents `flake.nix` (2-space file vs `indentWidth: 4`) on every Edit/Write — patch `flake.nix` through the shell (sed/python heredoc) instead, then `git diff --stat` must stay small.

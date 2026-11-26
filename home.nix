@@ -179,6 +179,7 @@ in
         ./modules/apps/helix.nix
         ./modules/apps/claude.nix
         ./modules/apps/vscode.nix
+        ./modules/apps/drill.nix
     ] ++
     lib.optionals isMac [
         ./modules/system/tiling-hotkeys.nix

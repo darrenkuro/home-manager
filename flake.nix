@@ -29,6 +29,11 @@
       url = "git+ssh://git@github.com/darrenkuro/42tirana-bocal";
       flake = false;
     };
+    # coding-drill runner (modules/apps/drill.nix); the data lives in logbook
+    drill = {
+      url = "git+ssh://git@github.com/darrenkuro/drill";
+      flake = false;
+    };
   };
 
   outputs = {
@@ -40,11 +45,12 @@
     remotion-skills,
     claude-config,
     bocal,
+    drill,
     ...
   }: let
     lib = nixpkgs.lib;
     hmExtraArgs = {
-      inherit claude-plugins-official obsidian-skills remotion-skills claude-config bocal;
+      inherit claude-plugins-official obsidian-skills remotion-skills claude-config bocal drill;
     };
 
     # Machine identity — the single source of truth. Every target below and
