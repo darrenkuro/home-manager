@@ -84,7 +84,9 @@ Use global `~/.config/claude/` only when not in a project context.
 - **Commit as you go**: in any git repo, commit after each verified step (tests / typecheck green) in the
   house format (`git-commit` skill), one logical change per commit, on the current branch (no branching
   first unless the repo's CLAUDE.md asks for it). This replaces the default "commit only when asked".
-  **Never push unless asked.** A repo's CLAUDE.md may tighten it (hm: commit before `re`), never loosen it
+  Then push, but **only to repos owned by the darrenkuro GitHub account** (remote under `darrenkuro/`);
+  never push to any other repo or as any other account unless Darren asks for that exact push, and never
+  force-push. A repo's CLAUDE.md may tighten this (hm: commit before `re`), never loosen it
 - **Autonomous**: Fix bugs and failing CI without hand-holding
 
 ### Process Management
