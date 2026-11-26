@@ -3,11 +3,11 @@
     "bocal": {
       "flake": false,
       "locked": {
-        "lastModified": 1795700463,
+        "lastModified": 1795720054,
         "narHash": "sha256-7j2rsh97fSTi08qW3ddPmNvTq2Stzjra/2cAZRlVw98=",
         "ref": "refs/heads/main",
-        "rev": "2e28cc5f87c6c0785f698bb9850989595972f28b",
-        "revCount": 180,
+        "rev": "07224ad838de63685c1f1db81ec193f354db8d00",
+        "revCount": 182,
         "type": "git",
         "url": "ssh://git@github.com/darrenkuro/42tirana-bocal"
       },
@@ -19,11 +19,11 @@
     "claude-config": {
       "flake": false,
       "locked": {
-        "lastModified": 1795714891,
-        "narHash": "sha256-rbg8y145qRQtQ6zCyJzdDQVp3A3H0eJAbL6vIl9HA0U=",
+        "lastModified": 1795719836,
+        "narHash": "sha256-+dyLvOY2qPheDmxMO5nKA+Ez5wvuk6V3MGFGTAZ8Hng=",
         "ref": "refs/heads/main",
-        "rev": "2cfa129bb723903ed17e79f3f071b0fa3d2b402c",
-        "revCount": 173,
+        "rev": "1c5ff60511a51f6d8c544b24c8a18a68e5c2e4c3",
+        "revCount": 174,
         "type": "git",
         "url": "ssh://git@github.com/darrenkuro/claude-config"
       },
