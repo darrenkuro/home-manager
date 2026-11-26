@@ -81,6 +81,10 @@ Use global `~/.config/claude/` only when not in a project context.
 - **Never leave agents unresolved**: When done, read results and report — don't claim "still running" without checking
 - **Self-improve**: After corrections, update `.claude/lessons.md`
 - **Verify before done**: Prove it works — run tests, check logs
+- **Commit as you go**: in any git repo, commit after each verified step (tests / typecheck green) in the
+  house format (`git-commit` skill), one logical change per commit, on the current branch (no branching
+  first unless the repo's CLAUDE.md asks for it). This replaces the default "commit only when asked".
+  **Never push unless asked.** A repo's CLAUDE.md may tighten it (hm: commit before `re`), never loosen it
 - **Autonomous**: Fix bugs and failing CI without hand-holding
 
 ### Process Management
