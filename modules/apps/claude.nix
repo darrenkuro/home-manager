@@ -70,13 +70,6 @@
                 ];
             }
             {
-                # Backup files written with Write go to Dropbox/_backup/claude (predicate in the script)
-                matcher = "Write";
-                hooks = [
-                    { type = "command"; command = "~/.config/claude/hooks/redirect-backups.sh"; }
-                ];
-            }
-            {
                 matcher = "Skill";
                 hooks = [
                     {
