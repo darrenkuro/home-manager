@@ -28,7 +28,7 @@ anki-backup() {
     local src="$HOME/Library/Application Support/Anki2/Darren Kuro"
     local dst="$HOME/Library/CloudStorage/Dropbox/_backup/claude/anki"
     local newest
-    newest=$(ls -t "$src"/backups/backup-*.colpkg 2>/dev/null | head -1)
+    newest=$(command ls -t "$src"/backups/backup-*.colpkg 2>/dev/null | head -1)
     if [ -z "$newest" ]; then
         echo "anki-backup: no backups/*.colpkg in $src" >&2
         return 1
@@ -42,10 +42,10 @@ anki-backup() {
     mkdir -p "$dst"
     cp -p "$newest" "$dst/"
     # keep the latest 2 copies in Dropbox (retention D2 of the setup cleanup)
-    ls -t "$dst"/backup-*.colpkg 2>/dev/null | tail -n +3 | while IFS= read -r old; do
-        rm -f "$old"
+    command ls -t "$dst"/backup-*.colpkg 2>/dev/null | tail -n +3 | while IFS= read -r old; do
+        /bin/rm -f "$old"
         echo "pruned : ${old##*/}"
     done
     rsync -a --delete "$src/collection.media/" "$dst/collection.media/"
-    echo "done   : $(ls "$dst"/backup-*.colpkg | wc -l | tr -d ' ') backups, $(du -sh "$dst/collection.media" | cut -f1) media"
+    echo "done   : $(command ls "$dst"/backup-*.colpkg | wc -l | tr -d ' ') backups, $(du -sh "$dst/collection.media" | cut -f1) media"
 }

@@ -35,7 +35,7 @@ anki-restore() {
     stamp=$(date +%Y-%m-%d-%H%M)
     local safety="$HOME/Library/CloudStorage/Dropbox/_backup/claude/anki-prerestore-$stamp"
     if [ -z "$file" ]; then
-        file=$(ls -t "$mirror"/backup-*.colpkg "$profile"/backups/backup-*.colpkg 2>/dev/null | head -1)
+        file=$(command ls -t "$mirror"/backup-*.colpkg "$profile"/backups/backup-*.colpkg 2>/dev/null | head -1)
     fi
     if [ ! -f "$file" ]; then
         echo "anki-restore: no backup found ($file)" >&2
