@@ -189,6 +189,9 @@ in
         ./modules/apps/ghostty.nix
         ./modules/apps/app-icons.nix
     ] ++
-    lib.optionals isMac [ ./modules/apps/unison.nix ./modules/apps/alfred.nix ] ++
-    lib.optionals ( machine == "ft" ) [ ./modules/system/linux-ft.nix ];
+    lib.optionals isMac [
+        ./modules/apps/unison.nix
+        ./modules/apps/alfred.nix
+        ./modules/apps/ambience.nix
+    ] ++ lib.optionals ( machine == "ft" ) [ ./modules/system/linux-ft.nix ];
 }
