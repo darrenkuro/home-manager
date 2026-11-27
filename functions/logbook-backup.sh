@@ -44,6 +44,9 @@ logbook-backup() {
     mkdir -p "$dst"
     # write beside the target, then rename: Dropbox never uploads a half-written file
     sqlite3 "$src/logbook.db" ".backup '$dst/.logbook-$day.db.partial'" || return 1
+    # the copy inherits WAL mode, and opening it would leave -wal/-shm files beside it: one self-contained file instead
+    sqlite3 "$dst/.logbook-$day.db.partial" 'pragma journal_mode = delete' > /dev/null || return 1
+    /bin/rm -f "$dst/.logbook-$day.db.partial-wal" "$dst/.logbook-$day.db.partial-shm" # empty once out of WAL mode
     if [ "$(sqlite3 "$dst/.logbook-$day.db.partial" 'pragma quick_check')" != "ok" ]; then
         echo "logbook-backup: the copy failed quick_check; kept as $dst/.logbook-$day.db.partial" >&2
         return 1
