@@ -57,3 +57,4 @@ When undoing a temporary tweak (e.g. a sed-uncommented toggle), stage the file's
 `re` ends in `exec zsh`; from a script/background shell that becomes an interactive shell idling on a pipe — the switch succeeds but the process never exits. (Moot while rebuilds are manual-only.)
 
 - 2026-11-26: the PostToolUse format hook re-indents `flake.nix` (2-space file vs `indentWidth: 4`) on every Edit/Write — patch `flake.nix` through the shell (sed/python heredoc) instead, then `git diff --stat` must stay small.
+- 2026-11-27: `functions/*.sh` are sourced into interactive zsh, so aliases expand inside them at definition time: `ls` → `eza` (`-t` means `--time <FIELD>`), `rm` → `trash`. Use `command ls` and `/bin/rm` (as `tidy` does); test a new function with `zsh -ic 'source <file>; <fn> --dry-run'`, never with bash. Hit by `anki-backup` (`3beddca`).
