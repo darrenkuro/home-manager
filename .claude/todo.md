@@ -26,4 +26,4 @@ Decided 2026-11-27 (tasks/2026-11-anki-setup): Anki stays out of hm except two s
 hand) and `anki-restore`. The 2026-06-18 copy-in-place add-on draft is superseded (hm `programs.anki` and nixpkgs add-ons
 lock the Add-ons dialog and fight Anki's updater; note types live in logbook/anki/models, pushed by `logbook sync anki --models`).
 
-- [ ] recurring task "run anki-backup" (monthly) once Logbook's task CLI is the place for it (2026-11-27)
+- [ ] recurring task "run backup" (monthly; umbrella over `anki-backup`, `logbook-backup`, tasks/2026-11-setup-cleanup Area G) once Logbook's task CLI is the place for it (2026-11-27)
