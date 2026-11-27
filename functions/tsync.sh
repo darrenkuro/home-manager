@@ -5,7 +5,8 @@ _check_preamble || return 0
 
 # tsync [-claude] [unison options…]
 # Two-way sync with the work iMac: ~/Documents/42tirana (Unison profile
-# 42tirana in ~/.config/unison, modules/apps/unison.nix), plus, with -claude,
+# 42tirana in ~/.config/unison, modules/apps/unison.nix) and the ambience
+# tracks in ~/.local/share/audio (profile ambience), plus, with -claude,
 # the Claude session state (profile claude: projects/ incl. memory, plans,
 # todos), plus the Alfred prefs bundle, which is a git repo (modules/apps/alfred.nix)
 # and goes by git, not Unison: each side commits what Alfred wrote, pulls with
@@ -207,15 +208,17 @@ tsync() {
     # -auto: one-sided changes (new, edited, deleted) go without a per-item
     # prompt; only conflicts are asked, then one "Proceed?" for the lot.
     # unison exit codes: 0 all done, 1 some items skipped, 2 non-fatal errors, 3 fatal
-    local rc1=0 rc2=0
+    local rc1=0 rc2=0 rc3=0
     _tsync_run 42tirana "${opts[@]}" || rc1=$?
     # Should never fire after the checks above; the replaced copy is in the backup.
     if ! _tsync_db_ok || ! _tsync_db_ok "$peer"; then
         _tsync_warn "hub DB fails quick_check after the sync — the previous copy is in ~/.local/state/unison/backup"
         rc1=3
     fi
+    _tsync_run ambience "${opts[@]}" || rc3=$?
     [ "$claude" -eq 1 ] && { _tsync_run claude "${opts[@]}" || rc2=$?; }
     [ "$rc1" -gt "$rc" ] && rc=$rc1
     [ "$rc2" -gt "$rc" ] && rc=$rc2
+    [ "$rc3" -gt "$rc" ] && rc=$rc3
     return "$rc"
 }

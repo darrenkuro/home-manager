@@ -1,4 +1,5 @@
-# Unison — two-way sync of ~/Documents/42tirana and the Claude session state
+# Unison — two-way sync of ~/Documents/42tirana, the ambience tracks and the
+# Claude session state
 # between the MacBook and the work iMac, over Tailscale ssh (`work`, ssh.nix).
 # Manual only: `tsync` (functions/tsync.sh) runs the two profiles below; there
 # is no agent. Both Macs get the package (the iMac is the ssh server side); the
@@ -58,6 +59,15 @@ in
             backupnot = Regex (.*/)?node_modules(/.*)?
             backuplocation = central
             maxbackups = 2
+        '';
+
+        # The background tracks `noise` plays (ambience.nix). Write-once media, so
+        # no backups here: the laptop's Dropbox audio/ambience is the backup.
+        "unison/ambience.prf".text = ''
+            # managed by home-manager (modules/apps/unison.nix)
+            root = ${homeDir}/.local/share/audio
+            root = ssh://work/${homeDir}/.local/share/audio
+            ${common}
         '';
 
         # Claude Code state that is worth having on both Macs: transcripts (UUID
