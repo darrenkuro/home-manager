@@ -19,11 +19,11 @@
     "claude-config": {
       "flake": false,
       "locked": {
-        "lastModified": 1795801963,
-        "narHash": "sha256-p3cLEhzZf/QWUhbQmlJ5OV6AY6CGHXbwKif9vuJ4v/0=",
+        "lastModified": 1795818786,
+        "narHash": "sha256-I3U/qoJHV78B4r7p4ZQcgQm4j1bSrQ9X/ZFqpl0UCsE=",
         "ref": "refs/heads/main",
-        "rev": "1b025ab9fd51f389fd72c9338f41d5572300ec83",
-        "revCount": 180,
+        "rev": "9772422c52d6582a52e7cd71259c6f39ff40f781",
+        "revCount": 182,
         "type": "git",
         "url": "ssh://git@github.com/darrenkuro/claude-config"
       },
@@ -51,11 +51,11 @@
     "drill": {
       "flake": false,
       "locked": {
-        "lastModified": 1795804996,
-        "narHash": "sha256-bgfBrMAvTQ6ewFWcsMz0g4gJTdqCrv7uavYx9WGVPM8=",
+        "lastModified": 1795819326,
+        "narHash": "sha256-EtZRIS2wPAcdRyQnnuJy5L/qh4Hr9ta6cjUsIwAMd4I=",
         "ref": "refs/heads/main",
-        "rev": "77aac7506d97dc05dff8e14b7f43f76283bfc8cd",
-        "revCount": 8,
+        "rev": "d5c2f6dcd013e6bb6bc23dc097693667329ce297",
+        "revCount": 11,
         "type": "git",
         "url": "ssh://git@github.com/darrenkuro/drill"
       },
